@@ -3,6 +3,7 @@ unit Delphi.WebMock;
 interface
 
 uses
+  Delphi.WebMock.RequestStub,
   IdGlobal,
   IdHTTP,
   IdHTTPServer,
@@ -10,10 +11,6 @@ uses
   System.SysUtils;
 
 type
-  IStubbedRequest = interface
-    ['{5A50CC6F-8ACF-4DF1-B1B4-B1FA66955A8F}']
-  end;
-
   TWebMock = class(TObject)
   private
     FServer: TIdHTTPServer;
@@ -24,7 +21,7 @@ type
   public
     constructor Create(const APort: TIdPort = 8080);
     destructor Destroy; override;
-    function StubRequest(const AMethod: TIdHTTPMethod; const AURI: string): IStubbedRequest;
+    function StubRequest(const AMethod: TIdHTTPMethod; const AURI: string): IWebMockRequestStub;
     property BaseURL: string read FBaseURL;
   end;
 
@@ -61,7 +58,7 @@ begin
   FBaseURL := Format('http://127.0.0.1:%d/', [Server.DefaultPort]);
 end;
 
-function TWebMock.StubRequest(const AMethod: TIdHTTPMethod; const AURI: string): IStubbedRequest;
+function TWebMock.StubRequest(const AMethod: TIdHTTPMethod; const AURI: string): IWebMockRequestStub;
 begin
 
 end;

@@ -13,7 +13,9 @@ uses
   DUnitX.TestFramework,
   Delphi.WebMock.Tests in 'Delphi.WebMock.Tests.pas',
   Delphi.WebMock in '..\Delphi.WebMock.pas',
-  TestHelpers in 'TestHelpers.pas';
+  TestHelpers in 'TestHelpers.pas',
+  Delphi.WebMock.RequestStub.Tests in 'Delphi.WebMock.RequestStub.Tests.pas',
+  Delphi.WebMock.RequestStub in '..\Delphi.WebMock.RequestStub.pas';
 
 var
   runner : ITestRunner;
