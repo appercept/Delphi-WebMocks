@@ -3,47 +3,79 @@ unit Delphi.WebMock;
 interface
 
 uses
-  Delphi.WebMock.RequestStub,
+  Delphi.WebMock.RequestStub, Delphi.WebMock.Response,
+  Delphi.WebMock.ResponseStatus,
+  IdContext,
+  IdCustomHTTPServer,
   IdGlobal,
-  IdHTTP,
   IdHTTPServer,
-  IdSocketHandle,
-  System.SysUtils;
+  System.Generics.Collections;
 
 type
+  TWebWockPort = TIdPort;
+
   TWebMock = class(TObject)
   private
     FServer: TIdHTTPServer;
     FBaseURL: string;
-    procedure InitializeServer(const APort: TIdPort);
+    FStubRegistry: TObjectList<TWebMockRequestStub>;
+    procedure InitializeServer(const APort: TWebWockPort);
+    procedure OnServerRequest(AContext: TIdContext;
+      ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
+    function GetRequestStub(const ARequestInfo: TIdHTTPRequestInfo)
+      : TWebMockRequestStub;
+    procedure RespondWith(AResponse: TWebMockResponse;
+      AResponseInfo: TIdHTTPResponseInfo);
+    procedure SetResponseStatus(AResponseInfo: TIdHTTPResponseInfo;
+      const AResponseStatus: TWebMockResponseStatus);
     property Server: TIdHTTPServer read FServer write FServer;
-  protected
+    property StubRegistry: TObjectList<TWebMockRequestStub> read FStubRegistry;
   public
-    constructor Create(const APort: TIdPort = 8080);
+    constructor Create(const APort: TWebWockPort = 8080);
     destructor Destroy; override;
-    function StubRequest(const AMethod: TIdHTTPMethod; const AURI: string): IWebMockRequestStub;
+    function StubRequest(const AMethod: string; const AURI: string)
+      : TWebMockRequestStub;
     property BaseURL: string read FBaseURL;
   end;
 
 implementation
 
+uses
+  Delphi.WebMock.Indy.RequestMatcher,
+  IdHTTP,
+  IdSocketHandle,
+  System.SysUtils;
+
 { TWebMock }
 
-constructor TWebMock.Create(const APort: TIdPort = 8080);
+constructor TWebMock.Create(const APort: TWebWockPort = 8080);
 begin
   inherited Create;
+  FStubRegistry := TObjectList<TWebMockRequestStub>.Create;
   InitializeServer(APort);
 end;
 
 destructor TWebMock.Destroy;
 begin
+  FStubRegistry.Free;
   FServer.Free;
   inherited;
 end;
 
-procedure TWebMock.InitializeServer(const APort: TIdPort);
+function TWebMock.GetRequestStub(const ARequestInfo: TIdHTTPRequestInfo)
+  : TWebMockRequestStub;
 var
-  LBinding: TIdSocketHandle;
+  LRequestStub: TWebMockRequestStub;
+begin
+  for LRequestStub in StubRegistry do
+  begin
+    if LRequestStub.Matcher.IsMatch(ARequestInfo) then
+      Exit(LRequestStub);
+  end;
+  Result := nil;
+end;
+
+procedure TWebMock.InitializeServer(const APort: TWebWockPort);
 begin
   if Server <> nil then
   begin
@@ -54,13 +86,48 @@ begin
   FServer := TIdHTTPServer.Create;
   Server.ServerSoftware := 'Delphi WebMocks';
   Server.DefaultPort := APort;
+  Server.OnCommandGet := OnServerRequest;
   Server.Active := True;
   FBaseURL := Format('http://127.0.0.1:%d/', [Server.DefaultPort]);
 end;
 
-function TWebMock.StubRequest(const AMethod: TIdHTTPMethod; const AURI: string): IWebMockRequestStub;
+procedure TWebMock.OnServerRequest(AContext: TIdContext;
+  ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
+var
+  LRequestStub: TWebMockRequestStub;
 begin
+  LRequestStub := GetRequestStub(ARequestInfo);
+  if Assigned(LRequestStub) then
+    RespondWith(LRequestStub.Response, AResponseInfo)
+  else
+    SetResponseStatus(AResponseInfo, TWebMockResponseStatus.NotImplemented);
+end;
 
+procedure TWebMock.RespondWith(AResponse: TWebMockResponse;
+  AResponseInfo: TIdHTTPResponseInfo);
+begin
+  SetResponseStatus(AResponseInfo, AResponse.Status);
+end;
+
+procedure TWebMock.SetResponseStatus(AResponseInfo: TIdHTTPResponseInfo;
+  const AResponseStatus: TWebMockResponseStatus);
+begin
+  AResponseInfo.ResponseNo := AResponseStatus.Code;
+  if not AResponseStatus.Text.IsEmpty then
+    AResponseInfo.ResponseText := AResponseStatus.Text;
+end;
+
+function TWebMock.StubRequest(const AMethod: string; const AURI: string)
+  : TWebMockRequestStub;
+var
+  LMatcher: TWebMockIndyRequestMatcher;
+  LRequestStub: TWebMockRequestStub;
+begin
+  LMatcher := TWebMockIndyRequestMatcher.Create(AMethod, AURI);
+  LRequestStub := TWebMockRequestStub.Create(LMatcher);
+  StubRegistry.Add(LRequestStub);
+
+  Result := LRequestStub;
 end;
 
 end.

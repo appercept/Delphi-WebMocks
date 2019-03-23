@@ -121,6 +121,13 @@
         <DCCReference Include="TestHelpers.pas"/>
         <DCCReference Include="Delphi.WebMock.RequestStub.Tests.pas"/>
         <DCCReference Include="..\Delphi.WebMock.RequestStub.pas"/>
+        <DCCReference Include="Delphi.WebMock.Indy.RequestMatcher.Tests.pas"/>
+        <DCCReference Include="..\Delphi.WebMock.Indy.RequestMatcher.pas"/>
+        <DCCReference Include="Mock.Indy.HTTPRequestInfo.pas"/>
+        <DCCReference Include="Delphi.WebMock.ResponseStatus.Tests.pas"/>
+        <DCCReference Include="..\Delphi.WebMock.ResponseStatus.pas"/>
+        <DCCReference Include="Delphi.WebMock.Response.Tests.pas"/>
+        <DCCReference Include="..\Delphi.WebMock.Response.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
