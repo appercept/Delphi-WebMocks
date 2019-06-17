@@ -9,6 +9,7 @@ type
     FText: string;
   public
     constructor Create(const ACode: Integer = 0; const AText: string = '');
+    function ToString: string; override;
 
     // Informational Constructors
     constructor Continue;
@@ -88,6 +89,9 @@ type
 implementation
 
 { TWebMockResponseStatus }
+
+uses
+  System.SysUtils;
 
 constructor TWebMockResponseStatus.Accepted;
 begin
@@ -370,6 +374,11 @@ end;
 constructor TWebMockResponseStatus.TooManyRequests;
 begin
   Create(429);
+end;
+
+function TWebMockResponseStatus.ToString: string;
+begin
+  Result := Format('%d', [Code]);
 end;
 
 constructor TWebMockResponseStatus.Unauthorized;

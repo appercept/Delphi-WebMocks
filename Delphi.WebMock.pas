@@ -33,6 +33,7 @@ type
   public
     constructor Create(const APort: TWebWockPort = 8080);
     destructor Destroy; override;
+    procedure PrintStubRegistry;
     function StubRequest(const AMethod: string; const AURI: string)
       : TWebMockRequestStub;
     property BaseURL: string read FBaseURL;
@@ -101,6 +102,16 @@ begin
     RespondWith(LRequestStub.Response, AResponseInfo)
   else
     SetResponseStatus(AResponseInfo, TWebMockResponseStatus.NotImplemented);
+end;
+
+procedure TWebMock.PrintStubRegistry;
+var
+  LRequestStub: TWebMockRequestStub;
+begin
+  System.Writeln;
+  System.Writeln('Registered Request Stubs');
+  for LRequestStub in StubRegistry do
+    System.Writeln(LRequestStub.ToString);
 end;
 
 procedure TWebMock.RespondWith(AResponse: TWebMockResponse;

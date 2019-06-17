@@ -15,6 +15,7 @@ type
   public
     constructor Create(AHTTPMethod: string = 'GET'; AURI: string = '*');
     function IsMatch(AHTTPRequestInfo: TIdHTTPRequestInfo): Boolean;
+    function ToString: string; override;
     property HTTPMethod: string read FHTTPMethod write FHTTPMethod;
     property URI: string read FURI write FURI;
   end;
@@ -22,6 +23,9 @@ type
 implementation
 
 { TWebMockIndyRequestMatcher }
+
+uses
+  System.SysUtils;
 
 constructor TWebMockIndyRequestMatcher.Create(AHTTPMethod: string = 'GET';
   AURI: string = '*');
@@ -42,6 +46,11 @@ function TWebMockIndyRequestMatcher.IsMatch(AHTTPRequestInfo
 begin
   Result := HTTPMethodMatches(AHTTPRequestInfo.Command) and
     URIMatches(AHTTPRequestInfo.Document);
+end;
+
+function TWebMockIndyRequestMatcher.ToString: string;
+begin
+  Result := Format('%s' + ^I + '%s', [HTTPMethod, URI]);
 end;
 
 function TWebMockIndyRequestMatcher.URIMatches(AURI: string): Boolean;

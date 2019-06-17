@@ -17,6 +17,7 @@ type
   public
     constructor Create(AMatcher: TWebMockIndyRequestMatcher);
     destructor Destroy; override;
+    function ToString: string; override;
     function ToReturn(AResponseStatus: TWebMockResponseStatus = nil)
       : TWebMockRequestStub;
     property Matcher: TWebMockIndyRequestMatcher read FMatcher;
@@ -52,6 +53,11 @@ begin
   Response.Status := AResponseStatus;
 
   Result := Self;
+end;
+
+function TWebMockRequestStub.ToString: string;
+begin
+  Result := Format('%s' + ^I + '%s', [Matcher.ToString, Response.ToString]);
 end;
 
 end.
