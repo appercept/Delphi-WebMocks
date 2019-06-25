@@ -4,11 +4,8 @@ interface
 
 uses
   Delphi.WebMock.RequestStub, Delphi.WebMock.Response,
-  Delphi.WebMock.ResponseStatus,
-  IdContext,
-  IdCustomHTTPServer,
-  IdGlobal,
-  IdHTTPServer,
+  Delphi.WebMock.ResponseContentSource, Delphi.WebMock.ResponseStatus,
+  IdContext, IdCustomHTTPServer, IdGlobal, IdHTTPServer,
   System.Generics.Collections;
 
 type
@@ -28,6 +25,8 @@ type
       AResponseInfo: TIdHTTPResponseInfo);
     procedure SetResponseStatus(AResponseInfo: TIdHTTPResponseInfo;
       const AResponseStatus: TWebMockResponseStatus);
+    procedure SetResponseContent(AResponseInfo: TIdHTTPResponseInfo;
+      const AResponseContent: IWebMockResponseContentSource);
     property Server: TIdHTTPServer read FServer write FServer;
     property StubRegistry: TObjectList<TWebMockRequestStub> read FStubRegistry;
   public
@@ -45,6 +44,7 @@ uses
   Delphi.WebMock.Indy.RequestMatcher,
   IdHTTP,
   IdSocketHandle,
+  System.Classes,
   System.SysUtils;
 
 { TWebMock }
@@ -118,6 +118,15 @@ procedure TWebMock.RespondWith(AResponse: TWebMockResponse;
   AResponseInfo: TIdHTTPResponseInfo);
 begin
   SetResponseStatus(AResponseInfo, AResponse.Status);
+  SetResponseContent(AResponseInfo, AResponse.ContentSource);
+end;
+
+procedure TWebMock.SetResponseContent(AResponseInfo: TIdHTTPResponseInfo;
+      const AResponseContent: IWebMockResponseContentSource);
+begin
+  AResponseInfo.ContentType := AResponseContent.ContentType;
+  AResponseInfo.ContentStream := AResponseContent.ContentStream;
+  AResponseInfo.FreeContentStream := True;
 end;
 
 procedure TWebMock.SetResponseStatus(AResponseInfo: TIdHTTPResponseInfo;

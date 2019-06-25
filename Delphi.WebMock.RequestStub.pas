@@ -20,6 +20,7 @@ type
     function ToString: string; override;
     function ToReturn(AResponseStatus: TWebMockResponseStatus = nil)
       : TWebMockRequestStub;
+    function WithContent(const AContent: string): TWebMockRequestStub;
     property Matcher: TWebMockIndyRequestMatcher read FMatcher;
     property Response: TWebMockResponse read FResponse write FResponse;
   end;
@@ -27,6 +28,7 @@ type
 implementation
 
 uses
+  Delphi.WebMock.ResponseContentString,
   System.SysUtils;
 
 { TWebMockRequestStub }
@@ -50,7 +52,8 @@ function TWebMockRequestStub.ToReturn(
 
   AResponseStatus: TWebMockResponseStatus = nil): TWebMockRequestStub;
 begin
-  Response.Status := AResponseStatus;
+  if Assigned(AResponseStatus) then
+    Response.Status := AResponseStatus;
 
   Result := Self;
 end;
@@ -58,6 +61,14 @@ end;
 function TWebMockRequestStub.ToString: string;
 begin
   Result := Format('%s' + ^I + '%s', [Matcher.ToString, Response.ToString]);
+end;
+
+function TWebMockRequestStub.WithContent(
+  const AContent: string): TWebMockRequestStub;
+begin
+  Response.ContentSource := TWebMockResponseContentString.Create(AContent);
+
+  Result := Self;
 end;
 
 end.

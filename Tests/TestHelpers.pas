@@ -8,7 +8,7 @@ uses
   System.Rtti;
 
 function Get(const AURL: string): TIdHTTPResponse;
-function Post(const AURL: string; const ABody: string): TIdHTTPResponse;
+function Post(const AURL: string; const ARequestContent: string): TIdHTTPResponse;
 
 function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
 procedure SetPropertyValue(AObject: TObject; APropertyName: string;
@@ -23,23 +23,29 @@ uses
 function Get(const AURL: string): TIdHTTPResponse;
 var
   LClient: TIdHTTP;
+  LResponseStream: TStream;
 begin
   LClient := TIdHTTP.Create;
+  LResponseStream := TMemoryStream.Create;
   try
-    LClient.Get(AURL);
+    LClient.Get(AURL, LResponseStream);
+    LClient.Response.ContentStream.Position := 0;
   except
     on E: EIdException do
   end;
   Result := LClient.Response;
 end;
 
-function Post(const AURL: string; const ABody: string): TIdHTTPResponse;
+function Post(const AURL: string; const ARequestContent: string): TIdHTTPResponse;
 var
   LClient: TIdHTTP;
+  LResponseStream: TStream;
 begin
   LClient := TIdHTTP.Create;
+  LResponseStream := TMemoryStream.Create;
   try
-    LClient.Post(AURL, TStringStream.Create(ABody));
+    LClient.Post(AURL, TStringStream.Create(ARequestContent), LResponseStream);
+    LClient.Response.ContentStream.Position := 0;
   except
     on E: EIdException do
   end;

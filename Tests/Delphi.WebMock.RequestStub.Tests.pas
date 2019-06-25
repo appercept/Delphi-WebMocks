@@ -20,9 +20,15 @@ type
     [Test]
     procedure Test_ToReturn_Always_ReturnsSelf;
     [Test]
-    procedure Test_ToReturn_WithNoArguments_DoesNothing;
+    procedure Test_ToReturn_WithNoArguments_DoesNotRaiseException;
     [Test]
-    procedure Test_ToReturn_WithResponse_SetsResponse;
+    procedure Test_ToReturn_WithNoArguments_DoesNotChangeStatus;
+    [Test]
+    procedure Test_ToReturn_WithResponse_SetsResponseStatus;
+    [Test]
+    procedure Test_WithContent_WithString_ReturnsSelf;
+    [Test]
+    procedure Test_WithContent_WithString_SetsResponseContent;
   end;
 
 implementation
@@ -32,6 +38,7 @@ uses
   Delphi.WebMock.ResponseStatus,
   IdCustomHTTPServer,
   Mock.Indy.HTTPRequestInfo,
+  System.Classes,
   TestHelpers;
 
 { TWebMockRequestStubTests }
@@ -51,10 +58,10 @@ end;
 
 procedure TWebMockRequestStubTests.Test_ToReturn_Always_ReturnsSelf;
 begin
-  Assert.AreEqual(StubbedRequest, StubbedRequest.ToReturn as TWebMockRequestStub);
+  Assert.AreSame(StubbedRequest, StubbedRequest.ToReturn);
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_WithNoArguments_DoesNothing;
+procedure TWebMockRequestStubTests.Test_ToReturn_WithNoArguments_DoesNotRaiseException;
 begin
   Assert.WillNotRaiseAny(
   procedure
@@ -63,7 +70,18 @@ begin
   end);
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_WithResponse_SetsResponse;
+procedure TWebMockRequestStubTests.Test_ToReturn_WithNoArguments_DoesNotChangeStatus;
+var
+  LExpectedStatus: TWebMockResponseStatus;
+begin
+  LExpectedStatus := StubbedRequest.Response.Status;
+
+  StubbedRequest.ToReturn;
+
+  Assert.AreSame(LExpectedStatus, StubbedRequest.Response.Status);
+end;
+
+procedure TWebMockRequestStubTests.Test_ToReturn_WithResponse_SetsResponseStatus;
 var
   LResponse: TWebMockResponseStatus;
 begin
@@ -72,6 +90,25 @@ begin
   StubbedRequest.ToReturn(LResponse);
 
   Assert.AreSame(LResponse, StubbedRequest.Response.Status);
+end;
+
+procedure TWebMockRequestStubTests.Test_WithContent_WithString_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithContent(''));
+end;
+
+procedure TWebMockRequestStubTests.Test_WithContent_WithString_SetsResponseContent;
+var
+  LExpectedContent: string;
+begin
+  LExpectedContent := 'Text Body.';
+
+  StubbedRequest.WithContent(LExpectedContent);
+
+  Assert.AreEqual(
+    LExpectedContent,
+    (StubbedRequest.Response.ContentSource.ContentStream as TStringStream).DataString
+  );
 end;
 
 initialization

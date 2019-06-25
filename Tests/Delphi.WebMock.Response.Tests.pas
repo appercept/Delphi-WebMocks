@@ -21,6 +21,8 @@ type
     procedure Test_Create_WithoutArguments_SetsStatusToOK;
     [Test]
     procedure Test_Create_WithStatus_SetsStatus;
+    [Test]
+    procedure Test_ContentSource_WhenNotSet_ReturnsEmptyContentSource;
   end;
 
 implementation
@@ -37,6 +39,11 @@ end;
 procedure TWebMockResponseTests.TearDown;
 begin
   WebMockResponse.Free;
+end;
+
+procedure TWebMockResponseTests.Test_ContentSource_WhenNotSet_ReturnsEmptyContentSource;
+begin
+  Assert.AreEqual(Int64(0), WebMockResponse.ContentSource.ContentStream.Size);
 end;
 
 procedure TWebMockResponseTests.Test_Create_WithoutArguments_SetsStatusToOK;

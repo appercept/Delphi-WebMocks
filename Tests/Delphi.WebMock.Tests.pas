@@ -4,7 +4,9 @@ interface
 
 uses
   DUnitX.TestFramework,
-  Delphi.WebMock;
+  Delphi.WebMock,
+  System.Classes,
+  System.SysUtils;
 
 type
 
@@ -35,6 +37,12 @@ type
     procedure Test_Response_WhenToReturnSetsStatus_ReturnsSpecifiedStatusText;
     [Test]
     procedure Test_Response_WhenToReturnSetsCustomStatus_ReturnsSpecifiedStatusText;
+    [Test]
+    procedure Test_Response_WhenWithContentIsAStringWithoutContentType_SetsContentTypeToPlainText;
+    [Test]
+    procedure Test_Response_WhenWithContentIsAString_ReturnsStringAsContent;
+    [Test]
+    procedure Test_Response_WhenWithContentIsString_ReturnsUTF8CharSet;
   end;
 
 implementation
@@ -42,7 +50,7 @@ implementation
 uses
   Delphi.WebMock.RequestStub,
   Delphi.WebMock.ResponseStatus,
-  IdHTTP,
+  IdGlobal, IdHTTP,
   System.StrUtils,
   TestHelpers;
 
@@ -127,6 +135,44 @@ begin
   LResponse := Post(WebMock.BaseURL + 'response', '');
 
   Assert.IsTrue(EndsStr('Created', LResponse.ResponseText));
+end;
+
+procedure TWebMockTests.Test_Response_WhenWithContentIsAString_ReturnsStringAsContent;
+var
+  LExpectedContent: string;
+  LResponse: TIdHTTPResponse;
+  LHeader: string;
+  LContentText: string;
+begin
+  LExpectedContent := 'Body Text';
+
+  WebMock.StubRequest('GET', '/text').ToReturn.WithContent(LExpectedContent);
+  LResponse := Get(WebMock.BaseURL + 'text');
+
+  LContentText := ReadStringFromStream(LResponse.ContentStream);
+  Assert.AreEqual(LExpectedContent, LContentText);
+end;
+
+procedure TWebMockTests.Test_Response_WhenWithContentIsString_ReturnsUTF8CharSet;
+var
+  LResponse: TIdHTTPResponse;
+  LHeader: string;
+begin
+  WebMock.StubRequest('GET', '/text').ToReturn.WithContent('UTF-8 Text');
+  LResponse := Get(WebMock.BaseURL + 'text');
+
+  Assert.AreEqual('UTF-8', LResponse.CharSet);
+end;
+
+procedure TWebMockTests.Test_Response_WhenWithContentIsAStringWithoutContentType_SetsContentTypeToPlainText;
+var
+  LResponse: TIdHTTPResponse;
+  LHeader: string;
+begin
+  WebMock.StubRequest('GET', '/text').ToReturn.WithContent('Text');
+  LResponse := Get(WebMock.BaseURL + 'text');
+
+  Assert.AreEqual('text/plain', LResponse.ContentType);
 end;
 
 procedure TWebMockTests.Test_Response_WhenToReturnSetsCustomStatus_ReturnsSpecifiedStatusText;

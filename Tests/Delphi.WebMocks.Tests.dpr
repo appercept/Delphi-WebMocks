@@ -23,7 +23,10 @@ uses
   Delphi.WebMock.ResponseStatus.Tests in 'Delphi.WebMock.ResponseStatus.Tests.pas',
   Delphi.WebMock.ResponseStatus in '..\Delphi.WebMock.ResponseStatus.pas',
   Delphi.WebMock.Response.Tests in 'Delphi.WebMock.Response.Tests.pas',
-  Delphi.WebMock.Response in '..\Delphi.WebMock.Response.pas';
+  Delphi.WebMock.Response in '..\Delphi.WebMock.Response.pas',
+  Delphi.WebMock.ResponseContentString.Tests in 'Delphi.WebMock.ResponseContentString.Tests.pas',
+  Delphi.WebMock.ResponseContentString in '..\Delphi.WebMock.ResponseContentString.pas',
+  Delphi.WebMock.ResponseContentSource in '..\Delphi.WebMock.ResponseContentSource.pas';
 
 var
   Runner: ITestRunner;
