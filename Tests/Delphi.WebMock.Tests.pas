@@ -81,7 +81,7 @@ procedure TWebMockTests.Test_Create_WithNoArguments_StartsListeningOnPort8080;
 var
   LResponse: TIdHTTPResponse;
 begin
-  LResponse := Get('http://localhost:8080/');
+  LResponse := WebClient.Get('http://localhost:8080/');
 
   Assert.AreEqual('Delphi WebMocks', LResponse.Server);
 end;
@@ -93,7 +93,7 @@ begin
   WebMock.Free;
 
   WebMock := TWebMock.Create(8088);
-  LResponse := Get('http://localhost:8088/');
+  LResponse := WebClient.Get('http://localhost:8088/');
 
   Assert.AreEqual('Delphi WebMocks', LResponse.Server);
 end;
@@ -102,7 +102,7 @@ procedure TWebMockTests.Test_Response_WhenRequestIsNotStubbed_ReturnsNotImplemen
 var
   LResponse: TIdHTTPResponse;
 begin
-  LResponse := Get(WebMock.BaseURL);
+  LResponse := WebClient.Get(WebMock.BaseURL);
 
   Assert.AreEqual(501, LResponse.ResponseCode);
 end;
@@ -112,7 +112,7 @@ var
   LResponse: TIdHTTPResponse;
 begin
   WebMock.StubRequest('GET', '/');
-  LResponse := Get(WebMock.BaseURL);
+  LResponse := WebClient.Get(WebMock.BaseURL);
 
   Assert.AreEqual(200, LResponse.ResponseCode);
 end;
@@ -122,7 +122,7 @@ var
   LResponse: TIdHTTPResponse;
 begin
   WebMock.StubRequest('POST', '/response').ToReturn(TWebMockResponseStatus.Created);
-  LResponse := Post(WebMock.BaseURL + 'response', '');
+  LResponse := WebClient.Post(WebMock.BaseURL + 'response', '');
 
   Assert.AreEqual(201, LResponse.ResponseCode);
 end;
@@ -132,7 +132,7 @@ var
   LResponse: TIdHTTPResponse;
 begin
   WebMock.StubRequest('POST', '/response').ToReturn(TWebMockResponseStatus.Created);
-  LResponse := Post(WebMock.BaseURL + 'response', '');
+  LResponse := WebClient.Post(WebMock.BaseURL + 'response', '');
 
   Assert.IsTrue(EndsStr('Created', LResponse.ResponseText));
 end;
@@ -147,7 +147,7 @@ begin
   LExpectedContent := 'Body Text';
 
   WebMock.StubRequest('GET', '/text').ToReturn.WithContent(LExpectedContent);
-  LResponse := Get(WebMock.BaseURL + 'text');
+  LResponse := WebClient.Get(WebMock.BaseURL + 'text');
 
   LContentText := ReadStringFromStream(LResponse.ContentStream);
   Assert.AreEqual(LExpectedContent, LContentText);
@@ -159,7 +159,7 @@ var
   LHeader: string;
 begin
   WebMock.StubRequest('GET', '/text').ToReturn.WithContent('UTF-8 Text');
-  LResponse := Get(WebMock.BaseURL + 'text');
+  LResponse := WebClient.Get(WebMock.BaseURL + 'text');
 
   Assert.AreEqual('UTF-8', LResponse.CharSet);
 end;
@@ -170,7 +170,7 @@ var
   LHeader: string;
 begin
   WebMock.StubRequest('GET', '/text').ToReturn.WithContent('Text');
-  LResponse := Get(WebMock.BaseURL + 'text');
+  LResponse := WebClient.Get(WebMock.BaseURL + 'text');
 
   Assert.AreEqual('text/plain', LResponse.ContentType);
 end;
@@ -183,7 +183,7 @@ begin
   LExpectedStatus := TWebMockResponseStatus.Create(999, 'My Status');
 
   WebMock.StubRequest('POST', '/response').ToReturn(LExpectedStatus);
-  LResponse := Post(WebMock.BaseURL + 'response', '');
+  LResponse := WebClient.Post(WebMock.BaseURL + 'response', '');
 
   Assert.IsTrue(EndsStr('My Status', LResponse.ResponseText));
 end;
