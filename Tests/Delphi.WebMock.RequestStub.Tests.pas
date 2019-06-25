@@ -29,6 +29,10 @@ type
     procedure Test_WithContent_WithString_ReturnsSelf;
     [Test]
     procedure Test_WithContent_WithString_SetsResponseContent;
+    [Test]
+    procedure Test_WithContentFile_Always_ReturnsSelf;
+    [Test]
+    procedure Test_WithContentFile_WithValidFile_SetsResponseContent;
   end;
 
 implementation
@@ -90,6 +94,28 @@ begin
   StubbedRequest.ToReturn(LResponse);
 
   Assert.AreSame(LResponse, StubbedRequest.Response.Status);
+end;
+
+procedure TWebMockRequestStubTests.Test_WithContentFile_Always_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithContentFile(FixturePath('Sample.txt')));
+end;
+
+procedure TWebMockRequestStubTests.Test_WithContentFile_WithValidFile_SetsResponseContent;
+var
+  LExpectedContent: string;
+  LActualStream: TStringStream;
+begin
+  LExpectedContent := 'Sample Text';
+
+  StubbedRequest.WithContentFile(FixturePath('Sample.txt'));
+
+  LActualStream := TStringStream.Create;
+  LActualStream.CopyFrom(StubbedRequest.Response.ContentSource.ContentStream, 0);
+  Assert.AreEqual(
+    LExpectedContent,
+    LActualStream.DataString
+  );
 end;
 
 procedure TWebMockRequestStubTests.Test_WithContent_WithString_ReturnsSelf;
