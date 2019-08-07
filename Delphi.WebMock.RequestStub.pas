@@ -19,11 +19,7 @@ type
     destructor Destroy; override;
     function ToString: string; override;
     function ToReturn(AResponseStatus: TWebMockResponseStatus = nil)
-      : TWebMockRequestStub;
-    function WithContent(const AContent: string;
-      const AContentType: string = 'text/plain; charset=utf-8'): TWebMockRequestStub;
-    function WithContentFile(const AFileName: string;
-      const AContentType: string = ''): TWebMockRequestStub;
+      : TWebMockResponse;
     property Matcher: TWebMockIndyRequestMatcher read FMatcher;
     property Response: TWebMockResponse read FResponse write FResponse;
   end;
@@ -31,7 +27,6 @@ type
 implementation
 
 uses
-  Delphi.WebMock.ResponseContentFile, Delphi.WebMock.ResponseContentString,
   System.SysUtils;
 
 { TWebMockRequestStub }
@@ -52,33 +47,17 @@ begin
 end;
 
 function TWebMockRequestStub.ToReturn(
-  AResponseStatus: TWebMockResponseStatus = nil): TWebMockRequestStub;
+  AResponseStatus: TWebMockResponseStatus = nil): TWebMockResponse;
 begin
   if Assigned(AResponseStatus) then
     Response.Status := AResponseStatus;
 
-  Result := Self;
+  Result := Response;
 end;
 
 function TWebMockRequestStub.ToString: string;
 begin
   Result := Format('%s' + ^I + '%s', [Matcher.ToString, Response.ToString]);
-end;
-
-function TWebMockRequestStub.WithContent(const AContent: string;
-  const AContentType: string = 'text/plain; charset=utf-8'): TWebMockRequestStub;
-begin
-  Response.ContentSource := TWebMockResponseContentString.Create(AContent, AContentType);
-
-  Result := Self;
-end;
-
-function TWebMockRequestStub.WithContentFile(
-  const AFileName: string; const AContentType: string = ''): TWebMockRequestStub;
-begin
-  Response.ContentSource := TWebMockResponseContentFile.Create(AFileName, AContentType);
-
-  Result := Self;
 end;
 
 end.

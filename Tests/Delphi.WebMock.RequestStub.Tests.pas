@@ -18,32 +18,23 @@ type
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure ToReturn_Always_ReturnsSelf;
+    procedure ToReturn_Always_ReturnsAResponseStub;
     [Test]
     procedure ToReturn_WithNoArguments_DoesNotRaiseException;
     [Test]
     procedure ToReturn_WithNoArguments_DoesNotChangeStatus;
     [Test]
     procedure ToReturn_WithResponse_SetsResponseStatus;
-    [Test]
-    procedure WithContent_Always_ReturnsSelf;
-    [Test]
-    procedure WithContent_WithString_SetsResponseContent;
-    [Test]
-    procedure WithContentFile_Always_ReturnsSelf;
-    [Test]
-    procedure WithContentFile_WithValidFile_SetsResponseContent;
   end;
 
 implementation
 
 uses
   Delphi.WebMock.Indy.RequestMatcher,
+  Delphi.WebMock.Response,
   Delphi.WebMock.ResponseStatus,
   IdCustomHTTPServer,
-  Mock.Indy.HTTPRequestInfo,
-  System.Classes,
-  TestHelpers;
+  Mock.Indy.HTTPRequestInfo;
 
 { TWebMockRequestStubTests }
 
@@ -60,9 +51,9 @@ begin
   StubbedRequest := nil;
 end;
 
-procedure TWebMockRequestStubTests.ToReturn_Always_ReturnsSelf;
+procedure TWebMockRequestStubTests.ToReturn_Always_ReturnsAResponseStub;
 begin
-  Assert.AreSame(StubbedRequest, StubbedRequest.ToReturn);
+  Assert.IsTrue(StubbedRequest.ToReturn is TWebMockResponse);
 end;
 
 procedure TWebMockRequestStubTests.ToReturn_WithNoArguments_DoesNotRaiseException;
@@ -94,47 +85,6 @@ begin
   StubbedRequest.ToReturn(LResponse);
 
   Assert.AreSame(LResponse, StubbedRequest.Response.Status);
-end;
-
-procedure TWebMockRequestStubTests.WithContentFile_Always_ReturnsSelf;
-begin
-  Assert.AreSame(StubbedRequest, StubbedRequest.WithContentFile(FixturePath('Sample.txt')));
-end;
-
-procedure TWebMockRequestStubTests.WithContentFile_WithValidFile_SetsResponseContent;
-var
-  LExpectedContent: string;
-  LActualStream: TStringStream;
-begin
-  LExpectedContent := 'Sample Text';
-
-  StubbedRequest.WithContentFile(FixturePath('Sample.txt'));
-
-  LActualStream := TStringStream.Create;
-  LActualStream.CopyFrom(StubbedRequest.Response.ContentSource.ContentStream, 0);
-  Assert.AreEqual(
-    LExpectedContent,
-    LActualStream.DataString
-  );
-end;
-
-procedure TWebMockRequestStubTests.WithContent_Always_ReturnsSelf;
-begin
-  Assert.AreSame(StubbedRequest, StubbedRequest.WithContent(''));
-end;
-
-procedure TWebMockRequestStubTests.WithContent_WithString_SetsResponseContent;
-var
-  LExpectedContent: string;
-begin
-  LExpectedContent := 'Text Body.';
-
-  StubbedRequest.WithContent(LExpectedContent);
-
-  Assert.AreEqual(
-    LExpectedContent,
-    (StubbedRequest.Response.ContentSource.ContentStream as TStringStream).DataString
-  );
 end;
 
 initialization
