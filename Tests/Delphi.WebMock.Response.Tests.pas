@@ -18,11 +18,11 @@ type
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure Test_Create_WithoutArguments_SetsStatusToOK;
+    procedure Create_WithoutArguments_SetsStatusToOK;
     [Test]
-    procedure Test_Create_WithStatus_SetsStatus;
+    procedure Create_WithStatus_SetsStatus;
     [Test]
-    procedure Test_ContentSource_WhenNotSet_ReturnsEmptyContentSource;
+    procedure ContentSource_WhenNotSet_ReturnsEmptyContentSource;
   end;
 
 implementation
@@ -41,17 +41,17 @@ begin
   WebMockResponse.Free;
 end;
 
-procedure TWebMockResponseTests.Test_ContentSource_WhenNotSet_ReturnsEmptyContentSource;
+procedure TWebMockResponseTests.ContentSource_WhenNotSet_ReturnsEmptyContentSource;
 begin
   Assert.AreEqual(Int64(0), WebMockResponse.ContentSource.ContentStream.Size);
 end;
 
-procedure TWebMockResponseTests.Test_Create_WithoutArguments_SetsStatusToOK;
+procedure TWebMockResponseTests.Create_WithoutArguments_SetsStatusToOK;
 begin
   Assert.AreEqual(200, WebMockResponse.Status.Code);
 end;
 
-procedure TWebMockResponseTests.Test_Create_WithStatus_SetsStatus;
+procedure TWebMockResponseTests.Create_WithStatus_SetsStatus;
 var
   LExpectedStatus: TWebMockResponseStatus;
 begin

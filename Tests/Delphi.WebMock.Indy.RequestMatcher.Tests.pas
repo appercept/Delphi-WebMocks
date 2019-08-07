@@ -24,15 +24,15 @@ type
     procedure Test_StringProperty_Defaults_ToValue(APropertyName,
       Expected: string);
     [Test]
-    procedure Test_IsMatch_GivenAMatchingRequestInfo_ReturnsTrue;
+    procedure IsMatch_GivenAMatchingRequestInfo_ReturnsTrue;
     [Test]
-    procedure Test_IsMatch_WhenMethodIsWildcardGivenAnyRequestInfoMethod_ReturnsTrue;
+    procedure IsMatch_WhenMethodIsWildcardGivenAnyRequestInfoMethod_ReturnsTrue;
     [Test]
-    procedure Test_IsMatch_WhenURIIsWildcardGivenAnyRequestInfoURI_ReturnsTrue;
+    procedure IsMatch_WhenURIIsWildcardGivenAnyRequestInfoURI_ReturnsTrue;
     [Test]
-    procedure Test_IsMatch_GivenDifferingHTTPMethod_ReturnsFalse;
+    procedure IsMatch_GivenDifferingHTTPMethod_ReturnsFalse;
     [Test]
-    procedure Test_IsMatch_GivenDifferingURI_ReturnsFalse;
+    procedure IsMatch_GivenDifferingURI_ReturnsFalse;
   end;
 
 implementation
@@ -53,7 +53,7 @@ begin
   RequestMatcher := nil;
 end;
 
-procedure TWebMockIndyRequestMatcherTests.Test_IsMatch_GivenAMatchingRequestInfo_ReturnsTrue;
+procedure TWebMockIndyRequestMatcherTests.IsMatch_GivenAMatchingRequestInfo_ReturnsTrue;
 var
   LRequestInfo: TIdHTTPRequestInfo;
 begin
@@ -64,7 +64,7 @@ begin
   Assert.IsTrue(RequestMatcher.IsMatch(LRequestInfo));
 end;
 
-procedure TWebMockIndyRequestMatcherTests.Test_IsMatch_GivenDifferingHTTPMethod_ReturnsFalse;
+procedure TWebMockIndyRequestMatcherTests.IsMatch_GivenDifferingHTTPMethod_ReturnsFalse;
 var
   LRequestInfo: TIdHTTPRequestInfo;
 begin
@@ -75,7 +75,7 @@ begin
   Assert.IsFalse(RequestMatcher.IsMatch(LRequestInfo));
 end;
 
-procedure TWebMockIndyRequestMatcherTests.Test_IsMatch_GivenDifferingURI_ReturnsFalse;
+procedure TWebMockIndyRequestMatcherTests.IsMatch_GivenDifferingURI_ReturnsFalse;
 var
   LRequestInfo: TIdHTTPRequestInfo;
 begin
@@ -86,7 +86,7 @@ begin
   Assert.IsFalse(RequestMatcher.IsMatch(LRequestInfo));
 end;
 
-procedure TWebMockIndyRequestMatcherTests.Test_IsMatch_WhenMethodIsWildcardGivenAnyRequestInfoMethod_ReturnsTrue;
+procedure TWebMockIndyRequestMatcherTests.IsMatch_WhenMethodIsWildcardGivenAnyRequestInfoMethod_ReturnsTrue;
 var
   LRequestInfo: TIdHTTPRequestInfo;
 begin
@@ -97,7 +97,7 @@ begin
   Assert.IsTrue(RequestMatcher.IsMatch(LRequestInfo));
 end;
 
-procedure TWebMockIndyRequestMatcherTests.Test_IsMatch_WhenURIIsWildcardGivenAnyRequestInfoURI_ReturnsTrue;
+procedure TWebMockIndyRequestMatcherTests.IsMatch_WhenURIIsWildcardGivenAnyRequestInfoURI_ReturnsTrue;
 var
   LRequestInfo: TIdHTTPRequestInfo;
 begin

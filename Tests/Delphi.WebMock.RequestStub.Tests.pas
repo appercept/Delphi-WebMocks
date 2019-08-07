@@ -18,21 +18,21 @@ type
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure Test_ToReturn_Always_ReturnsSelf;
+    procedure ToReturn_Always_ReturnsSelf;
     [Test]
-    procedure Test_ToReturn_WithNoArguments_DoesNotRaiseException;
+    procedure ToReturn_WithNoArguments_DoesNotRaiseException;
     [Test]
-    procedure Test_ToReturn_WithNoArguments_DoesNotChangeStatus;
+    procedure ToReturn_WithNoArguments_DoesNotChangeStatus;
     [Test]
-    procedure Test_ToReturn_WithResponse_SetsResponseStatus;
+    procedure ToReturn_WithResponse_SetsResponseStatus;
     [Test]
-    procedure Test_WithContent_WithString_ReturnsSelf;
+    procedure WithContent_Always_ReturnsSelf;
     [Test]
-    procedure Test_WithContent_WithString_SetsResponseContent;
+    procedure WithContent_WithString_SetsResponseContent;
     [Test]
-    procedure Test_WithContentFile_Always_ReturnsSelf;
+    procedure WithContentFile_Always_ReturnsSelf;
     [Test]
-    procedure Test_WithContentFile_WithValidFile_SetsResponseContent;
+    procedure WithContentFile_WithValidFile_SetsResponseContent;
   end;
 
 implementation
@@ -60,12 +60,12 @@ begin
   StubbedRequest := nil;
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_Always_ReturnsSelf;
+procedure TWebMockRequestStubTests.ToReturn_Always_ReturnsSelf;
 begin
   Assert.AreSame(StubbedRequest, StubbedRequest.ToReturn);
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_WithNoArguments_DoesNotRaiseException;
+procedure TWebMockRequestStubTests.ToReturn_WithNoArguments_DoesNotRaiseException;
 begin
   Assert.WillNotRaiseAny(
   procedure
@@ -74,7 +74,7 @@ begin
   end);
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_WithNoArguments_DoesNotChangeStatus;
+procedure TWebMockRequestStubTests.ToReturn_WithNoArguments_DoesNotChangeStatus;
 var
   LExpectedStatus: TWebMockResponseStatus;
 begin
@@ -85,7 +85,7 @@ begin
   Assert.AreSame(LExpectedStatus, StubbedRequest.Response.Status);
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_WithResponse_SetsResponseStatus;
+procedure TWebMockRequestStubTests.ToReturn_WithResponse_SetsResponseStatus;
 var
   LResponse: TWebMockResponseStatus;
 begin
@@ -96,12 +96,12 @@ begin
   Assert.AreSame(LResponse, StubbedRequest.Response.Status);
 end;
 
-procedure TWebMockRequestStubTests.Test_WithContentFile_Always_ReturnsSelf;
+procedure TWebMockRequestStubTests.WithContentFile_Always_ReturnsSelf;
 begin
   Assert.AreSame(StubbedRequest, StubbedRequest.WithContentFile(FixturePath('Sample.txt')));
 end;
 
-procedure TWebMockRequestStubTests.Test_WithContentFile_WithValidFile_SetsResponseContent;
+procedure TWebMockRequestStubTests.WithContentFile_WithValidFile_SetsResponseContent;
 var
   LExpectedContent: string;
   LActualStream: TStringStream;
@@ -118,12 +118,12 @@ begin
   );
 end;
 
-procedure TWebMockRequestStubTests.Test_WithContent_WithString_ReturnsSelf;
+procedure TWebMockRequestStubTests.WithContent_Always_ReturnsSelf;
 begin
   Assert.AreSame(StubbedRequest, StubbedRequest.WithContent(''));
 end;
 
-procedure TWebMockRequestStubTests.Test_WithContent_WithString_SetsResponseContent;
+procedure TWebMockRequestStubTests.WithContent_WithString_SetsResponseContent;
 var
   LExpectedContent: string;
 begin
