@@ -147,6 +147,7 @@
         <DCCReference Include="Delphi.WebMock.Tests.Client.pas"/>
         <DCCReference Include="Delphi.WebMock.ResponseContentFile.Tests.pas"/>
         <DCCReference Include="..\Delphi.WebMock.ResponseContentFile.pas"/>
+        <DCCReference Include="Delphi.WebMock.Matching.Tests.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

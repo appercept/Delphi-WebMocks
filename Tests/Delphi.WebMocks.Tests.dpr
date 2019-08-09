@@ -29,7 +29,8 @@ uses
   Delphi.WebMock.ResponseContentSource in '..\Delphi.WebMock.ResponseContentSource.pas',
   Delphi.WebMock.Tests.Client in 'Delphi.WebMock.Tests.Client.pas',
   Delphi.WebMock.ResponseContentFile.Tests in 'Delphi.WebMock.ResponseContentFile.Tests.pas',
-  Delphi.WebMock.ResponseContentFile in '..\Delphi.WebMock.ResponseContentFile.pas';
+  Delphi.WebMock.ResponseContentFile in '..\Delphi.WebMock.ResponseContentFile.pas',
+  Delphi.WebMock.Matching.Tests in 'Delphi.WebMock.Matching.Tests.pas';
 
 var
   Runner: ITestRunner;
