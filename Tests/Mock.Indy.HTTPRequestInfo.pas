@@ -9,6 +9,7 @@ type
   TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
   public
     constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
+    property RawHeaders;
   end;
 
 implementation

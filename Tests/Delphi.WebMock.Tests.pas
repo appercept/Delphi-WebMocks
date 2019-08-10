@@ -20,35 +20,37 @@ type
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure Test_Create_WithNoArguments_StartsListeningOnPort8080;
+    procedure Create_WithNoArguments_StartsListeningOnPort8080;
     [Test]
-    procedure Test_Create_WithPort_StartsListeningOnPortPort;
+    procedure Create_WithPort_StartsListeningOnPortPort;
     [Test]
-    procedure Test_BaseURL_ByDefault_ReturnsLocalHostURLWithDefaultPort;
+    procedure BaseURL_ByDefault_ReturnsLocalHostURLWithDefaultPort;
     [Test]
-    procedure Test_BaseURL_WhenPortIsNotDefault_ReturnsLocalHostURLWithPort;
+    procedure BaseURL_WhenPortIsNotDefault_ReturnsLocalHostURLWithPort;
     [Test]
-    procedure Test_Response_WhenRequestStubbed_ReturnsOK;
+    procedure StubResponse_Always_ReturnsARequestStub;
     [Test]
-    procedure Test_Response_WhenRequestIsNotStubbed_ReturnsNotImplemented;
+    procedure Response_WhenRequestStubbed_ReturnsOK;
     [Test]
-    procedure Test_Response_WhenToReturnSetsStatus_ReturnsSpecifiedStatusCode;
+    procedure Response_WhenRequestIsNotStubbed_ReturnsNotImplemented;
     [Test]
-    procedure Test_Response_WhenToReturnSetsStatus_ReturnsSpecifiedStatusText;
+    procedure Response_WhenToReturnSetsStatus_ReturnsSpecifiedStatusCode;
     [Test]
-    procedure Test_Response_WhenToReturnSetsCustomStatus_ReturnsSpecifiedStatusText;
+    procedure Response_WhenToReturnSetsStatus_ReturnsSpecifiedStatusText;
     [Test]
-    procedure Test_Response_WhenWithContentIsAStringWithoutContentType_SetsContentTypeToPlainText;
+    procedure Response_WhenToReturnSetsCustomStatus_ReturnsSpecifiedStatusText;
     [Test]
-    procedure Test_Response_WhenWithContentIsAStringWithContentType_SetsContentType;
+    procedure Response_WhenWithContentIsAStringWithoutContentType_SetsContentTypeToPlainText;
     [Test]
-    procedure Test_Response_WhenWithContentIsAString_ReturnsStringAsContent;
+    procedure Response_WhenWithContentIsAStringWithContentType_SetsContentType;
     [Test]
-    procedure Test_Response_WhenWithContentIsString_ReturnsUTF8CharSet;
+    procedure Response_WhenWithContentIsAString_ReturnsStringAsContent;
     [Test]
-    procedure Test_Response_WhenWithContentFileWithoutContentType_SetsContentTypeToInferedType;
+    procedure Response_WhenWithContentIsString_ReturnsUTF8CharSet;
     [Test]
-    procedure Test_Response_WhenWithContentFileWithContentType_SetsContentType;
+    procedure Response_WhenWithContentFileWithoutContentType_SetsContentTypeToInferedType;
+    [Test]
+    procedure Response_WhenWithContentFileWithContentType_SetsContentType;
   end;
 
 implementation
@@ -70,12 +72,12 @@ begin
   WebMock.Free;
 end;
 
-procedure TWebMockTests.Test_BaseURL_ByDefault_ReturnsLocalHostURLWithDefaultPort;
+procedure TWebMockTests.BaseURL_ByDefault_ReturnsLocalHostURLWithDefaultPort;
 begin
   Assert.AreEqual('http://127.0.0.1:8080/', WebMock.BaseURL);
 end;
 
-procedure TWebMockTests.Test_BaseURL_WhenPortIsNotDefault_ReturnsLocalHostURLWithPort;
+procedure TWebMockTests.BaseURL_WhenPortIsNotDefault_ReturnsLocalHostURLWithPort;
 begin
   WebMock.Free;
   WebMock := TWebMock.Create(8088);
@@ -83,7 +85,7 @@ begin
   Assert.AreEqual('http://127.0.0.1:8088/', WebMock.BaseURL);
 end;
 
-procedure TWebMockTests.Test_Create_WithNoArguments_StartsListeningOnPort8080;
+procedure TWebMockTests.Create_WithNoArguments_StartsListeningOnPort8080;
 var
   LResponse: TIdHTTPResponse;
 begin
@@ -92,7 +94,7 @@ begin
   Assert.AreEqual('Delphi WebMocks', LResponse.Server);
 end;
 
-procedure TWebMockTests.Test_Create_WithPort_StartsListeningOnPortPort;
+procedure TWebMockTests.Create_WithPort_StartsListeningOnPortPort;
 var
   LResponse: TIdHTTPResponse;
 begin
@@ -104,7 +106,7 @@ begin
   Assert.AreEqual('Delphi WebMocks', LResponse.Server);
 end;
 
-procedure TWebMockTests.Test_Response_WhenRequestIsNotStubbed_ReturnsNotImplemented;
+procedure TWebMockTests.Response_WhenRequestIsNotStubbed_ReturnsNotImplemented;
 var
   LResponse: TIdHTTPResponse;
 begin
@@ -113,7 +115,7 @@ begin
   Assert.AreEqual(501, LResponse.ResponseCode);
 end;
 
-procedure TWebMockTests.Test_Response_WhenRequestStubbed_ReturnsOK;
+procedure TWebMockTests.Response_WhenRequestStubbed_ReturnsOK;
 var
   LResponse: TIdHTTPResponse;
 begin
@@ -123,7 +125,7 @@ begin
   Assert.AreEqual(200, LResponse.ResponseCode);
 end;
 
-procedure TWebMockTests.Test_Response_WhenToReturnSetsStatus_ReturnsSpecifiedStatusCode;
+procedure TWebMockTests.Response_WhenToReturnSetsStatus_ReturnsSpecifiedStatusCode;
 var
   LResponse: TIdHTTPResponse;
 begin
@@ -133,7 +135,7 @@ begin
   Assert.AreEqual(201, LResponse.ResponseCode);
 end;
 
-procedure TWebMockTests.Test_Response_WhenToReturnSetsStatus_ReturnsSpecifiedStatusText;
+procedure TWebMockTests.Response_WhenToReturnSetsStatus_ReturnsSpecifiedStatusText;
 var
   LResponse: TIdHTTPResponse;
 begin
@@ -143,7 +145,7 @@ begin
   Assert.IsTrue(EndsStr('Created', LResponse.ResponseText));
 end;
 
-procedure TWebMockTests.Test_Response_WhenWithContentIsAString_ReturnsStringAsContent;
+procedure TWebMockTests.Response_WhenWithContentIsAString_ReturnsStringAsContent;
 var
   LExpectedContent: string;
   LResponse: TIdHTTPResponse;
@@ -159,7 +161,7 @@ begin
   Assert.AreEqual(LExpectedContent, LContentText);
 end;
 
-procedure TWebMockTests.Test_Response_WhenWithContentIsString_ReturnsUTF8CharSet;
+procedure TWebMockTests.Response_WhenWithContentIsString_ReturnsUTF8CharSet;
 var
   LResponse: TIdHTTPResponse;
   LHeader: string;
@@ -170,7 +172,12 @@ begin
   Assert.AreEqual('UTF-8', LResponse.CharSet);
 end;
 
-procedure TWebMockTests.Test_Response_WhenWithContentFileWithContentType_SetsContentType;
+procedure TWebMockTests.StubResponse_Always_ReturnsARequestStub;
+begin
+  Assert.IsTrue(WebMock.StubRequest('GET', '/') is TWebMockRequestStub);
+end;
+
+procedure TWebMockTests.Response_WhenWithContentFileWithContentType_SetsContentType;
 var
   LExpected: string;
   LResponse: TIdHTTPResponse;
@@ -183,7 +190,7 @@ begin
   Assert.AreEqual(LExpected, LResponse.ContentType);
 end;
 
-procedure TWebMockTests.Test_Response_WhenWithContentFileWithoutContentType_SetsContentTypeToInferedType;
+procedure TWebMockTests.Response_WhenWithContentFileWithoutContentType_SetsContentTypeToInferedType;
 var
   LResponse: TIdHTTPResponse;
 begin
@@ -193,7 +200,7 @@ begin
   Assert.AreEqual('application/json', LResponse.ContentType);
 end;
 
-procedure TWebMockTests.Test_Response_WhenWithContentIsAStringWithContentType_SetsContentType;
+procedure TWebMockTests.Response_WhenWithContentIsAStringWithContentType_SetsContentType;
 var
   LExpected: string;
   LResponse: TIdHTTPResponse;
@@ -206,7 +213,7 @@ begin
   Assert.AreEqual(LExpected, LResponse.ContentType);
 end;
 
-procedure TWebMockTests.Test_Response_WhenWithContentIsAStringWithoutContentType_SetsContentTypeToPlainText;
+procedure TWebMockTests.Response_WhenWithContentIsAStringWithoutContentType_SetsContentTypeToPlainText;
 var
   LResponse: TIdHTTPResponse;
 begin
@@ -216,7 +223,7 @@ begin
   Assert.AreEqual('text/plain', LResponse.ContentType);
 end;
 
-procedure TWebMockTests.Test_Response_WhenToReturnSetsCustomStatus_ReturnsSpecifiedStatusText;
+procedure TWebMockTests.Response_WhenToReturnSetsCustomStatus_ReturnsSpecifiedStatusText;
 var
   LExpectedStatus: TWebMockResponseStatus;
   LResponse: TIdHTTPResponse;

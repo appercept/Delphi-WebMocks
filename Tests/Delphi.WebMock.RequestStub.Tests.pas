@@ -18,32 +18,34 @@ type
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure Test_ToReturn_Always_ReturnsSelf;
+    procedure ToReturn_Always_ReturnsAResponseStub;
     [Test]
-    procedure Test_ToReturn_WithNoArguments_DoesNotRaiseException;
+    procedure ToReturn_WithNoArguments_DoesNotRaiseException;
     [Test]
-    procedure Test_ToReturn_WithNoArguments_DoesNotChangeStatus;
+    procedure ToReturn_WithNoArguments_DoesNotChangeStatus;
     [Test]
-    procedure Test_ToReturn_WithResponse_SetsResponseStatus;
+    procedure ToReturn_WithResponse_SetsResponseStatus;
     [Test]
-    procedure Test_WithContent_WithString_ReturnsSelf;
+    procedure WithHeader_Always_ReturnsSelf;
     [Test]
-    procedure Test_WithContent_WithString_SetsResponseContent;
+    procedure WithHeader_Always_SetsValueForHeader;
     [Test]
-    procedure Test_WithContentFile_Always_ReturnsSelf;
+    procedure WithHeader_Always_OverwritesExistingValues;
     [Test]
-    procedure Test_WithContentFile_WithValidFile_SetsResponseContent;
+    procedure WithHeaders_Always_ReturnsSelf;
+    [Test]
+    procedure WithHeaders_Always_SetsAllValues;
   end;
 
 implementation
 
 uses
   Delphi.WebMock.Indy.RequestMatcher,
+  Delphi.WebMock.Response,
   Delphi.WebMock.ResponseStatus,
   IdCustomHTTPServer,
   Mock.Indy.HTTPRequestInfo,
-  System.Classes,
-  TestHelpers;
+  System.Classes;
 
 { TWebMockRequestStubTests }
 
@@ -60,12 +62,12 @@ begin
   StubbedRequest := nil;
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_Always_ReturnsSelf;
+procedure TWebMockRequestStubTests.ToReturn_Always_ReturnsAResponseStub;
 begin
-  Assert.AreSame(StubbedRequest, StubbedRequest.ToReturn);
+  Assert.IsTrue(StubbedRequest.ToReturn is TWebMockResponse);
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_WithNoArguments_DoesNotRaiseException;
+procedure TWebMockRequestStubTests.ToReturn_WithNoArguments_DoesNotRaiseException;
 begin
   Assert.WillNotRaiseAny(
   procedure
@@ -74,7 +76,7 @@ begin
   end);
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_WithNoArguments_DoesNotChangeStatus;
+procedure TWebMockRequestStubTests.ToReturn_WithNoArguments_DoesNotChangeStatus;
 var
   LExpectedStatus: TWebMockResponseStatus;
 begin
@@ -85,7 +87,7 @@ begin
   Assert.AreSame(LExpectedStatus, StubbedRequest.Response.Status);
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_WithResponse_SetsResponseStatus;
+procedure TWebMockRequestStubTests.ToReturn_WithResponse_SetsResponseStatus;
 var
   LResponse: TWebMockResponseStatus;
 begin
@@ -96,45 +98,70 @@ begin
   Assert.AreSame(LResponse, StubbedRequest.Response.Status);
 end;
 
-procedure TWebMockRequestStubTests.Test_WithContentFile_Always_ReturnsSelf;
-begin
-  Assert.AreSame(StubbedRequest, StubbedRequest.WithContentFile(FixturePath('Sample.txt')));
-end;
-
-procedure TWebMockRequestStubTests.Test_WithContentFile_WithValidFile_SetsResponseContent;
+procedure TWebMockRequestStubTests.WithHeaders_Always_ReturnsSelf;
 var
-  LExpectedContent: string;
-  LActualStream: TStringStream;
+  LHeaders: TStringList;
+  LHeaderName, LHeaderValue: string;
+  I: Integer;
 begin
-  LExpectedContent := 'Sample Text';
+  LHeaders := TStringList.Create;
 
-  StubbedRequest.WithContentFile(FixturePath('Sample.txt'));
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithHeaders(LHeaders));
 
-  LActualStream := TStringStream.Create;
-  LActualStream.CopyFrom(StubbedRequest.Response.ContentSource.ContentStream, 0);
-  Assert.AreEqual(
-    LExpectedContent,
-    LActualStream.DataString
-  );
+  LHeaders.Free;
 end;
 
-procedure TWebMockRequestStubTests.Test_WithContent_WithString_ReturnsSelf;
-begin
-  Assert.AreSame(StubbedRequest, StubbedRequest.WithContent(''));
-end;
-
-procedure TWebMockRequestStubTests.Test_WithContent_WithString_SetsResponseContent;
+procedure TWebMockRequestStubTests.WithHeaders_Always_SetsAllValues;
 var
-  LExpectedContent: string;
+  LHeaders: TStringList;
+  LHeaderName, LHeaderValue: string;
+  I: Integer;
 begin
-  LExpectedContent := 'Text Body.';
+  LHeaders := TStringList.Create;
+  LHeaders.Values['Header1'] := 'Value1';
+  LHeaders.Values['Header2'] := 'Value2';
 
-  StubbedRequest.WithContent(LExpectedContent);
+  StubbedRequest.WithHeaders(LHeaders);
 
-  Assert.AreEqual(
-    LExpectedContent,
-    (StubbedRequest.Response.ContentSource.ContentStream as TStringStream).DataString
-  );
+  for I := 0 to LHeaders.Count - 1 do
+  begin
+    LHeaderName := LHeaders.Names[I];
+    LHeaderValue := LHeaders.ValueFromIndex[I];
+    Assert.AreEqual(LHeaderValue, StubbedRequest.Matcher.Headers[LHeaderName]);
+  end;
+
+  LHeaders.Free;
+end;
+
+procedure TWebMockRequestStubTests.WithHeader_Always_OverwritesExistingValues;
+var
+  LHeaderName, LHeaderValue1, LHeaderValue2: string;
+begin
+  LHeaderName := 'Header1';
+  LHeaderValue1 := 'Value1';
+  LHeaderValue2 := 'Value2';
+
+  StubbedRequest.WithHeader(LHeaderName, LHeaderValue1);
+  StubbedRequest.WithHeader(LHeaderName, LHeaderValue2);
+
+  Assert.AreEqual(LHeaderValue2, StubbedRequest.Matcher.Headers[LHeaderName]);
+end;
+
+procedure TWebMockRequestStubTests.WithHeader_Always_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithHeader('Header', 'Value'));
+end;
+
+procedure TWebMockRequestStubTests.WithHeader_Always_SetsValueForHeader;
+var
+  LHeaderName, LHeaderValue: string;
+begin
+  LHeaderName := 'Header1';
+  LHeaderValue := 'Value1';
+
+  StubbedRequest.WithHeader(LHeaderName, LHeaderValue);
+
+  Assert.AreEqual(LHeaderValue, StubbedRequest.Matcher.Headers[LHeaderName]);
 end;
 
 initialization
