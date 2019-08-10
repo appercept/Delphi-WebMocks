@@ -31,6 +31,14 @@ type
     procedure Request_NotMatchingMethodAndPath_ReturnsNotImplemented(const AMatcherMethod, AMatcherURI, ARequestURI: string);
     [Test]
     procedure Request_MatchingSingleHeader_ReturnsOK;
+    [Test]
+    procedure Request_NotMatchingSingleHeader_ReturnsNotImplemented;
+    [Test]
+    procedure Request_MatchingMultipleHeaders_ReturnsOK;
+    [Test]
+    procedure Request_PartiallyMatchingMultipleHeaders_ReturnsNotImplemented;
+    [Test]
+    procedure Request_MatchingMultipleHeadersStringList_ReturnsOK;
   end;
 
 implementation
@@ -42,14 +50,67 @@ uses
   System.StrUtils,
   TestHelpers;
 
-procedure TWebMockMatchingTests.Request_MatchingSingleHeader_ReturnsOK;
+procedure TWebMockMatchingTests.Request_MatchingMultipleHeadersStringList_ReturnsOK;
 var
+  LHeaders: TStringList;
   LResponse: TIdHTTPResponse;
 begin
-  WebMock.StubRequest('*', '*').WithHeader('CustomerHeader', 'Value');
-  LResponse := WebClient.Get(WebMock.BaseURL);
+  LHeaders := TStringList.Create;
+  LHeaders.Values['Header1'] := 'Value1';
+  LHeaders.Values['Header2'] := 'Value2';
+
+  WebMock.StubRequest('*', '*').WithHeaders(LHeaders);
+  LResponse := WebClient.Get(WebMock.BaseURL, LHeaders);
 
   Assert.AreEqual(200, LResponse.ResponseCode);
+
+  LResponse.Free;
+  LHeaders.Free;
+end;
+
+procedure TWebMockMatchingTests.Request_MatchingMultipleHeaders_ReturnsOK;
+var
+  LHeaderName1, LHeaderValue1, LHeaderName2, LHeaderValue2: string;
+  LHeaders: TStringList;
+  LResponse: TIdHTTPResponse;
+begin
+  LHeaderName1 := 'Header1';
+  LHeaderValue1 := 'Value1';
+  LHeaderName2 := 'Header2';
+  LHeaderValue2 := 'Value2';
+  LHeaders := TStringList.Create;
+  LHeaders.AddPair(LHeaderName1, LHeaderValue1);
+  LHeaders.AddPair(LHeaderName2, LHeaderValue2);
+
+  WebMock.StubRequest('*', '*')
+    .WithHeader(LHeaderName1, LHeaderValue1)
+    .WithHeader(LHeaderName2, LHeaderValue2);
+  LResponse := WebClient.Get(WebMock.BaseURL, LHeaders);
+
+  Assert.AreEqual(200, LResponse.ResponseCode);
+
+  LResponse.Free;
+  LHeaders.Free;
+end;
+
+procedure TWebMockMatchingTests.Request_MatchingSingleHeader_ReturnsOK;
+var
+  LHeaderName, LHeaderValue: string;
+  LHeaders: TStringList;
+  LResponse: TIdHTTPResponse;
+begin
+  LHeaderName := 'CustomerHeader';
+  LHeaderValue := 'Value';
+  LHeaders := TStringList.Create;
+  LHeaders.AddPair(LHeaderName, LHeaderValue);
+
+  WebMock.StubRequest('*', '*').WithHeader(LHeaderName, LHeaderValue);
+  LResponse := WebClient.Get(WebMock.BaseURL, LHeaders);
+
+  Assert.AreEqual(200, LResponse.ResponseCode);
+
+  LResponse.Free;
+  LHeaders.Free;
 end;
 
 procedure TWebMockMatchingTests.Request_NotMatchingMethodAndPath_ReturnsNotImplemented(const AMatcherMethod, AMatcherURI, ARequestURI: string);
@@ -60,6 +121,45 @@ begin
   LResponse := WebClient.Get(WebMock.BaseURL + ARequestURI);
 
   Assert.AreEqual(501, LResponse.ResponseCode);
+
+  LResponse.Free;
+end;
+
+procedure TWebMockMatchingTests.Request_NotMatchingSingleHeader_ReturnsNotImplemented;
+var
+  LResponse: TIdHTTPResponse;
+begin
+  WebMock.StubRequest('*', '*').WithHeader('CustomerHeader', 'Value');
+  LResponse := WebClient.Get(WebMock.BaseURL);
+
+  Assert.AreEqual(501, LResponse.ResponseCode);
+
+  LResponse.Free;
+end;
+
+procedure TWebMockMatchingTests.Request_PartiallyMatchingMultipleHeaders_ReturnsNotImplemented;
+var
+  LHeaderName1, LHeaderValue1, LHeaderName2, LHeaderValue2: string;
+  LHeaders: TStringList;
+  LResponse: TIdHTTPResponse;
+begin
+  LHeaderName1 := 'Header1';
+  LHeaderValue1 := 'Value1';
+  LHeaderName2 := 'Header2';
+  LHeaderValue2 := 'Value2';
+  LHeaders := TStringList.Create;
+  LHeaders.AddPair(LHeaderName1, LHeaderValue1);
+  LHeaders.AddPair(LHeaderName2, 'WrongValue');
+
+  WebMock.StubRequest('*', '*')
+    .WithHeader(LHeaderName1, LHeaderValue1)
+    .WithHeader(LHeaderName2, LHeaderValue2);
+  LResponse := WebClient.Get(WebMock.BaseURL, LHeaders);
+
+  Assert.AreEqual(501, LResponse.ResponseCode);
+
+  LResponse.Free;
+  LHeaders.Free;
 end;
 
 procedure TWebMockMatchingTests.Request_WithMatchingMethodAndPath_ReturnsOK(const AMatcherMethod, AMatcherURI, ARequestURI: string);
@@ -70,6 +170,8 @@ begin
   LResponse := WebClient.Get(WebMock.BaseURL + ARequestURI);
 
   Assert.AreEqual(200, LResponse.ResponseCode);
+
+  LResponse.Free;
 end;
 
 procedure TWebMockMatchingTests.Setup;

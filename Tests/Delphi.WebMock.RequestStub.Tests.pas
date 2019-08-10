@@ -25,6 +25,16 @@ type
     procedure ToReturn_WithNoArguments_DoesNotChangeStatus;
     [Test]
     procedure ToReturn_WithResponse_SetsResponseStatus;
+    [Test]
+    procedure WithHeader_Always_ReturnsSelf;
+    [Test]
+    procedure WithHeader_Always_SetsValueForHeader;
+    [Test]
+    procedure WithHeader_Always_OverwritesExistingValues;
+    [Test]
+    procedure WithHeaders_Always_ReturnsSelf;
+    [Test]
+    procedure WithHeaders_Always_SetsAllValues;
   end;
 
 implementation
@@ -34,7 +44,8 @@ uses
   Delphi.WebMock.Response,
   Delphi.WebMock.ResponseStatus,
   IdCustomHTTPServer,
-  Mock.Indy.HTTPRequestInfo;
+  Mock.Indy.HTTPRequestInfo,
+  System.Classes;
 
 { TWebMockRequestStubTests }
 
@@ -85,6 +96,72 @@ begin
   StubbedRequest.ToReturn(LResponse);
 
   Assert.AreSame(LResponse, StubbedRequest.Response.Status);
+end;
+
+procedure TWebMockRequestStubTests.WithHeaders_Always_ReturnsSelf;
+var
+  LHeaders: TStringList;
+  LHeaderName, LHeaderValue: string;
+  I: Integer;
+begin
+  LHeaders := TStringList.Create;
+
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithHeaders(LHeaders));
+
+  LHeaders.Free;
+end;
+
+procedure TWebMockRequestStubTests.WithHeaders_Always_SetsAllValues;
+var
+  LHeaders: TStringList;
+  LHeaderName, LHeaderValue: string;
+  I: Integer;
+begin
+  LHeaders := TStringList.Create;
+  LHeaders.Values['Header1'] := 'Value1';
+  LHeaders.Values['Header2'] := 'Value2';
+
+  StubbedRequest.WithHeaders(LHeaders);
+
+  for I := 0 to LHeaders.Count - 1 do
+  begin
+    LHeaderName := LHeaders.Names[I];
+    LHeaderValue := LHeaders.ValueFromIndex[I];
+    Assert.AreEqual(LHeaderValue, StubbedRequest.Matcher.Headers[LHeaderName]);
+  end;
+
+  LHeaders.Free;
+end;
+
+procedure TWebMockRequestStubTests.WithHeader_Always_OverwritesExistingValues;
+var
+  LHeaderName, LHeaderValue1, LHeaderValue2: string;
+begin
+  LHeaderName := 'Header1';
+  LHeaderValue1 := 'Value1';
+  LHeaderValue2 := 'Value2';
+
+  StubbedRequest.WithHeader(LHeaderName, LHeaderValue1);
+  StubbedRequest.WithHeader(LHeaderName, LHeaderValue2);
+
+  Assert.AreEqual(LHeaderValue2, StubbedRequest.Matcher.Headers[LHeaderName]);
+end;
+
+procedure TWebMockRequestStubTests.WithHeader_Always_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithHeader('Header', 'Value'));
+end;
+
+procedure TWebMockRequestStubTests.WithHeader_Always_SetsValueForHeader;
+var
+  LHeaderName, LHeaderValue: string;
+begin
+  LHeaderName := 'Header1';
+  LHeaderValue := 'Value1';
+
+  StubbedRequest.WithHeader(LHeaderName, LHeaderValue);
+
+  Assert.AreEqual(LHeaderValue, StubbedRequest.Matcher.Headers[LHeaderName]);
 end;
 
 initialization
