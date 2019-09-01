@@ -19,8 +19,7 @@ type
     [TearDown]
     procedure TearDown;
     [Test]
-    [TestCase('HTTPMethod', 'HTTPMethod,GET')]
-    [TestCase('HTTPMethod', 'URI,*')]
+    [TestCase('HTTPMethod GET', 'HTTPMethod,GET')]
     procedure StringProperty_Defaults_ToValue(APropertyName, Expected: string);
     [Test]
     procedure Headers_Always_IsADictionary;
@@ -51,7 +50,7 @@ uses
 
 procedure TWebMockIndyRequestMatcherTests.Setup;
 begin
-  RequestMatcher := TWebMockIndyRequestMatcher.Create;
+  RequestMatcher := TWebMockIndyRequestMatcher.Create('');
 end;
 
 procedure TWebMockIndyRequestMatcherTests.TearDown;
@@ -70,7 +69,7 @@ var
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/match');
 
-  RequestMatcher := TWebMockIndyRequestMatcher.Create('GET', '/match');
+  RequestMatcher := TWebMockIndyRequestMatcher.Create('/match', 'GET');
 
   Assert.IsTrue(RequestMatcher.IsMatch(LRequestInfo));
 end;
@@ -92,7 +91,7 @@ var
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/no-match');
 
-  RequestMatcher := TWebMockIndyRequestMatcher.Create('GET', '/match');
+  RequestMatcher := TWebMockIndyRequestMatcher.Create('/match', 'GET');
 
   Assert.IsFalse(RequestMatcher.IsMatch(LRequestInfo));
 end;
@@ -107,7 +106,7 @@ begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/match');
   LRequestInfo.RawHeaders.AddValue(LHeaderName, LHeaderValue);
 
-  RequestMatcher := TWebMockIndyRequestMatcher.Create('GET', '/match');
+  RequestMatcher := TWebMockIndyRequestMatcher.Create('/match', 'GET');
   RequestMatcher.Headers.AddOrSetValue(LHeaderName, LHeaderValue);
 
   Assert.IsTrue(RequestMatcher.IsMatch(LRequestInfo));
@@ -119,7 +118,7 @@ var
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/match');
 
-  RequestMatcher := TWebMockIndyRequestMatcher.Create('GET', '/match');
+  RequestMatcher := TWebMockIndyRequestMatcher.Create('/match', 'GET');
   RequestMatcher.Headers.AddOrSetValue('Header1', 'Value1');
 
   Assert.IsFalse(RequestMatcher.IsMatch(LRequestInfo));
@@ -131,7 +130,7 @@ var
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('HEAD');
 
-  RequestMatcher := TWebMockIndyRequestMatcher.Create('*');
+  RequestMatcher := TWebMockIndyRequestMatcher.Create('*', '*');
 
   Assert.IsTrue(RequestMatcher.IsMatch(LRequestInfo));
 end;
@@ -142,7 +141,7 @@ var
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/match');
 
-  RequestMatcher := TWebMockIndyRequestMatcher.Create('GET', '*');
+  RequestMatcher := TWebMockIndyRequestMatcher.Create('*', 'GET');
 
   Assert.IsTrue(RequestMatcher.IsMatch(LRequestInfo));
 end;

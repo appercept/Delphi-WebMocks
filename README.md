@@ -79,6 +79,15 @@ constructing a valid URL.
 
 ## Examples
 ### Stubbing
+#### Matching request document path by regular-expression
+Matching a request by regular-expression can be useful for stubbing dynamic
+routes for a ReSTful resource involving a resource name and an unknown resource
+ID such as `/resource/999`. Such a request could be stubbed by:
+```Delphi
+WebMock.StubRequest('GET', TRegEx.Create('^/resource/\d+$'));
+```
+NOTE: Be sure to add `System.RegularExpressions` to your uses clause.
+
 #### Stubbed Response Codes
 By default a response status will be `200 OK` for a stubbed request. If a
 request is made to `TWebMock` without a registered stub it will respond
@@ -131,10 +140,10 @@ file named `Content.txt` in the project folder, the path will be
     - [x] ~~Simple wild-card `*`~~
   - [x] Path by:
     - [x] ~~Exact Matching~~
-    - [ ] Regular Expressions
+    - [x] ~~Regular Expressions~~
     - [x] ~~Simple wild-card `*`~~
   - [ ] Headers by:
-    - [ ] Exact Matching
+    - [x] ~~Exact Matching~~
     - [ ] Regular Expressions
   - [ ] Content by:
     - [ ] Exact Matching

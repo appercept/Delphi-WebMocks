@@ -28,7 +28,9 @@ type
     [Test]
     procedure BaseURL_WhenPortIsNotDefault_ReturnsLocalHostURLWithPort;
     [Test]
-    procedure StubResponse_Always_ReturnsARequestStub;
+    procedure StubResponse_WithStringURI_ReturnsARequestStub;
+    [Test]
+    procedure StubResponse_WithRegExURI_ReturnsARequestStub;
     [Test]
     procedure Response_WhenRequestStubbed_ReturnsOK;
     [Test]
@@ -59,7 +61,7 @@ uses
   Delphi.WebMock.RequestStub,
   Delphi.WebMock.ResponseStatus,
   IdGlobal, IdHTTP,
-  System.StrUtils,
+  System.RegularExpressions, System.StrUtils,
   TestHelpers;
 
 procedure TWebMockTests.Setup;
@@ -172,7 +174,12 @@ begin
   Assert.AreEqual('UTF-8', LResponse.CharSet);
 end;
 
-procedure TWebMockTests.StubResponse_Always_ReturnsARequestStub;
+procedure TWebMockTests.StubResponse_WithRegExURI_ReturnsARequestStub;
+begin
+  Assert.IsTrue(WebMock.StubRequest('GET', TRegEx.Create('.*')) is TWebMockRequestStub);
+end;
+
+procedure TWebMockTests.StubResponse_WithStringURI_ReturnsARequestStub;
 begin
   Assert.IsTrue(WebMock.StubRequest('GET', '/') is TWebMockRequestStub);
 end;

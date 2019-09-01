@@ -53,7 +53,7 @@ procedure TWebMockRequestStubTests.Setup;
 var
   LMatcher: TWebMockIndyRequestMatcher;
 begin
-  LMatcher := TWebMockIndyRequestMatcher.Create;
+  LMatcher := TWebMockIndyRequestMatcher.Create('');
   StubbedRequest := TWebMockRequestStub.Create(LMatcher);
 end;
 

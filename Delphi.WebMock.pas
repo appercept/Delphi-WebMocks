@@ -6,7 +6,7 @@ uses
   Delphi.WebMock.RequestStub, Delphi.WebMock.Response,
   Delphi.WebMock.ResponseContentSource, Delphi.WebMock.ResponseStatus,
   IdContext, IdCustomHTTPServer, IdGlobal, IdHTTPServer,
-  System.Generics.Collections;
+  System.Generics.Collections, System.RegularExpressions;
 
 type
   TWebWockPort = TIdPort;
@@ -34,7 +34,9 @@ type
     destructor Destroy; override;
     procedure PrintStubRegistry;
     function StubRequest(const AMethod: string; const AURI: string)
-      : TWebMockRequestStub;
+      : TWebMockRequestStub; overload;
+    function StubRequest(const AMethod: string; const AURIPattern: TRegEx)
+      : TWebMockRequestStub; overload;
     property BaseURL: string read FBaseURL;
   end;
 
@@ -137,13 +139,26 @@ begin
     AResponseInfo.ResponseText := AResponseStatus.Text;
 end;
 
+function TWebMock.StubRequest(const AMethod: string;
+  const AURIPattern: TRegEx): TWebMockRequestStub;
+var
+  LMatcher: TWebMockIndyRequestMatcher;
+  LRequestStub: TWebMockRequestStub;
+begin
+  LMatcher := TWebMockIndyRequestMatcher.Create(AURIPattern, AMethod);
+  LRequestStub := TWebMockRequestStub.Create(LMatcher);
+  StubRegistry.Add(LRequestStub);
+
+  Result := LRequestStub;
+end;
+
 function TWebMock.StubRequest(const AMethod: string; const AURI: string)
   : TWebMockRequestStub;
 var
   LMatcher: TWebMockIndyRequestMatcher;
   LRequestStub: TWebMockRequestStub;
 begin
-  LMatcher := TWebMockIndyRequestMatcher.Create(AMethod, AURI);
+  LMatcher := TWebMockIndyRequestMatcher.Create(AURI, AMethod);
   LRequestStub := TWebMockRequestStub.Create(LMatcher);
   StubRegistry.Add(LRequestStub);
 
