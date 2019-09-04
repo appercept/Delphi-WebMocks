@@ -79,6 +79,57 @@ constructing a valid URL.
 
 ## Examples
 ### Stubbing
+#### Request matching by HTTP method and document path
+The simplest form of request matching and starting point for all request stubs
+is by HTTP method and document path. For example stubbing the HTTP verb `GET` to
+the server root `/` is achieved by:
+```Delphi
+WebMock.StubRequest('GET', '/');
+```
+
+The use of a single wild-card character `*` can be used to match _any_ request.
+For example, to match all `POST` requests regardless of document path you can
+use:
+```Delphi
+WebMock.StubRequest('POST', '*');
+```
+
+Similarly, to match any HTTP method for a given path you can use:
+```Delphi
+WebMock.StubRequest('*', '/path');
+```
+
+It is perfectly possible to have a catch-all of `*` and `*` for both HTTP method
+and document path.
+
+#### Request matching by header value
+HTTP request headers can be matched like:
+```Delphi
+WebMock.StubRequest('*', '*').WithHeader('Header-Name', 'Header-Value');
+```
+
+Matching multiple headers can be achieved in 2 ways. The first is to simply
+chain `WithHeader` calls e.g.:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithHeader('Header-1', 'Header-Value-1')
+  .WithHeader('Header-2', 'Header-Value-2');
+```
+
+Alternatively, `WithHeaders` accepts a `TStringList` of key-value pairs e.g.:
+```Delphi
+var
+  Headers: TStringList;
+
+begin
+  Headers := TStringList.Create;
+  Headers.Values['Header-1'] := 'Value-1';
+  Headers.Values['Header-2'] := 'Value-2';
+
+  WebMock.StubRequest('*', '*').WithHeaders(Headers);
+end;
+```
+
 #### Matching request document path by regular-expression
 Matching a request by regular-expression can be useful for stubbing dynamic
 routes for a ReSTful resource involving a resource name and an unknown resource
