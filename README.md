@@ -154,6 +154,34 @@ request is made to `TWebMock` without a registered stub it will respond
 WebMock.StubRequest('GET', '/').ToReturn(TWebMockResponseStatus.NotFound);
 ```
 
+#### Stubbed Response Headers
+Headers can be added to a response stub like:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .AndReturn.WithHeader('Header1', 'Value1');
+```
+
+As with request header matching multiple headers can be specified either through
+method chaining or by using the `WithHeaders` method.
+```Delphi
+  WebMock.StubRequest('*', '*')
+    .AndReturn.WithHeader('Header1', 'Value1')
+    .AndReturn.WithHeader('Header2', 'Value2');
+
+/* or */
+
+var
+  Headers: TStringList;
+begin
+  Headers := TStringList.Create;
+  Headers.Values['Header1'] := 'Value1';
+  Headers.Values['Header2'] := 'Value2';
+
+  WebMock.StubRequest('*', '*')
+    .AndReturn.WithHeaders(Headers);
+end;
+```
+
 #### Stubbed Response Content: String Values
 By default a stubbed response returns a zero length body with content-type
 `text/plain`. Simple response content that is easily represented as a `string`
@@ -200,18 +228,18 @@ file named `Content.txt` in the project folder, the path will be
     - [x] ~~Exact Matching~~
     - [x] ~~Regular Expressions~~
     - [x] ~~Simple wild-card `*`~~
-  - [ ] Headers by:
+  - [x] Headers by:
     - [x] ~~Exact Matching~~
     - [x] ~~Regular Expressions~~
   - [ ] Content by:
     - [ ] Exact Matching
     - [ ] Regular Expressions
-* [x] Static Response Stubs
+* [x] ~~Static Response Stubs~~
   - [x] ~~Status Codes~~
   - [x] ~~Content~~
     - [x] ~~Simple Text~~
     - [x] ~~Fixture Files~~
-  - [ ] Headers
+  - [x] ~~Headers~~
 * [ ] Request History
 * [ ] Assertions/Expectations
 * [ ] Dynamic Response Stubs

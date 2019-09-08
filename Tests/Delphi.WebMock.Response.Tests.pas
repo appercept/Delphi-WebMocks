@@ -31,6 +31,16 @@ type
     procedure WithContentFile_Always_ReturnsSelf;
     [Test]
     procedure WithContentFile_WithValidFile_SetsResponseContent;
+    [Test]
+    procedure WithHeader_Always_ReturnsSelf;
+    [Test]
+    procedure WithHeader_Always_SetsValueForHeader;
+    [Test]
+    procedure WithHeader_Always_OverwritesExistingValues;
+    [Test]
+    procedure WithHeaders_Always_ReturnsSelf;
+    [Test]
+    procedure WithHeaders_Always_SetsAllValues;
   end;
 
 implementation
@@ -91,6 +101,73 @@ begin
     LExpectedContent,
     (WebMockResponse.ContentSource.ContentStream as TStringStream).DataString
   );
+end;
+
+procedure TWebMockResponseTests.WithHeaders_Always_ReturnsSelf;
+var
+  LHeaders: TStringList;
+begin
+  LHeaders := TStringList.Create;
+
+  Assert.AreSame(WebMockResponse, WebMockResponse.WithHeaders(LHeaders));
+
+  LHeaders.Free;
+end;
+
+procedure TWebMockResponseTests.WithHeaders_Always_SetsAllValues;
+var
+  LHeaders: TStringList;
+  LHeaderName, LHeaderValue: string;
+  I: Integer;
+begin
+  LHeaders := TStringList.Create;
+  LHeaders.Values['Header1'] := 'Value1';
+  LHeaders.Values['Header2'] := 'Value2';
+
+  WebMockResponse.WithHeaders(LHeaders);
+
+  for I := 0 to LHeaders.Count - 1 do
+  begin
+    LHeaderName := LHeaders.Names[I];
+    LHeaderValue := LHeaders.ValueFromIndex[I];
+    Assert.AreEqual(LHeaderValue, WebMockResponse.Headers.Values[LHeaderName]);
+  end;
+
+  LHeaders.Free;
+end;
+
+procedure TWebMockResponseTests.WithHeader_Always_OverwritesExistingValues;
+var
+  LHeaderName, LHeaderValue1, LHeaderValue2: string;
+begin
+  LHeaderName := 'Header1';
+  LHeaderValue1 := 'Value1';
+  LHeaderValue2 := 'Value2';
+
+  WebMockResponse.WithHeader(LHeaderName, LHeaderValue1);
+  WebMockResponse.WithHeader(LHeaderName, LHeaderValue2);
+
+  Assert.AreEqual(LHeaderValue2, WebMockResponse.Headers.Values[LHeaderName]);
+end;
+
+procedure TWebMockResponseTests.WithHeader_Always_ReturnsSelf;
+begin
+  Assert.AreSame(
+    WebMockResponse,
+    WebMockResponse.WithHeader('Header1', 'Value1')
+  );
+end;
+
+procedure TWebMockResponseTests.WithHeader_Always_SetsValueForHeader;
+var
+  LHeaderName, LHeaderValue: string;
+begin
+  LHeaderName := 'Header1';
+  LHeaderValue := 'Value1';
+
+  WebMockResponse.WithHeader(LHeaderName, LHeaderValue);
+
+  Assert.AreEqual(LHeaderValue, WebMockResponse.Headers.Values[LHeaderName]);
 end;
 
 procedure TWebMockResponseTests.ContentSource_WhenNotSet_ReturnsEmptyContentSource;

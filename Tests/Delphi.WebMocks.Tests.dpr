@@ -30,12 +30,13 @@ uses
   Delphi.WebMock.Tests.Client in 'Delphi.WebMock.Tests.Client.pas',
   Delphi.WebMock.ResponseContentFile.Tests in 'Delphi.WebMock.ResponseContentFile.Tests.pas',
   Delphi.WebMock.ResponseContentFile in '..\Delphi.WebMock.ResponseContentFile.pas',
-  Delphi.WebMock.Matching.Tests in 'Delphi.WebMock.Matching.Tests.pas',
+  Delphi.WebMock.Matching.Tests in 'Features\Delphi.WebMock.Matching.Tests.pas',
   Delphi.WebMock.StringWildcardMatcher.Tests in 'Delphi.WebMock.StringWildcardMatcher.Tests.pas',
   Delphi.WebMock.StringWildcardMatcher in '..\Delphi.WebMock.StringWildcardMatcher.pas',
   Delphi.WebMock.StringMatcher in '..\Delphi.WebMock.StringMatcher.pas',
   Delphi.WebMock.StringRegExMatcher.Tests in 'Delphi.WebMock.StringRegExMatcher.Tests.pas',
-  Delphi.WebMock.StringRegExMatcher in '..\Delphi.WebMock.StringRegExMatcher.pas';
+  Delphi.WebMock.StringRegExMatcher in '..\Delphi.WebMock.StringRegExMatcher.pas',
+  Delphi.WebMock.ResponsesWithHeaders.Tests in 'Features\Delphi.WebMock.ResponsesWithHeaders.Tests.pas';
 
 var
   Runner: ITestRunner;
