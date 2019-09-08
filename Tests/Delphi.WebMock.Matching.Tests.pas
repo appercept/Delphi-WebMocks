@@ -38,15 +38,19 @@ type
     [TestCase('No Resource by ID', 'GET,^/resource/\d+$,resource/abc')]
     procedure RequestWithMethodAndRegExPath_NotMatching_RespondsNotImplemented(const AMatcherMethod, AMatcherURIPattern, ARequestURI: string);
     [Test]
-    procedure Request_MatchingSingleHeader_ReturnsOK;
+    procedure Request_MatchingSingleHeader_RespondsOK;
     [Test]
-    procedure Request_NotMatchingSingleHeader_ReturnsNotImplemented;
+    procedure Request_NotMatchingSingleHeader_RespondsNotImplemented;
     [Test]
-    procedure Request_MatchingMultipleHeaders_ReturnsOK;
+    procedure Request_MatchingMultipleHeaders_RespondsOK;
     [Test]
-    procedure Request_PartiallyMatchingMultipleHeaders_ReturnsNotImplemented;
+    procedure Request_PartiallyMatchingMultipleHeaders_RespondsNotImplemented;
     [Test]
-    procedure Request_MatchingMultipleHeadersStringList_ReturnsOK;
+    procedure Request_MatchingMultipleHeadersStringList_RespondsOK;
+    [Test]
+    procedure Request_MatchingSingleHeaderByRegEx_RespondsOK;
+    [Test]
+    procedure Request_NotMatchingSingleHeaderByRegEx_RespondsNotImplemented;
   end;
 
 implementation
@@ -58,7 +62,7 @@ uses
   System.RegularExpressions, System.StrUtils,
   TestHelpers;
 
-procedure TWebMockMatchingTests.Request_MatchingMultipleHeadersStringList_ReturnsOK;
+procedure TWebMockMatchingTests.Request_MatchingMultipleHeadersStringList_RespondsOK;
 var
   LHeaders: TStringList;
   LResponse: TIdHTTPResponse;
@@ -76,7 +80,7 @@ begin
   LHeaders.Free;
 end;
 
-procedure TWebMockMatchingTests.Request_MatchingMultipleHeaders_ReturnsOK;
+procedure TWebMockMatchingTests.Request_MatchingMultipleHeaders_RespondsOK;
 var
   LHeaderName1, LHeaderValue1, LHeaderName2, LHeaderValue2: string;
   LHeaders: TStringList;
@@ -101,7 +105,27 @@ begin
   LHeaders.Free;
 end;
 
-procedure TWebMockMatchingTests.Request_MatchingSingleHeader_ReturnsOK;
+procedure TWebMockMatchingTests.Request_MatchingSingleHeaderByRegEx_RespondsOK;
+var
+  LHeaderName: string;
+  LHeaders: TStringList;
+  LResponse: TIdHTTPResponse;
+begin
+  LHeaderName := 'Accept';
+  LHeaders := TStringList.Create;
+  LHeaders.Values[LHeaderName] := 'text/plain';
+
+  WebMock.StubRequest('*', '*')
+    .WithHeader(LHeaderName, TRegEx.Create('text/.+'));
+  LResponse := WebClient.Get(WebMock.BaseURL, LHeaders);
+
+  Assert.AreEqual(200, LResponse.ResponseCode);
+
+  LResponse.Free;
+  LHeaders.Free;
+end;
+
+procedure TWebMockMatchingTests.Request_MatchingSingleHeader_RespondsOK;
 var
   LHeaderName, LHeaderValue: string;
   LHeaders: TStringList;
@@ -133,7 +157,27 @@ begin
   LResponse.Free;
 end;
 
-procedure TWebMockMatchingTests.Request_NotMatchingSingleHeader_ReturnsNotImplemented;
+procedure TWebMockMatchingTests.Request_NotMatchingSingleHeaderByRegEx_RespondsNotImplemented;
+var
+  LHeaderName: string;
+  LHeaders: TStringList;
+  LResponse: TIdHTTPResponse;
+begin
+  LHeaderName := 'Accept';
+  LHeaders := TStringList.Create;
+  LHeaders.Values[LHeaderName] := 'text/plain';
+
+  WebMock.StubRequest('*', '*')
+    .WithHeader(LHeaderName, TRegEx.Create('video/.+'));
+  LResponse := WebClient.Get(WebMock.BaseURL, LHeaders);
+
+  Assert.AreEqual(501, LResponse.ResponseCode);
+
+  LResponse.Free;
+  LHeaders.Free;
+end;
+
+procedure TWebMockMatchingTests.Request_NotMatchingSingleHeader_RespondsNotImplemented;
 var
   LResponse: TIdHTTPResponse;
 begin
@@ -145,7 +189,7 @@ begin
   LResponse.Free;
 end;
 
-procedure TWebMockMatchingTests.Request_PartiallyMatchingMultipleHeaders_ReturnsNotImplemented;
+procedure TWebMockMatchingTests.Request_PartiallyMatchingMultipleHeaders_RespondsNotImplemented;
 var
   LHeaderName1, LHeaderValue1, LHeaderName2, LHeaderValue2: string;
   LHeaders: TStringList;

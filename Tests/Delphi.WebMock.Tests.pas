@@ -28,9 +28,9 @@ type
     [Test]
     procedure BaseURL_WhenPortIsNotDefault_ReturnsLocalHostURLWithPort;
     [Test]
-    procedure StubResponse_WithStringURI_ReturnsARequestStub;
+    procedure StubRequest_WithStringURI_ReturnsARequestStub;
     [Test]
-    procedure StubResponse_WithRegExURI_ReturnsARequestStub;
+    procedure StubRequest_WithRegExURI_ReturnsARequestStub;
     [Test]
     procedure Response_WhenRequestStubbed_ReturnsOK;
     [Test]
@@ -174,12 +174,12 @@ begin
   Assert.AreEqual('UTF-8', LResponse.CharSet);
 end;
 
-procedure TWebMockTests.StubResponse_WithRegExURI_ReturnsARequestStub;
+procedure TWebMockTests.StubRequest_WithRegExURI_ReturnsARequestStub;
 begin
   Assert.IsTrue(WebMock.StubRequest('GET', TRegEx.Create('.*')) is TWebMockRequestStub);
 end;
 
-procedure TWebMockTests.StubResponse_WithStringURI_ReturnsARequestStub;
+procedure TWebMockTests.StubRequest_WithStringURI_ReturnsARequestStub;
 begin
   Assert.IsTrue(WebMock.StubRequest('GET', '/') is TWebMockRequestStub);
 end;

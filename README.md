@@ -130,13 +130,20 @@ begin
 end;
 ```
 
-#### Matching request document path by regular-expression
+#### Matching request document path or headers by regular-expression
 Matching a request by regular-expression can be useful for stubbing dynamic
 routes for a ReSTful resource involving a resource name and an unknown resource
 ID such as `/resource/999`. Such a request could be stubbed by:
 ```Delphi
 WebMock.StubRequest('GET', TRegEx.Create('^/resource/\d+$'));
 ```
+
+Matching headers can similarly by achieved by:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithHeader('Accept', TRegEx.Create('video/.+'));
+```
+
 NOTE: Be sure to add `System.RegularExpressions` to your uses clause.
 
 #### Stubbed Response Codes
@@ -195,7 +202,7 @@ file named `Content.txt` in the project folder, the path will be
     - [x] ~~Simple wild-card `*`~~
   - [ ] Headers by:
     - [x] ~~Exact Matching~~
-    - [ ] Regular Expressions
+    - [x] ~~Regular Expressions~~
   - [ ] Content by:
     - [ ] Exact Matching
     - [ ] Regular Expressions

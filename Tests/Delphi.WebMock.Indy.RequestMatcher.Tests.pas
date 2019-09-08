@@ -42,6 +42,7 @@ type
 implementation
 
 uses
+  Delphi.WebMock.StringMatcher, Delphi.WebMock.StringWildcardMatcher,
   Mock.Indy.HTTPRequestInfo,
   TestHelpers,
   System.Generics.Collections;
@@ -60,7 +61,7 @@ end;
 
 procedure TWebMockIndyRequestMatcherTests.Headers_Always_IsADictionary;
 begin
-  Assert.IsTrue(RequestMatcher.Headers is TDictionary<string, string>);
+  Assert.IsTrue(RequestMatcher.Headers is TDictionary<string, IStringMatcher>);
 end;
 
 procedure TWebMockIndyRequestMatcherTests.IsMatch_GivenAMatchingRequestInfo_ReturnsTrue;
@@ -102,12 +103,14 @@ var
   LHeaderName, LHeaderValue: string;
 begin
   LHeaderName := 'Header1';
-  LHeaderValue := 'Header2';
+  LHeaderValue := 'Value1';
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/match');
   LRequestInfo.RawHeaders.AddValue(LHeaderName, LHeaderValue);
 
   RequestMatcher := TWebMockIndyRequestMatcher.Create('/match', 'GET');
-  RequestMatcher.Headers.AddOrSetValue(LHeaderName, LHeaderValue);
+  RequestMatcher.Headers.AddOrSetValue(
+    LHeaderName, TWebMockStringWildcardMatcher.Create(LHeaderValue)
+  );
 
   Assert.IsTrue(RequestMatcher.IsMatch(LRequestInfo));
 end;
@@ -119,7 +122,9 @@ begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/match');
 
   RequestMatcher := TWebMockIndyRequestMatcher.Create('/match', 'GET');
-  RequestMatcher.Headers.AddOrSetValue('Header1', 'Value1');
+  RequestMatcher.Headers.AddOrSetValue(
+    'Header1', TWebMockStringWildcardMatcher.Create('Value1')
+  );
 
   Assert.IsFalse(RequestMatcher.IsMatch(LRequestInfo));
 end;

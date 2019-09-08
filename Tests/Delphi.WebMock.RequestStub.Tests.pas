@@ -26,11 +26,15 @@ type
     [Test]
     procedure ToReturn_WithResponse_SetsResponseStatus;
     [Test]
-    procedure WithHeader_Always_ReturnsSelf;
+    procedure WithHeader_GivenString_ReturnsSelf;
     [Test]
-    procedure WithHeader_Always_SetsValueForHeader;
+    procedure WithHeader_GivenString_SetsValueForHeader;
     [Test]
     procedure WithHeader_Always_OverwritesExistingValues;
+    [Test]
+    procedure WithHeader_GivenRegEx_ReturnsSelf;
+    [Test]
+    procedure WithHeader_GivenRegEx_SetsPatternForHeader;
     [Test]
     procedure WithHeaders_Always_ReturnsSelf;
     [Test]
@@ -40,12 +44,12 @@ type
 implementation
 
 uses
-  Delphi.WebMock.Indy.RequestMatcher,
-  Delphi.WebMock.Response,
-  Delphi.WebMock.ResponseStatus,
+  Delphi.WebMock.Indy.RequestMatcher, Delphi.WebMock.Response,
+  Delphi.WebMock.ResponseStatus, Delphi.WebMock.StringMatcher,
+  Delphi.WebMock.StringWildcardMatcher, Delphi.WebMock.StringRegExMatcher,
   IdCustomHTTPServer,
   Mock.Indy.HTTPRequestInfo,
-  System.Classes;
+  System.Classes, System.RegularExpressions;
 
 { TWebMockRequestStubTests }
 
@@ -127,7 +131,10 @@ begin
   begin
     LHeaderName := LHeaders.Names[I];
     LHeaderValue := LHeaders.ValueFromIndex[I];
-    Assert.AreEqual(LHeaderValue, StubbedRequest.Matcher.Headers[LHeaderName]);
+    Assert.AreEqual(
+      LHeaderValue,
+      (StubbedRequest.Matcher.Headers[LHeaderName] as TWebMockStringWildcardMatcher).Value
+    );
   end;
 
   LHeaders.Free;
@@ -136,23 +143,49 @@ end;
 procedure TWebMockRequestStubTests.WithHeader_Always_OverwritesExistingValues;
 var
   LHeaderName, LHeaderValue1, LHeaderValue2: string;
+  LMatcher: IStringMatcher;
 begin
   LHeaderName := 'Header1';
   LHeaderValue1 := 'Value1';
   LHeaderValue2 := 'Value2';
 
   StubbedRequest.WithHeader(LHeaderName, LHeaderValue1);
+  LMatcher := StubbedRequest.Matcher.Headers[LHeaderName];
   StubbedRequest.WithHeader(LHeaderName, LHeaderValue2);
 
-  Assert.AreEqual(LHeaderValue2, StubbedRequest.Matcher.Headers[LHeaderName]);
+  Assert.AreNotSame(LMatcher, StubbedRequest.Matcher.Headers[LHeaderName]);
 end;
 
-procedure TWebMockRequestStubTests.WithHeader_Always_ReturnsSelf;
+procedure TWebMockRequestStubTests.WithHeader_GivenRegEx_ReturnsSelf;
+begin
+  Assert.AreSame(
+    StubbedRequest,
+    StubbedRequest.WithHeader('Header', TRegEx.Create(''))
+  );
+end;
+
+procedure TWebMockRequestStubTests.WithHeader_GivenRegEx_SetsPatternForHeader;
+var
+  LHeaderName: string;
+  LHeaderPattern: TRegEx;
+begin
+  LHeaderName := 'Header1';
+  LHeaderPattern := TRegEx.Create('');
+
+  StubbedRequest.WithHeader(LHeaderName, LHeaderPattern);
+
+  Assert.AreEqual(
+    LHeaderPattern,
+    (StubbedRequest.Matcher.Headers[LHeaderName] as TWebMockStringRegExMatcher).RegEx
+  );
+end;
+
+procedure TWebMockRequestStubTests.WithHeader_GivenString_ReturnsSelf;
 begin
   Assert.AreSame(StubbedRequest, StubbedRequest.WithHeader('Header', 'Value'));
 end;
 
-procedure TWebMockRequestStubTests.WithHeader_Always_SetsValueForHeader;
+procedure TWebMockRequestStubTests.WithHeader_GivenString_SetsValueForHeader;
 var
   LHeaderName, LHeaderValue: string;
 begin
@@ -161,7 +194,10 @@ begin
 
   StubbedRequest.WithHeader(LHeaderName, LHeaderValue);
 
-  Assert.AreEqual(LHeaderValue, StubbedRequest.Matcher.Headers[LHeaderName]);
+  Assert.AreEqual(
+    LHeaderValue,
+    (StubbedRequest.Matcher.Headers[LHeaderName] as TWebMockStringWildcardMatcher).Value
+  );
 end;
 
 initialization

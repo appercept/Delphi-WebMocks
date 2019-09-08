@@ -10,7 +10,7 @@ uses
 type
   TWebMockIndyRequestMatcher = class(TObject)
   private
-    FHeaders: TDictionary<string, string>;
+    FHeaders: TDictionary<string, IStringMatcher>;
     FHTTPMethod: string;
     FURIMatcher: IStringMatcher;
     function HeadersMatches(AHeaders: TIdHeaderList): Boolean;
@@ -21,7 +21,7 @@ type
     destructor Destroy; override;
     function IsMatch(AHTTPRequestInfo: TIdHTTPRequestInfo): Boolean;
     function ToString: string; override;
-    property Headers: TDictionary<string, string> read FHeaders;
+    property Headers: TDictionary<string, IStringMatcher> read FHeaders;
     property HTTPMethod: string read FHTTPMethod write FHTTPMethod;
     property URIMatcher: IStringMatcher read FURIMatcher;
   end;
@@ -38,7 +38,7 @@ constructor TWebMockIndyRequestMatcher.Create(AURI: string;
   AHTTPMethod: string = 'GET');
 begin
   inherited Create;
-  FHeaders := TDictionary<string, string>.Create;
+  FHeaders := TDictionary<string, IStringMatcher>.Create;
   FURIMatcher := TWebMockStringWildcardMatcher.Create(AURI);
   FHTTPMethod := AHTTPMethod;
 end;
@@ -47,7 +47,7 @@ constructor TWebMockIndyRequestMatcher.Create(AURIPattern: TRegEx;
   AHTTPMethod: string = 'GET');
 begin
   inherited Create;
-  FHeaders := TDictionary<string, string>.Create;
+  FHeaders := TDictionary<string, IStringMatcher>.Create;
   FURIMatcher := TWebMockStringRegExMatcher.Create(AURIPattern);
   FHTTPMethod := AHTTPMethod;
 end;
@@ -61,11 +61,11 @@ end;
 function TWebMockIndyRequestMatcher.HeadersMatches(
   AHeaders: TIdHeaderList): Boolean;
 var
-  LHeader: TPair<string, string>;
+  LHeader: TPair<string, IStringMatcher>;
 begin
   for LHeader in Headers do
   begin
-    if AHeaders.Values[LHeader.Key] <> LHeader.Value then
+    if not LHeader.Value.IsMatch(AHeaders.Values[LHeader.Key]) then
     begin
       Result := False;
       Exit;
