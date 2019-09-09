@@ -26,6 +26,10 @@ type
     [Test]
     procedure ToReturn_WithResponse_SetsResponseStatus;
     [Test]
+    procedure WithContent_GivenString_ReturnsSelf;
+    [Test]
+    procedure WithContent_GivenString_SetsValueForContent;
+    [Test]
     procedure WithHeader_GivenString_ReturnsSelf;
     [Test]
     procedure WithHeader_GivenString_SetsValueForHeader;
@@ -100,6 +104,25 @@ begin
   StubbedRequest.ToReturn(LResponse);
 
   Assert.AreSame(LResponse, StubbedRequest.Response.Status);
+end;
+
+procedure TWebMockRequestStubTests.WithContent_GivenString_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithContent('Hello.'));
+end;
+
+procedure TWebMockRequestStubTests.WithContent_GivenString_SetsValueForContent;
+var
+  LContent: string;
+begin
+  LContent := 'Welcome!';
+
+  StubbedRequest.WithContent(LContent);
+
+  Assert.AreEqual(
+    LContent,
+    (StubbedRequest.Matcher.Content as TWebMockStringWildcardMatcher).Value
+  );
 end;
 
 procedure TWebMockRequestStubTests.WithHeaders_Always_ReturnsSelf;

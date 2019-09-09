@@ -130,6 +130,12 @@ begin
 end;
 ```
 
+#### Request matching by header value
+HTTP request can be matched by content like:
+```Delphi
+WebMock.StubRequest('*', '*').WithContent('String content.');
+```
+
 #### Matching request document path or headers by regular-expression
 Matching a request by regular-expression can be useful for stubbing dynamic
 routes for a ReSTful resource involving a resource name and an unknown resource
@@ -158,15 +164,15 @@ WebMock.StubRequest('GET', '/').ToReturn(TWebMockResponseStatus.NotFound);
 Headers can be added to a response stub like:
 ```Delphi
 WebMock.StubRequest('*', '*')
-  .AndReturn.WithHeader('Header1', 'Value1');
+  .ToReturn.WithHeader('Header1', 'Value1');
 ```
 
 As with request header matching multiple headers can be specified either through
 method chaining or by using the `WithHeaders` method.
 ```Delphi
   WebMock.StubRequest('*', '*')
-    .AndReturn.WithHeader('Header1', 'Value1')
-    .AndReturn.WithHeader('Header2', 'Value2');
+    .ToReturn.WithHeader('Header1', 'Value1')
+    .ToReturn.WithHeader('Header2', 'Value2');
 
 /* or */
 
@@ -178,7 +184,7 @@ begin
   Headers.Values['Header2'] := 'Value2';
 
   WebMock.StubRequest('*', '*')
-    .AndReturn.WithHeaders(Headers);
+    .ToReturn.WithHeaders(Headers);
 end;
 ```
 
@@ -187,13 +193,15 @@ By default a stubbed response returns a zero length body with content-type
 `text/plain`. Simple response content that is easily represented as a `string`
 can be set with `WithContent`.
 ```Delphi
-WebMock.StubRequest('GET', '/').WithContent('Text To Return');
+WebMock.StubRequest('GET', '/')
+  .ToReturn.WithContent('Text To Return');
 ```
 
 If you want to return a specific content-type it can be specified as the second
 argument e.g.
 ```Delphi
-WebMock.StubRequest('GET', '/').WithContent('{ "status": "ok" }', 'application/json');
+WebMock.StubRequest('GET', '/')
+  .ToReturn.WithContent('{ "status": "ok" }', 'application/json');
 ```
 
 #### Stubbed Response Content: Fixture Files
@@ -232,7 +240,7 @@ file named `Content.txt` in the project folder, the path will be
     - [x] ~~Exact Matching~~
     - [x] ~~Regular Expressions~~
   - [ ] Content by:
-    - [ ] Exact Matching
+    - [x] ~~Exact Matching~~
     - [ ] Regular Expressions
 * [x] ~~Static Response Stubs~~
   - [x] ~~Status Codes~~

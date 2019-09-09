@@ -154,6 +154,10 @@
         <DCCReference Include="Delphi.WebMock.StringRegExMatcher.Tests.pas"/>
         <DCCReference Include="..\Delphi.WebMock.StringRegExMatcher.pas"/>
         <DCCReference Include="Features\Delphi.WebMock.ResponsesWithHeaders.Tests.pas"/>
+        <DCCReference Include="Features\Delphi.WebMock.ResponsesWithContent.Tests.pas"/>
+        <DCCReference Include="Features\Delphi.WebMock.MatchingContent.Tests.pas"/>
+        <DCCReference Include="Delphi.WebMock.StringAnyMatcher.Tests.pas"/>
+        <DCCReference Include="..\Delphi.WebMock.StringAnyMatcher.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

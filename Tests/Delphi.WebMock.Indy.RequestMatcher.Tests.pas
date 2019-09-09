@@ -24,6 +24,8 @@ type
     [Test]
     procedure Headers_Always_IsADictionary;
     [Test]
+    procedure Content_ByDefault_MatchesAnyString;
+    [Test]
     procedure IsMatch_GivenAMatchingRequestInfo_ReturnsTrue;
     [Test]
     procedure IsMatch_WhenMethodIsWildcardGivenAnyRequestInfoMethod_ReturnsTrue;
@@ -34,6 +36,10 @@ type
     [Test]
     procedure IsMatch_GivenDifferingURI_ReturnsFalse;
     [Test]
+    procedure IsMatch_WhenContentMatcherMatchesRequestInfo_ReturnsTrue;
+    [Test]
+    procedure IsMatch_WhenContentMatcherDoesNotMatchRequestInfo_ReturnsFalse;
+    [Test]
     procedure IsMatch_WhenHeadersAreSetGivenMatchingRequestInfo_ReturnsTrue;
     [Test]
     procedure IsMatch_WhenHeadersAreSetGivenNonMatchingRequestInfo_ReturnsFalse;
@@ -42,10 +48,11 @@ type
 implementation
 
 uses
-  Delphi.WebMock.StringMatcher, Delphi.WebMock.StringWildcardMatcher,
+  Delphi.WebMock.StringMatcher, Delphi.WebMock.StringAnyMatcher,
+  Delphi.WebMock.StringWildcardMatcher,
   Mock.Indy.HTTPRequestInfo,
   TestHelpers,
-  System.Generics.Collections;
+  System.Classes, System.Generics.Collections;
 
 { TWebMockIndyRequestMatcherTests }
 
@@ -57,6 +64,11 @@ end;
 procedure TWebMockIndyRequestMatcherTests.TearDown;
 begin
   RequestMatcher := nil;
+end;
+
+procedure TWebMockIndyRequestMatcherTests.Content_ByDefault_MatchesAnyString;
+begin
+  Assert.IsTrue(RequestMatcher.Content.IsMatch('Any Value'));
 end;
 
 procedure TWebMockIndyRequestMatcherTests.Headers_Always_IsADictionary;
@@ -95,6 +107,34 @@ begin
   RequestMatcher := TWebMockIndyRequestMatcher.Create('/match', 'GET');
 
   Assert.IsFalse(RequestMatcher.IsMatch(LRequestInfo));
+end;
+
+procedure TWebMockIndyRequestMatcherTests.IsMatch_WhenContentMatcherDoesNotMatchRequestInfo_ReturnsFalse;
+var
+  LRequestInfo: TIdHTTPRequestInfo;
+  LContentBody: TStringStream;
+begin
+  LContentBody := TStringStream.Create('No Match');
+  LRequestInfo := TMockIdHTTPRequestInfo.Mock('POST', '/');
+  LRequestInfo.PostStream := LContentBody;
+  RequestMatcher := TWebMockIndyRequestMatcher.Create('/', 'POST');
+  RequestMatcher.Content := TWebMockStringWildcardMatcher.Create('Other Value');
+
+  Assert.IsFalse(RequestMatcher.IsMatch(LRequestInfo));
+end;
+
+procedure TWebMockIndyRequestMatcherTests.IsMatch_WhenContentMatcherMatchesRequestInfo_ReturnsTrue;
+var
+  LRequestInfo: TIdHTTPRequestInfo;
+  LContentBody: TStringStream;
+begin
+  LContentBody := TStringStream.Create('Match');
+  LRequestInfo := TMockIdHTTPRequestInfo.Mock('POST', '/');
+  LRequestInfo.PostStream := LContentBody;
+  RequestMatcher := TWebMockIndyRequestMatcher.Create('/', 'POST');
+  RequestMatcher.Content := TWebMockStringWildcardMatcher.Create('Match');
+
+  Assert.IsTrue(RequestMatcher.IsMatch(LRequestInfo));
 end;
 
 procedure TWebMockIndyRequestMatcherTests.IsMatch_WhenHeadersAreSetGivenMatchingRequestInfo_ReturnsTrue;
