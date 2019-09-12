@@ -19,7 +19,8 @@ type
     function ToString: string; override;
     function ToReturn(AResponseStatus: TWebMockResponseStatus = nil)
       : TWebMockResponse;
-    function WithContent(const AContent: string): TWebMockRequestStub;
+    function WithContent(const AContent: string): TWebMockRequestStub; overload;
+    function WithContent(const APattern: TRegEx): TWebMockRequestStub; overload;
     function WithHeader(AName, AValue: string): TWebMockRequestStub; overload;
     function WithHeader(AName: string; APattern: TRegEx)
       : TWebMockRequestStub; overload;
@@ -79,6 +80,14 @@ function TWebMockRequestStub.WithContent(
   const AContent: string): TWebMockRequestStub;
 begin
   Matcher.Content := TWebMockStringWildcardMatcher.Create(AContent);
+
+  Result := Self;
+end;
+
+function TWebMockRequestStub.WithContent(
+  const APattern: TRegEx): TWebMockRequestStub;
+begin
+  Matcher.Content := TWebMockStringRegExMatcher.Create(APattern);
 
   Result := Self;
 end;

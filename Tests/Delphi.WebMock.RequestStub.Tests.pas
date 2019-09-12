@@ -30,6 +30,10 @@ type
     [Test]
     procedure WithContent_GivenString_SetsValueForContent;
     [Test]
+    procedure WithContent_GivenRegEx_ReturnsSelf;
+    [Test]
+    procedure WithContent_GivenRegEx_SetsValueForContent;
+    [Test]
     procedure WithHeader_GivenString_ReturnsSelf;
     [Test]
     procedure WithHeader_GivenString_SetsValueForHeader;
@@ -104,6 +108,28 @@ begin
   StubbedRequest.ToReturn(LResponse);
 
   Assert.AreSame(LResponse, StubbedRequest.Response.Status);
+end;
+
+procedure TWebMockRequestStubTests.WithContent_GivenRegEx_ReturnsSelf;
+begin
+  Assert.AreSame(
+    StubbedRequest,
+    StubbedRequest.WithContent(TRegEx.Create('Hello.'))
+  );
+end;
+
+procedure TWebMockRequestStubTests.WithContent_GivenRegEx_SetsValueForContent;
+var
+  LPattern: TRegEx;
+begin
+  LPattern := TRegEx.Create('.+');
+
+  StubbedRequest.WithContent(LPattern);
+
+  Assert.AreEqual(
+    LPattern,
+    (StubbedRequest.Matcher.Content as TWebMockStringRegExMatcher).RegEx
+  );
 end;
 
 procedure TWebMockRequestStubTests.WithContent_GivenString_ReturnsSelf;

@@ -136,7 +136,7 @@ HTTP request can be matched by content like:
 WebMock.StubRequest('*', '*').WithContent('String content.');
 ```
 
-#### Matching request document path or headers by regular-expression
+#### Matching request document path, headers, or content by regular-expression
 Matching a request by regular-expression can be useful for stubbing dynamic
 routes for a ReSTful resource involving a resource name and an unknown resource
 ID such as `/resource/999`. Such a request could be stubbed by:
@@ -148,6 +148,12 @@ Matching headers can similarly by achieved by:
 ```Delphi
 WebMock.StubRequest('*', '*')
   .WithHeader('Accept', TRegEx.Create('video/.+'));
+```
+
+Matching content can be performed like:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithContent(TRegEx.Create('Hello'));
 ```
 
 NOTE: Be sure to add `System.RegularExpressions` to your uses clause.
