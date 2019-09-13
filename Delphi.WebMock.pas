@@ -6,7 +6,7 @@ uses
   Delphi.WebMock.RequestStub, Delphi.WebMock.Response,
   Delphi.WebMock.ResponseContentSource, Delphi.WebMock.ResponseStatus,
   IdContext, IdCustomHTTPServer, IdGlobal, IdHTTPServer,
-  System.Generics.Collections;
+  System.Classes, System.Generics.Collections, System.RegularExpressions;
 
 type
   TWebWockPort = TIdPort;
@@ -23,10 +23,12 @@ type
       : TWebMockRequestStub;
     procedure RespondWith(AResponse: TWebMockResponse;
       AResponseInfo: TIdHTTPResponseInfo);
-    procedure SetResponseStatus(AResponseInfo: TIdHTTPResponseInfo;
-      const AResponseStatus: TWebMockResponseStatus);
     procedure SetResponseContent(AResponseInfo: TIdHTTPResponseInfo;
       const AResponseContent: IWebMockResponseContentSource);
+    procedure SetResponseHeaders(AResponseInfo: TIdHTTPResponseInfo;
+      const AResponseHeaders: TStrings);
+    procedure SetResponseStatus(AResponseInfo: TIdHTTPResponseInfo;
+      const AResponseStatus: TWebMockResponseStatus);
     property Server: TIdHTTPServer read FServer write FServer;
     property StubRegistry: TObjectList<TWebMockRequestStub> read FStubRegistry;
   public
@@ -34,7 +36,9 @@ type
     destructor Destroy; override;
     procedure PrintStubRegistry;
     function StubRequest(const AMethod: string; const AURI: string)
-      : TWebMockRequestStub;
+      : TWebMockRequestStub; overload;
+    function StubRequest(const AMethod: string; const AURIPattern: TRegEx)
+      : TWebMockRequestStub; overload;
     property BaseURL: string read FBaseURL;
   end;
 
@@ -44,7 +48,6 @@ uses
   Delphi.WebMock.Indy.RequestMatcher,
   IdHTTP,
   IdSocketHandle,
-  System.Classes,
   System.SysUtils;
 
 { TWebMock }
@@ -118,6 +121,7 @@ procedure TWebMock.RespondWith(AResponse: TWebMockResponse;
   AResponseInfo: TIdHTTPResponseInfo);
 begin
   SetResponseStatus(AResponseInfo, AResponse.Status);
+  SetResponseHeaders(AResponseInfo, AResponse.Headers);
   SetResponseContent(AResponseInfo, AResponse.ContentSource);
 end;
 
@@ -129,6 +133,12 @@ begin
   AResponseInfo.FreeContentStream := True;
 end;
 
+procedure TWebMock.SetResponseHeaders(AResponseInfo: TIdHTTPResponseInfo;
+  const AResponseHeaders: TStrings);
+begin
+  AResponseInfo.CustomHeaders.AddStrings(AResponseHeaders);
+end;
+
 procedure TWebMock.SetResponseStatus(AResponseInfo: TIdHTTPResponseInfo;
   const AResponseStatus: TWebMockResponseStatus);
 begin
@@ -137,13 +147,26 @@ begin
     AResponseInfo.ResponseText := AResponseStatus.Text;
 end;
 
+function TWebMock.StubRequest(const AMethod: string;
+  const AURIPattern: TRegEx): TWebMockRequestStub;
+var
+  LMatcher: TWebMockIndyRequestMatcher;
+  LRequestStub: TWebMockRequestStub;
+begin
+  LMatcher := TWebMockIndyRequestMatcher.Create(AURIPattern, AMethod);
+  LRequestStub := TWebMockRequestStub.Create(LMatcher);
+  StubRegistry.Add(LRequestStub);
+
+  Result := LRequestStub;
+end;
+
 function TWebMock.StubRequest(const AMethod: string; const AURI: string)
   : TWebMockRequestStub;
 var
   LMatcher: TWebMockIndyRequestMatcher;
   LRequestStub: TWebMockRequestStub;
 begin
-  LMatcher := TWebMockIndyRequestMatcher.Create(AMethod, AURI);
+  LMatcher := TWebMockIndyRequestMatcher.Create(AURI, AMethod);
   LRequestStub := TWebMockRequestStub.Create(LMatcher);
   StubRegistry.Add(LRequestStub);
 

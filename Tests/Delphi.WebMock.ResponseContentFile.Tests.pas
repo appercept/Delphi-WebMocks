@@ -18,13 +18,13 @@ type
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure Test_Create_WithValidFileName_LoadsContentStreamFromFile;
+    procedure Create_WithValidFileName_LoadsContentStreamFromFile;
     [Test]
-    procedure Test_ContentType_WhenNotSpecifiedWithKnownFileType_SetsContentType;
+    procedure ContentType_WhenNotSpecifiedWithKnownFileType_SetsContentType;
     [Test]
-    procedure Test_ContentType_WhenNotSpecifiedWithUnknownFileType_SetsContentTypeToBinary;
+    procedure ContentType_WhenNotSpecifiedWithUnknownFileType_SetsContentTypeToBinary;
     [Test]
-    procedure Test_ContentType_WhenSpecified_ReturnsContentType;
+    procedure ContentType_WhenSpecified_ReturnsContentType;
   end;
 
 implementation
@@ -45,21 +45,21 @@ begin
   WebMockResponseContentFile.Free;
 end;
 
-procedure TWebMockResponseContentFileTests.Test_ContentType_WhenNotSpecifiedWithKnownFileType_SetsContentType;
+procedure TWebMockResponseContentFileTests.ContentType_WhenNotSpecifiedWithKnownFileType_SetsContentType;
 begin
   WebMockResponseContentFile := TWebMockResponseContentFile.Create(FixturePath('Sample.txt'));
 
   Assert.AreEqual('text/plain', WebMockResponseContentFile.ContentType);
 end;
 
-procedure TWebMockResponseContentFileTests.Test_ContentType_WhenNotSpecifiedWithUnknownFileType_SetsContentTypeToBinary;
+procedure TWebMockResponseContentFileTests.ContentType_WhenNotSpecifiedWithUnknownFileType_SetsContentTypeToBinary;
 begin
   WebMockResponseContentFile := TWebMockResponseContentFile.Create(FixturePath('Sample.unknown'));
 
   Assert.AreEqual('application/octet-stream', WebMockResponseContentFile.ContentType);
 end;
 
-procedure TWebMockResponseContentFileTests.Test_ContentType_WhenSpecified_ReturnsContentType;
+procedure TWebMockResponseContentFileTests.ContentType_WhenSpecified_ReturnsContentType;
 var
   LExpected: string;
 begin
@@ -70,7 +70,7 @@ begin
   Assert.AreEqual(LExpected, WebMockResponseContentFile.ContentType);
 end;
 
-procedure TWebMockResponseContentFileTests.Test_Create_WithValidFileName_LoadsContentStreamFromFile;
+procedure TWebMockResponseContentFileTests.Create_WithValidFileName_LoadsContentStreamFromFile;
 var
   LActualContent: TStringStream;
 begin

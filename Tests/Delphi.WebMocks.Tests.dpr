@@ -29,7 +29,18 @@ uses
   Delphi.WebMock.ResponseContentSource in '..\Delphi.WebMock.ResponseContentSource.pas',
   Delphi.WebMock.Tests.Client in 'Delphi.WebMock.Tests.Client.pas',
   Delphi.WebMock.ResponseContentFile.Tests in 'Delphi.WebMock.ResponseContentFile.Tests.pas',
-  Delphi.WebMock.ResponseContentFile in '..\Delphi.WebMock.ResponseContentFile.pas';
+  Delphi.WebMock.ResponseContentFile in '..\Delphi.WebMock.ResponseContentFile.pas',
+  Delphi.WebMock.Matching.Tests in 'Features\Delphi.WebMock.Matching.Tests.pas',
+  Delphi.WebMock.StringWildcardMatcher.Tests in 'Delphi.WebMock.StringWildcardMatcher.Tests.pas',
+  Delphi.WebMock.StringWildcardMatcher in '..\Delphi.WebMock.StringWildcardMatcher.pas',
+  Delphi.WebMock.StringMatcher in '..\Delphi.WebMock.StringMatcher.pas',
+  Delphi.WebMock.StringRegExMatcher.Tests in 'Delphi.WebMock.StringRegExMatcher.Tests.pas',
+  Delphi.WebMock.StringRegExMatcher in '..\Delphi.WebMock.StringRegExMatcher.pas',
+  Delphi.WebMock.ResponsesWithHeaders.Tests in 'Features\Delphi.WebMock.ResponsesWithHeaders.Tests.pas',
+  Delphi.WebMock.ResponsesWithContent.Tests in 'Features\Delphi.WebMock.ResponsesWithContent.Tests.pas',
+  Delphi.WebMock.MatchingContent.Tests in 'Features\Delphi.WebMock.MatchingContent.Tests.pas',
+  Delphi.WebMock.StringAnyMatcher.Tests in 'Delphi.WebMock.StringAnyMatcher.Tests.pas',
+  Delphi.WebMock.StringAnyMatcher in '..\Delphi.WebMock.StringAnyMatcher.pas';
 
 var
   Runner: ITestRunner;

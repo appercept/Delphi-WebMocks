@@ -79,6 +79,85 @@ constructing a valid URL.
 
 ## Examples
 ### Stubbing
+#### Request matching by HTTP method and document path
+The simplest form of request matching and starting point for all request stubs
+is by HTTP method and document path. For example stubbing the HTTP verb `GET` to
+the server root `/` is achieved by:
+```Delphi
+WebMock.StubRequest('GET', '/');
+```
+
+The use of a single wild-card character `*` can be used to match _any_ request.
+For example, to match all `POST` requests regardless of document path you can
+use:
+```Delphi
+WebMock.StubRequest('POST', '*');
+```
+
+Similarly, to match any HTTP method for a given path you can use:
+```Delphi
+WebMock.StubRequest('*', '/path');
+```
+
+It is perfectly possible to have a catch-all of `*` and `*` for both HTTP method
+and document path.
+
+#### Request matching by header value
+HTTP request headers can be matched like:
+```Delphi
+WebMock.StubRequest('*', '*').WithHeader('Header-Name', 'Header-Value');
+```
+
+Matching multiple headers can be achieved in 2 ways. The first is to simply
+chain `WithHeader` calls e.g.:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithHeader('Header-1', 'Header-Value-1')
+  .WithHeader('Header-2', 'Header-Value-2');
+```
+
+Alternatively, `WithHeaders` accepts a `TStringList` of key-value pairs e.g.:
+```Delphi
+var
+  Headers: TStringList;
+
+begin
+  Headers := TStringList.Create;
+  Headers.Values['Header-1'] := 'Value-1';
+  Headers.Values['Header-2'] := 'Value-2';
+
+  WebMock.StubRequest('*', '*').WithHeaders(Headers);
+end;
+```
+
+#### Request matching by header value
+HTTP request can be matched by content like:
+```Delphi
+WebMock.StubRequest('*', '*').WithContent('String content.');
+```
+
+#### Matching request document path, headers, or content by regular-expression
+Matching a request by regular-expression can be useful for stubbing dynamic
+routes for a ReSTful resource involving a resource name and an unknown resource
+ID such as `/resource/999`. Such a request could be stubbed by:
+```Delphi
+WebMock.StubRequest('GET', TRegEx.Create('^/resource/\d+$'));
+```
+
+Matching headers can similarly by achieved by:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithHeader('Accept', TRegEx.Create('video/.+'));
+```
+
+Matching content can be performed like:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithContent(TRegEx.Create('Hello'));
+```
+
+NOTE: Be sure to add `System.RegularExpressions` to your uses clause.
+
 #### Stubbed Response Codes
 By default a response status will be `200 OK` for a stubbed request. If a
 request is made to `TWebMock` without a registered stub it will respond
@@ -87,18 +166,48 @@ request is made to `TWebMock` without a registered stub it will respond
 WebMock.StubRequest('GET', '/').ToReturn(TWebMockResponseStatus.NotFound);
 ```
 
+#### Stubbed Response Headers
+Headers can be added to a response stub like:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .ToReturn.WithHeader('Header1', 'Value1');
+```
+
+As with request header matching multiple headers can be specified either through
+method chaining or by using the `WithHeaders` method.
+```Delphi
+  WebMock.StubRequest('*', '*')
+    .ToReturn.WithHeader('Header1', 'Value1')
+    .ToReturn.WithHeader('Header2', 'Value2');
+
+/* or */
+
+var
+  Headers: TStringList;
+begin
+  Headers := TStringList.Create;
+  Headers.Values['Header1'] := 'Value1';
+  Headers.Values['Header2'] := 'Value2';
+
+  WebMock.StubRequest('*', '*')
+    .ToReturn.WithHeaders(Headers);
+end;
+```
+
 #### Stubbed Response Content: String Values
 By default a stubbed response returns a zero length body with content-type
 `text/plain`. Simple response content that is easily represented as a `string`
 can be set with `WithContent`.
 ```Delphi
-WebMock.StubRequest('GET', '/').WithContent('Text To Return');
+WebMock.StubRequest('GET', '/')
+  .ToReturn.WithContent('Text To Return');
 ```
 
 If you want to return a specific content-type it can be specified as the second
 argument e.g.
 ```Delphi
-WebMock.StubRequest('GET', '/').WithContent('{ "status": "ok" }', 'application/json');
+WebMock.StubRequest('GET', '/')
+  .ToReturn.WithContent('{ "status": "ok" }', 'application/json');
 ```
 
 #### Stubbed Response Content: Fixture Files
@@ -131,20 +240,20 @@ file named `Content.txt` in the project folder, the path will be
     - [x] ~~Simple wild-card `*`~~
   - [x] Path by:
     - [x] ~~Exact Matching~~
-    - [ ] Regular Expressions
+    - [x] ~~Regular Expressions~~
     - [x] ~~Simple wild-card `*`~~
-  - [ ] Headers by:
-    - [ ] Exact Matching
-    - [ ] Regular Expressions
+  - [x] Headers by:
+    - [x] ~~Exact Matching~~
+    - [x] ~~Regular Expressions~~
   - [ ] Content by:
-    - [ ] Exact Matching
-    - [ ] Regular Expressions
-* [x] Static Response Stubs
+    - [x] ~~Exact Matching~~
+    - [x] ~~Regular Expressions~~
+* [x] ~~Static Response Stubs~~
   - [x] ~~Status Codes~~
   - [x] ~~Content~~
     - [x] ~~Simple Text~~
     - [x] ~~Fixture Files~~
-  - [ ] Headers
+  - [x] ~~Headers~~
 * [ ] Request History
 * [ ] Assertions/Expectations
 * [ ] Dynamic Response Stubs

@@ -18,32 +18,46 @@ type
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure Test_ToReturn_Always_ReturnsSelf;
+    procedure ToReturn_Always_ReturnsAResponseStub;
     [Test]
-    procedure Test_ToReturn_WithNoArguments_DoesNotRaiseException;
+    procedure ToReturn_WithNoArguments_DoesNotRaiseException;
     [Test]
-    procedure Test_ToReturn_WithNoArguments_DoesNotChangeStatus;
+    procedure ToReturn_WithNoArguments_DoesNotChangeStatus;
     [Test]
-    procedure Test_ToReturn_WithResponse_SetsResponseStatus;
+    procedure ToReturn_WithResponse_SetsResponseStatus;
     [Test]
-    procedure Test_WithContent_WithString_ReturnsSelf;
+    procedure WithContent_GivenString_ReturnsSelf;
     [Test]
-    procedure Test_WithContent_WithString_SetsResponseContent;
+    procedure WithContent_GivenString_SetsValueForContent;
     [Test]
-    procedure Test_WithContentFile_Always_ReturnsSelf;
+    procedure WithContent_GivenRegEx_ReturnsSelf;
     [Test]
-    procedure Test_WithContentFile_WithValidFile_SetsResponseContent;
+    procedure WithContent_GivenRegEx_SetsValueForContent;
+    [Test]
+    procedure WithHeader_GivenString_ReturnsSelf;
+    [Test]
+    procedure WithHeader_GivenString_SetsValueForHeader;
+    [Test]
+    procedure WithHeader_Always_OverwritesExistingValues;
+    [Test]
+    procedure WithHeader_GivenRegEx_ReturnsSelf;
+    [Test]
+    procedure WithHeader_GivenRegEx_SetsPatternForHeader;
+    [Test]
+    procedure WithHeaders_Always_ReturnsSelf;
+    [Test]
+    procedure WithHeaders_Always_SetsAllValues;
   end;
 
 implementation
 
 uses
-  Delphi.WebMock.Indy.RequestMatcher,
-  Delphi.WebMock.ResponseStatus,
+  Delphi.WebMock.Indy.RequestMatcher, Delphi.WebMock.Response,
+  Delphi.WebMock.ResponseStatus, Delphi.WebMock.StringMatcher,
+  Delphi.WebMock.StringWildcardMatcher, Delphi.WebMock.StringRegExMatcher,
   IdCustomHTTPServer,
   Mock.Indy.HTTPRequestInfo,
-  System.Classes,
-  TestHelpers;
+  System.Classes, System.RegularExpressions;
 
 { TWebMockRequestStubTests }
 
@@ -51,7 +65,7 @@ procedure TWebMockRequestStubTests.Setup;
 var
   LMatcher: TWebMockIndyRequestMatcher;
 begin
-  LMatcher := TWebMockIndyRequestMatcher.Create;
+  LMatcher := TWebMockIndyRequestMatcher.Create('');
   StubbedRequest := TWebMockRequestStub.Create(LMatcher);
 end;
 
@@ -60,12 +74,12 @@ begin
   StubbedRequest := nil;
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_Always_ReturnsSelf;
+procedure TWebMockRequestStubTests.ToReturn_Always_ReturnsAResponseStub;
 begin
-  Assert.AreSame(StubbedRequest, StubbedRequest.ToReturn);
+  Assert.IsTrue(StubbedRequest.ToReturn is TWebMockResponse);
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_WithNoArguments_DoesNotRaiseException;
+procedure TWebMockRequestStubTests.ToReturn_WithNoArguments_DoesNotRaiseException;
 begin
   Assert.WillNotRaiseAny(
   procedure
@@ -74,7 +88,7 @@ begin
   end);
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_WithNoArguments_DoesNotChangeStatus;
+procedure TWebMockRequestStubTests.ToReturn_WithNoArguments_DoesNotChangeStatus;
 var
   LExpectedStatus: TWebMockResponseStatus;
 begin
@@ -85,7 +99,7 @@ begin
   Assert.AreSame(LExpectedStatus, StubbedRequest.Response.Status);
 end;
 
-procedure TWebMockRequestStubTests.Test_ToReturn_WithResponse_SetsResponseStatus;
+procedure TWebMockRequestStubTests.ToReturn_WithResponse_SetsResponseStatus;
 var
   LResponse: TWebMockResponseStatus;
 begin
@@ -96,44 +110,142 @@ begin
   Assert.AreSame(LResponse, StubbedRequest.Response.Status);
 end;
 
-procedure TWebMockRequestStubTests.Test_WithContentFile_Always_ReturnsSelf;
+procedure TWebMockRequestStubTests.WithContent_GivenRegEx_ReturnsSelf;
 begin
-  Assert.AreSame(StubbedRequest, StubbedRequest.WithContentFile(FixturePath('Sample.txt')));
-end;
-
-procedure TWebMockRequestStubTests.Test_WithContentFile_WithValidFile_SetsResponseContent;
-var
-  LExpectedContent: string;
-  LActualStream: TStringStream;
-begin
-  LExpectedContent := 'Sample Text';
-
-  StubbedRequest.WithContentFile(FixturePath('Sample.txt'));
-
-  LActualStream := TStringStream.Create;
-  LActualStream.CopyFrom(StubbedRequest.Response.ContentSource.ContentStream, 0);
-  Assert.AreEqual(
-    LExpectedContent,
-    LActualStream.DataString
+  Assert.AreSame(
+    StubbedRequest,
+    StubbedRequest.WithContent(TRegEx.Create('Hello.'))
   );
 end;
 
-procedure TWebMockRequestStubTests.Test_WithContent_WithString_ReturnsSelf;
-begin
-  Assert.AreSame(StubbedRequest, StubbedRequest.WithContent(''));
-end;
-
-procedure TWebMockRequestStubTests.Test_WithContent_WithString_SetsResponseContent;
+procedure TWebMockRequestStubTests.WithContent_GivenRegEx_SetsValueForContent;
 var
-  LExpectedContent: string;
+  LPattern: TRegEx;
 begin
-  LExpectedContent := 'Text Body.';
+  LPattern := TRegEx.Create('.+');
 
-  StubbedRequest.WithContent(LExpectedContent);
+  StubbedRequest.WithContent(LPattern);
 
   Assert.AreEqual(
-    LExpectedContent,
-    (StubbedRequest.Response.ContentSource.ContentStream as TStringStream).DataString
+    LPattern,
+    (StubbedRequest.Matcher.Content as TWebMockStringRegExMatcher).RegEx
+  );
+end;
+
+procedure TWebMockRequestStubTests.WithContent_GivenString_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithContent('Hello.'));
+end;
+
+procedure TWebMockRequestStubTests.WithContent_GivenString_SetsValueForContent;
+var
+  LContent: string;
+begin
+  LContent := 'Welcome!';
+
+  StubbedRequest.WithContent(LContent);
+
+  Assert.AreEqual(
+    LContent,
+    (StubbedRequest.Matcher.Content as TWebMockStringWildcardMatcher).Value
+  );
+end;
+
+procedure TWebMockRequestStubTests.WithHeaders_Always_ReturnsSelf;
+var
+  LHeaders: TStringList;
+  LHeaderName, LHeaderValue: string;
+  I: Integer;
+begin
+  LHeaders := TStringList.Create;
+
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithHeaders(LHeaders));
+
+  LHeaders.Free;
+end;
+
+procedure TWebMockRequestStubTests.WithHeaders_Always_SetsAllValues;
+var
+  LHeaders: TStringList;
+  LHeaderName, LHeaderValue: string;
+  I: Integer;
+begin
+  LHeaders := TStringList.Create;
+  LHeaders.Values['Header1'] := 'Value1';
+  LHeaders.Values['Header2'] := 'Value2';
+
+  StubbedRequest.WithHeaders(LHeaders);
+
+  for I := 0 to LHeaders.Count - 1 do
+  begin
+    LHeaderName := LHeaders.Names[I];
+    LHeaderValue := LHeaders.ValueFromIndex[I];
+    Assert.AreEqual(
+      LHeaderValue,
+      (StubbedRequest.Matcher.Headers[LHeaderName] as TWebMockStringWildcardMatcher).Value
+    );
+  end;
+
+  LHeaders.Free;
+end;
+
+procedure TWebMockRequestStubTests.WithHeader_Always_OverwritesExistingValues;
+var
+  LHeaderName, LHeaderValue1, LHeaderValue2: string;
+  LMatcher: IStringMatcher;
+begin
+  LHeaderName := 'Header1';
+  LHeaderValue1 := 'Value1';
+  LHeaderValue2 := 'Value2';
+
+  StubbedRequest.WithHeader(LHeaderName, LHeaderValue1);
+  LMatcher := StubbedRequest.Matcher.Headers[LHeaderName];
+  StubbedRequest.WithHeader(LHeaderName, LHeaderValue2);
+
+  Assert.AreNotSame(LMatcher, StubbedRequest.Matcher.Headers[LHeaderName]);
+end;
+
+procedure TWebMockRequestStubTests.WithHeader_GivenRegEx_ReturnsSelf;
+begin
+  Assert.AreSame(
+    StubbedRequest,
+    StubbedRequest.WithHeader('Header', TRegEx.Create(''))
+  );
+end;
+
+procedure TWebMockRequestStubTests.WithHeader_GivenRegEx_SetsPatternForHeader;
+var
+  LHeaderName: string;
+  LHeaderPattern: TRegEx;
+begin
+  LHeaderName := 'Header1';
+  LHeaderPattern := TRegEx.Create('');
+
+  StubbedRequest.WithHeader(LHeaderName, LHeaderPattern);
+
+  Assert.AreEqual(
+    LHeaderPattern,
+    (StubbedRequest.Matcher.Headers[LHeaderName] as TWebMockStringRegExMatcher).RegEx
+  );
+end;
+
+procedure TWebMockRequestStubTests.WithHeader_GivenString_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithHeader('Header', 'Value'));
+end;
+
+procedure TWebMockRequestStubTests.WithHeader_GivenString_SetsValueForHeader;
+var
+  LHeaderName, LHeaderValue: string;
+begin
+  LHeaderName := 'Header1';
+  LHeaderValue := 'Value1';
+
+  StubbedRequest.WithHeader(LHeaderName, LHeaderValue);
+
+  Assert.AreEqual(
+    LHeaderValue,
+    (StubbedRequest.Matcher.Headers[LHeaderName] as TWebMockStringWildcardMatcher).Value
   );
 end;
 

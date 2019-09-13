@@ -3,12 +3,14 @@ unit Delphi.WebMock.Tests.Client;
 interface
 
 uses
-  IdHTTP;
+  IdHTTP,
+  System.Classes;
 
 type
   TWebMockTestsClient = class(TObject)
   public
-    class function Get(const AURL: string): TIdHTTPResponse;
+    class function Get(const AURL: string; AHeaders: TStrings = nil)
+      : TIdHTTPResponse;
     class function Post(const AURL: string; const ARequestContent: string)
       : TIdHTTPResponse;
   end;
@@ -16,18 +18,20 @@ type
 implementation
 
 uses
-  IdException,
-  System.Classes;
+  IdException;
 
 { TWebMockTestsClient }
 
-class function TWebMockTestsClient.Get(const AURL: string): TIdHTTPResponse;
+class function TWebMockTestsClient.Get(const AURL: string;
+  AHeaders: TStrings = nil): TIdHTTPResponse;
 var
   LClient: TIdHTTP;
   LResponseStream: TStream;
 begin
   LClient := TIdHTTP.Create;
   LResponseStream := TMemoryStream.Create;
+  if Assigned(AHeaders) then
+    LClient.Request.CustomHeaders.AddStrings(AHeaders);
   try
     LClient.Get(AURL, LResponseStream);
     LClient.Response.ContentStream.Position := 0;
