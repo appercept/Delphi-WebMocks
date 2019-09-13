@@ -247,7 +247,7 @@ file named `Content.txt` in the project folder, the path will be
     - [x] ~~Regular Expressions~~
   - [ ] Content by:
     - [x] ~~Exact Matching~~
-    - [ ] Regular Expressions
+    - [x] ~~Regular Expressions~~
 * [x] ~~Static Response Stubs~~
   - [x] ~~Status Codes~~
   - [x] ~~Content~~
