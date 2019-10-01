@@ -17,8 +17,8 @@ uses
   TestHelpers in 'TestHelpers.pas',
   Delphi.WebMock.RequestStub.Tests in 'Delphi.WebMock.RequestStub.Tests.pas',
   Delphi.WebMock.RequestStub in '..\Delphi.WebMock.RequestStub.pas',
-  Delphi.WebMock.Indy.RequestMatcher.Tests in 'Delphi.WebMock.Indy.RequestMatcher.Tests.pas',
-  Delphi.WebMock.Indy.RequestMatcher in '..\Delphi.WebMock.Indy.RequestMatcher.pas',
+  Delphi.WebMock.HTTP.RequestMatcher.Tests in 'Delphi.WebMock.HTTP.RequestMatcher.Tests.pas',
+  Delphi.WebMock.HTTP.RequestMatcher in '..\Delphi.WebMock.HTTP.RequestMatcher.pas',
   Mock.Indy.HTTPRequestInfo in 'Mock.Indy.HTTPRequestInfo.pas',
   Delphi.WebMock.ResponseStatus.Tests in 'Delphi.WebMock.ResponseStatus.Tests.pas',
   Delphi.WebMock.ResponseStatus in '..\Delphi.WebMock.ResponseStatus.pas',
@@ -40,7 +40,11 @@ uses
   Delphi.WebMock.ResponsesWithContent.Tests in 'Features\Delphi.WebMock.ResponsesWithContent.Tests.pas',
   Delphi.WebMock.MatchingContent.Tests in 'Features\Delphi.WebMock.MatchingContent.Tests.pas',
   Delphi.WebMock.StringAnyMatcher.Tests in 'Delphi.WebMock.StringAnyMatcher.Tests.pas',
-  Delphi.WebMock.StringAnyMatcher in '..\Delphi.WebMock.StringAnyMatcher.pas';
+  Delphi.WebMock.StringAnyMatcher in '..\Delphi.WebMock.StringAnyMatcher.pas',
+  Delphi.WebMock.History.Tests in 'Features\Delphi.WebMock.History.Tests.pas',
+  Delphi.WebMock.HTTP.Messages in '..\Delphi.WebMock.HTTP.Messages.pas',
+  Delphi.WebMock.HTTP.Request.Tests in 'Delphi.WebMock.HTTP.Request.Tests.pas',
+  Delphi.WebMock.HTTP.Request in '..\Delphi.WebMock.HTTP.Request.pas';
 
 var
   Runner: ITestRunner;

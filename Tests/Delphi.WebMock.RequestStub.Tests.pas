@@ -52,7 +52,7 @@ type
 implementation
 
 uses
-  Delphi.WebMock.Indy.RequestMatcher, Delphi.WebMock.Response,
+  Delphi.WebMock.HTTP.RequestMatcher, Delphi.WebMock.Response,
   Delphi.WebMock.ResponseStatus, Delphi.WebMock.StringMatcher,
   Delphi.WebMock.StringWildcardMatcher, Delphi.WebMock.StringRegExMatcher,
   IdCustomHTTPServer,
@@ -63,9 +63,9 @@ uses
 
 procedure TWebMockRequestStubTests.Setup;
 var
-  LMatcher: TWebMockIndyRequestMatcher;
+  LMatcher: TWebMockHTTPRequestMatcher;
 begin
-  LMatcher := TWebMockIndyRequestMatcher.Create('');
+  LMatcher := TWebMockHTTPRequestMatcher.Create('');
   StubbedRequest := TWebMockRequestStub.Create(LMatcher);
 end;
 

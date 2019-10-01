@@ -28,6 +28,14 @@ type
     [Test]
     procedure BaseURL_WhenPortIsNotDefault_ReturnsLocalHostURLWithPort;
     [Test]
+    procedure Reset_Always_ClearsHistory;
+    [Test]
+    procedure Reset_Always_ClearsStubRegistry;
+    [Test]
+    procedure ResetHistory_Always_ClearsHistory;
+    [Test]
+    procedure RestStubRegistry_Always_ClearsStubRegistry;
+    [Test]
     procedure StubRequest_WithStringURI_ReturnsARequestStub;
     [Test]
     procedure StubRequest_WithRegExURI_ReturnsARequestStub;
@@ -96,6 +104,33 @@ begin
   Assert.AreEqual('Delphi WebMocks', LResponse.Server);
 end;
 
+procedure TWebMockTests.ResetHistory_Always_ClearsHistory;
+begin
+  WebClient.Get(WebMock.BaseURL + 'history');
+
+  WebMock.ResetHistory;
+
+  Assert.AreEqual(0, WebMock.History.Count);
+end;
+
+procedure TWebMockTests.Reset_Always_ClearsHistory;
+begin
+  WebClient.Get(WebMock.BaseURL + 'history');
+
+  WebMock.Reset;
+
+  Assert.AreEqual(0, WebMock.History.Count);
+end;
+
+procedure TWebMockTests.Reset_Always_ClearsStubRegistry;
+begin
+  WebMock.StubRequest('GET', 'document');
+
+  WebMock.Reset;
+
+  Assert.AreEqual(0, WebMock.StubRegistry.Count);
+end;
+
 procedure TWebMockTests.Response_WhenRequestIsNotStubbed_ReturnsNotImplemented;
 var
   LResponse: TIdHTTPResponse;
@@ -133,6 +168,15 @@ begin
   LResponse := WebClient.Post(WebMock.BaseURL + 'response', '');
 
   Assert.IsTrue(EndsStr('Created', LResponse.ResponseText));
+end;
+
+procedure TWebMockTests.RestStubRegistry_Always_ClearsStubRegistry;
+begin
+  WebMock.StubRequest('GET', 'document');
+
+  WebMock.ResetStubRegistry;
+
+  Assert.AreEqual(0, WebMock.StubRegistry.Count);
 end;
 
 procedure TWebMockTests.StubRequest_WithRegExURI_ReturnsARequestStub;

@@ -3,7 +3,7 @@ unit Delphi.WebMock.RequestStub;
 interface
 
 uses
-  Delphi.WebMock.Indy.RequestMatcher, Delphi.WebMock.Response,
+  Delphi.WebMock.HTTP.RequestMatcher, Delphi.WebMock.Response,
   Delphi.WebMock.ResponseStatus,
   IdCustomHTTPServer,
   System.Classes, System.Generics.Collections, System.RegularExpressions;
@@ -11,10 +11,10 @@ uses
 type
   TWebMockRequestStub = class(TObject)
   private
-    FMatcher: TWebMockIndyRequestMatcher;
+    FMatcher: TWebMockHTTPRequestMatcher;
     FResponse: TWebMockResponse;
   public
-    constructor Create(AMatcher: TWebMockIndyRequestMatcher);
+    constructor Create(AMatcher: TWebMockHTTPRequestMatcher);
     destructor Destroy; override;
     function ToString: string; override;
     function ToReturn(AResponseStatus: TWebMockResponseStatus = nil)
@@ -25,7 +25,7 @@ type
     function WithHeader(AName: string; APattern: TRegEx)
       : TWebMockRequestStub; overload;
     function WithHeaders(AHeaders: TStringList): TWebMockRequestStub;
-    property Matcher: TWebMockIndyRequestMatcher read FMatcher;
+    property Matcher: TWebMockHTTPRequestMatcher read FMatcher;
     property Response: TWebMockResponse read FResponse write FResponse;
   end;
 
@@ -37,7 +37,7 @@ uses
 
 { TWebMockRequestStub }
 
-constructor TWebMockRequestStub.Create(AMatcher: TWebMockIndyRequestMatcher);
+constructor TWebMockRequestStub.Create(AMatcher: TWebMockHTTPRequestMatcher);
 begin
   inherited Create;
   FMatcher := AMatcher;

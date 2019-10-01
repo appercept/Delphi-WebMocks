@@ -1,27 +1,28 @@
-unit Delphi.WebMock.Indy.RequestMatcher;
+unit Delphi.WebMock.HTTP.RequestMatcher;
 
 interface
 
 uses
-  Delphi.WebMock.StringMatcher,
+  Delphi.WebMock.HTTP.Messages, Delphi.WebMock.StringMatcher,
   IdCustomHTTPServer, IdHeaderList,
   System.Classes, System.Generics.Collections, System.RegularExpressions;
 
 type
-  TWebMockIndyRequestMatcher = class(TObject)
+  TWebMockHTTPRequestMatcher = class(TObject)
   private
     FContent: IStringMatcher;
     FHeaders: TDictionary<string, IStringMatcher>;
     FHTTPMethod: string;
     FURIMatcher: IStringMatcher;
-    function HeadersMatches(AHeaders: TIdHeaderList): Boolean;
+    function HeadersMatches(
+  AHeaders: TStrings): Boolean;
     function HTTPMethodMatches(AHTTPMethod: string): Boolean;
     function StreamToString(AStream: TStream): string;
   public
     constructor Create(AURI: string; AHTTPMethod: string = 'GET'); overload;
     constructor Create(AURIPattern: TRegEx; AHTTPMethod: string = 'GET'); overload;
     destructor Destroy; override;
-    function IsMatch(AHTTPRequestInfo: TIdHTTPRequestInfo): Boolean;
+    function IsMatch(ARequest: IHTTPRequest): Boolean;
     function ToString: string; override;
     property Content: IStringMatcher read FContent write FContent;
     property Headers: TDictionary<string, IStringMatcher> read FHeaders;
@@ -31,14 +32,14 @@ type
 
 implementation
 
-{ TWebMockIndyRequestMatcher }
+{ TWebMockHTTPRequestMatcher }
 
 uses
   Delphi.WebMock.StringWildcardMatcher, Delphi.WebMock.StringAnyMatcher,
   Delphi.WebMock.StringRegExMatcher,
   System.SysUtils;
 
-constructor TWebMockIndyRequestMatcher.Create(AURI: string;
+constructor TWebMockHTTPRequestMatcher.Create(AURI: string;
   AHTTPMethod: string = 'GET');
 begin
   inherited Create;
@@ -48,7 +49,7 @@ begin
   FHTTPMethod := AHTTPMethod;
 end;
 
-constructor TWebMockIndyRequestMatcher.Create(AURIPattern: TRegEx;
+constructor TWebMockHTTPRequestMatcher.Create(AURIPattern: TRegEx;
   AHTTPMethod: string = 'GET');
 begin
   inherited Create;
@@ -58,14 +59,14 @@ begin
   FHTTPMethod := AHTTPMethod;
 end;
 
-destructor TWebMockIndyRequestMatcher.Destroy;
+destructor TWebMockHTTPRequestMatcher.Destroy;
 begin
   FHeaders.Free;
   inherited;
 end;
 
-function TWebMockIndyRequestMatcher.HeadersMatches(
-  AHeaders: TIdHeaderList): Boolean;
+function TWebMockHTTPRequestMatcher.HeadersMatches(
+  AHeaders: TStrings): Boolean;
 var
   LHeader: TPair<string, IStringMatcher>;
 begin
@@ -81,22 +82,21 @@ begin
   Result := True;
 end;
 
-function TWebMockIndyRequestMatcher.HTTPMethodMatches
+function TWebMockHTTPRequestMatcher.HTTPMethodMatches
   (AHTTPMethod: string): Boolean;
 begin
   Result := (HTTPMethod = '*') or (AHTTPMethod = HTTPMethod);
 end;
 
-function TWebMockIndyRequestMatcher.IsMatch(AHTTPRequestInfo
-  : TIdHTTPRequestInfo): Boolean;
+function TWebMockHTTPRequestMatcher.IsMatch(ARequest: IHTTPRequest): Boolean;
 begin
-  Result := HTTPMethodMatches(AHTTPRequestInfo.Command) and
-    URIMatcher.IsMatch(AHTTPRequestInfo.Document) and
-    HeadersMatches(AHTTPRequestInfo.RawHeaders) and
-    Content.IsMatch(StreamToString(AHTTPRequestInfo.PostStream));
+  Result := HTTPMethodMatches(ARequest.Method) and
+    URIMatcher.IsMatch(ARequest.RequestURI) and
+    HeadersMatches(ARequest.Headers) and
+    Content.IsMatch(StreamToString(ARequest.Body));
 end;
 
-function TWebMockIndyRequestMatcher.StreamToString(AStream: TStream): string;
+function TWebMockHTTPRequestMatcher.StreamToString(AStream: TStream): string;
 var
   LStringStream: TStringStream;
 begin
@@ -108,14 +108,14 @@ begin
 
   LStringStream := TStringStream.Create;
   try
-    LStringStream.CopyFrom(AStream, AStream.Size);
+    LStringStream.CopyFrom(AStream, 0);
     Result := LStringStream.DataString;
   finally
     LStringStream.Free;
   end;
 end;
 
-function TWebMockIndyRequestMatcher.ToString: string;
+function TWebMockHTTPRequestMatcher.ToString: string;
 begin
   Result := Format('%s' + ^I + '%s', [HTTPMethod, URIMatcher]);
 end;

@@ -233,6 +233,32 @@ compiler will be output to the `Win32\Debug` folder. To correctly reference a
 file named `Content.txt` in the project folder, the path will be
 `..\..\Content.txt`.
 
+### Resetting Registered Stubs
+If you need to clear the current registered stubs you can call
+`ResetStubRegistry` or `Reset` on the instance of TWebMock. The general `Reset`
+method will return the TWebMock instance to a blank state including emptying the
+stub registry. The more specific `ResetStubRegistry` will as suggested clear
+only the stub registry.
+
+## Request History
+Each and every request made of the TWebMock instance is recorded in the
+`History` property. History entries contain all the key web request information:
+Method; RequestURI; Headers; and Body.
+
+It is possible to write assertions based upon the request history e.g.:
+```Delphi
+WebClient.Get(WebMock.BaseURL + 'document');
+
+Assert.AreEqual('GET', WebMock.History.Last.Method);
+Assert.AreEqual('/document', WebMock.History.Last.RequestURI);
+```
+
+### Resetting Request History
+If you need to clear request history you can call `ResetHistory` or `Reset` on
+the instance of TWebMock. The general `Reset` method will return the TWebMock
+instance to a blank state including emptying the history. The more specific
+`ResetHistory` will as suggested clear only the history.
+
 ## Planned Features
 * [x] Static Request Matchers
   - [x] ~~HTTP Verbs by:~~
@@ -245,7 +271,7 @@ file named `Content.txt` in the project folder, the path will be
   - [x] Headers by:
     - [x] ~~Exact Matching~~
     - [x] ~~Regular Expressions~~
-  - [ ] Content by:
+  - [x] ~~Content by:~~
     - [x] ~~Exact Matching~~
     - [x] ~~Regular Expressions~~
 * [x] ~~Static Response Stubs~~
@@ -254,7 +280,7 @@ file named `Content.txt` in the project folder, the path will be
     - [x] ~~Simple Text~~
     - [x] ~~Fixture Files~~
   - [x] ~~Headers~~
-* [ ] Request History
+* [x] ~~Request History~~
 * [ ] Assertions/Expectations
 * [ ] Dynamic Response Stubs
 * [ ] Dynamic Port Binding
