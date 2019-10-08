@@ -44,7 +44,8 @@ uses
   Delphi.WebMock.History.Tests in 'Features\Delphi.WebMock.History.Tests.pas',
   Delphi.WebMock.HTTP.Messages in '..\Delphi.WebMock.HTTP.Messages.pas',
   Delphi.WebMock.HTTP.Request.Tests in 'Delphi.WebMock.HTTP.Request.Tests.pas',
-  Delphi.WebMock.HTTP.Request in '..\Delphi.WebMock.HTTP.Request.pas';
+  Delphi.WebMock.HTTP.Request in '..\Delphi.WebMock.HTTP.Request.pas',
+  Delphi.WebMock.Responses.Tests in 'Features\Delphi.WebMock.Responses.Tests.pas';
 
 var
   Runner: ITestRunner;

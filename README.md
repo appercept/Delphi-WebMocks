@@ -53,7 +53,7 @@ begin
   WebMock.StubRequest('GET', '/endpoint');
 
   // Point your subject at the endpoint
-  Subject := TMyTestObject.Create(WebMock.BaseURL + 'endpoint');
+  Subject := TMyTestObject.Create(WebMock.URLFor('endpoint'));
 
   // Act
   Subject.Get;
@@ -74,8 +74,9 @@ creation.
 WebMock := TWebMock.Create(8088);
 ```
 
-The use of `WebMock.BaseURL` property within your tests is to simplify
-constructing a valid URL.
+The use of `WebMock.URLFor` function within your tests is to simplify
+constructing a valid URL. The `BaseURL` property contains a valid URL for the
+server root.
 
 ## Examples
 ### Stubbing
@@ -247,7 +248,7 @@ Method; RequestURI; Headers; and Body.
 
 It is possible to write assertions based upon the request history e.g.:
 ```Delphi
-WebClient.Get(WebMock.BaseURL + 'document');
+WebClient.Get(WebMock.URLFor('document'));
 
 Assert.AreEqual('GET', WebMock.History.Last.Method);
 Assert.AreEqual('/document', WebMock.History.Last.RequestURI);

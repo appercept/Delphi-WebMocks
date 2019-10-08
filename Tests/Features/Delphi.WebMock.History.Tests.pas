@@ -39,7 +39,7 @@ procedure TWebMockHistoryTests.History_AfterRequest_ContainsMatchingRequest;
 var
   LastRequest: IHTTPRequest;
 begin
-  WebClient.Get(WebMock.BaseURL + 'resource');
+  WebClient.Get(WebMock.URLFor('resource'));
 
   LastRequest := WebMock.History.Last;
   Assert.AreEqual('GET', LastRequest.Method);
@@ -53,7 +53,7 @@ begin
   ExpectedHistoryCount := WebMock.History.Count + 1;
   WebMock.StubRequest('GET', '/stubbed');
 
-  WebClient.Get(WebMock.BaseURL + 'stubbed');
+  WebClient.Get(WebMock.URLFor('stubbed'));
 
   Assert.AreEqual(ExpectedHistoryCount, WebMock.History.Count);
 end;
@@ -64,7 +64,7 @@ var
 begin
   ExpectedHistoryCount := WebMock.History.Count + 1;
 
-  WebClient.Get(WebMock.BaseURL + 'not-stubbed');
+  WebClient.Get(WebMock.URLFor('not-stubbed'));
 
   Assert.AreEqual(ExpectedHistoryCount, WebMock.History.Count);
 end;

@@ -42,6 +42,7 @@ type
       : TWebMockRequestStub; overload;
     function StubRequest(const AMethod: string; const AURIPattern: TRegEx)
       : TWebMockRequestStub; overload;
+    function URLFor(AURI: string): string;
     property BaseURL: string read FBaseURL;
     property History: TList<IHTTPRequest> read FHistory;
     property StubRegistry: TObjectList<TWebMockRequestStub> read FStubRegistry;
@@ -184,6 +185,18 @@ begin
   StubRegistry.Add(LRequestStub);
 
   Result := LRequestStub;
+end;
+
+function TWebMock.URLFor(AURI: string): string;
+var
+  LURI: string;
+begin
+  if AURI.StartsWith('/') then
+    LURI := AURI.Substring(1)
+  else
+    LURI := AURI;
+
+  Result := BaseURL + LURI;
 end;
 
 function TWebMock.StubRequest(const AMethod: string; const AURI: string)

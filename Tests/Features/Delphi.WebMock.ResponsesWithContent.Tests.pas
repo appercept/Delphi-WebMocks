@@ -49,7 +49,7 @@ begin
   LExpected := 'application/xml';
 
   WebMock.StubRequest('GET', '/json').ToReturn.WithContentFile(FixturePath('Response.json'), LExpected);
-  LResponse := WebClient.Get(WebMock.BaseURL + 'json');
+  LResponse := WebClient.Get(WebMock.URLFor('json'));
 
   Assert.AreEqual(LExpected, LResponse.ContentType);
 end;
@@ -59,7 +59,7 @@ var
   LResponse: TIdHTTPResponse;
 begin
   WebMock.StubRequest('GET', '/json').ToReturn.WithContentFile(FixturePath('Response.json'));
-  LResponse := WebClient.Get(WebMock.BaseURL + 'json');
+  LResponse := WebClient.Get(WebMock.URLFor('json'));
 
   Assert.AreEqual('application/json', LResponse.ContentType);
 end;
@@ -72,7 +72,7 @@ begin
   LExpected := 'text/rtf';
 
   WebMock.StubRequest('GET', '/text').ToReturn.WithContent('Text', LExpected);
-  LResponse := WebClient.Get(WebMock.BaseURL + 'text');
+  LResponse := WebClient.Get(WebMock.URLFor('text'));
 
   Assert.AreEqual(LExpected, LResponse.ContentType);
 end;
@@ -92,7 +92,7 @@ begin
   LExpectedContent := 'Body Text';
 
   WebMock.StubRequest('GET', '/text').ToReturn.WithContent(LExpectedContent);
-  LResponse := WebClient.Get(WebMock.BaseURL + 'text');
+  LResponse := WebClient.Get(WebMock.URLFor('text'));
 
   LContentText := ReadStringFromStream(LResponse.ContentStream);
   Assert.AreEqual(LExpectedContent, LContentText);
@@ -104,7 +104,7 @@ var
   LHeader: string;
 begin
   WebMock.StubRequest('GET', '/text').ToReturn.WithContent('UTF-8 Text');
-  LResponse := WebClient.Get(WebMock.BaseURL + 'text');
+  LResponse := WebClient.Get(WebMock.URLFor('text'));
 
   Assert.AreEqual('UTF-8', LResponse.CharSet);
 end;

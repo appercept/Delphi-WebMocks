@@ -150,7 +150,7 @@ var
   LResponse: TIdHTTPResponse;
 begin
   WebMock.StubRequest(AMatcherMethod, AMatcherURI);
-  LResponse := WebClient.Get(WebMock.BaseURL + ARequestURI);
+  LResponse := WebClient.Get(WebMock.URLFor(ARequestURI));
 
   Assert.AreEqual(501, LResponse.ResponseCode);
 
@@ -220,7 +220,7 @@ var
   LResponse: TIdHTTPResponse;
 begin
   WebMock.StubRequest(AMatcherMethod, TRegEx.Create(AMatcherURIPattern));
-  LResponse := WebClient.Get(WebMock.BaseURL + ARequestURI);
+  LResponse := WebClient.Get(WebMock.URLFor(ARequestURI));
 
   Assert.AreEqual(200, LResponse.ResponseCode);
 
@@ -233,7 +233,7 @@ var
   LResponse: TIdHTTPResponse;
 begin
   WebMock.StubRequest(AMatcherMethod, TRegEx.Create(AMatcherURIPattern));
-  LResponse := WebClient.Get(WebMock.BaseURL + ARequestURI);
+  LResponse := WebClient.Get(WebMock.URLFor(ARequestURI));
 
   Assert.AreEqual(501, LResponse.ResponseCode);
 
@@ -245,7 +245,7 @@ var
   LResponse: TIdHTTPResponse;
 begin
   WebMock.StubRequest(AMatcherMethod, AMatcherURI);
-  LResponse := WebClient.Get(WebMock.BaseURL + ARequestURI);
+  LResponse := WebClient.Get(WebMock.URLFor(ARequestURI));
 
   Assert.AreEqual(200, LResponse.ResponseCode);
 
