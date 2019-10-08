@@ -17,10 +17,10 @@ type
     constructor Create(AMatcher: TWebMockHTTPRequestMatcher);
     destructor Destroy; override;
     function ToString: string; override;
-    function ToReturn(AResponseStatus: TWebMockResponseStatus = nil)
+    function ToRespond(AResponseStatus: TWebMockResponseStatus = nil)
       : TWebMockResponse;
-    function WithContent(const AContent: string): TWebMockRequestStub; overload;
-    function WithContent(const APattern: TRegEx): TWebMockRequestStub; overload;
+    function WithBody(const AContent: string): TWebMockRequestStub; overload;
+    function WithBody(const APattern: TRegEx): TWebMockRequestStub; overload;
     function WithHeader(AName, AValue: string): TWebMockRequestStub; overload;
     function WithHeader(AName: string; APattern: TRegEx)
       : TWebMockRequestStub; overload;
@@ -52,7 +52,7 @@ begin
   inherited;
 end;
 
-function TWebMockRequestStub.ToReturn(
+function TWebMockRequestStub.ToRespond(
   AResponseStatus: TWebMockResponseStatus = nil): TWebMockResponse;
 begin
   if Assigned(AResponseStatus) then
@@ -76,18 +76,18 @@ begin
   Result := Self;
 end;
 
-function TWebMockRequestStub.WithContent(
+function TWebMockRequestStub.WithBody(
   const AContent: string): TWebMockRequestStub;
 begin
-  Matcher.Content := TWebMockStringWildcardMatcher.Create(AContent);
+  Matcher.Body := TWebMockStringWildcardMatcher.Create(AContent);
 
   Result := Self;
 end;
 
-function TWebMockRequestStub.WithContent(
+function TWebMockRequestStub.WithBody(
   const APattern: TRegEx): TWebMockRequestStub;
 begin
-  Matcher.Content := TWebMockStringRegExMatcher.Create(APattern);
+  Matcher.Body := TWebMockStringRegExMatcher.Create(APattern);
 
   Result := Self;
 end;

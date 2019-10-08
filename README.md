@@ -134,7 +134,7 @@ end;
 #### Request matching by header value
 HTTP request can be matched by content like:
 ```Delphi
-WebMock.StubRequest('*', '*').WithContent('String content.');
+WebMock.StubRequest('*', '*').WithBody('String content.');
 ```
 
 #### Matching request document path, headers, or content by regular-expression
@@ -154,7 +154,7 @@ WebMock.StubRequest('*', '*')
 Matching content can be performed like:
 ```Delphi
 WebMock.StubRequest('*', '*')
-  .WithContent(TRegEx.Create('Hello'));
+  .WithBody(TRegEx.Create('Hello'));
 ```
 
 NOTE: Be sure to add `System.RegularExpressions` to your uses clause.
@@ -162,24 +162,24 @@ NOTE: Be sure to add `System.RegularExpressions` to your uses clause.
 #### Stubbed Response Codes
 By default a response status will be `200 OK` for a stubbed request. If a
 request is made to `TWebMock` without a registered stub it will respond
-`501 Not Implemented`. To specify the response status use `ToReturn`.
+`501 Not Implemented`. To specify the response status use `ToRespond`.
 ```Delphi
-WebMock.StubRequest('GET', '/').ToReturn(TWebMockResponseStatus.NotFound);
+WebMock.StubRequest('GET', '/').ToRespond(TWebMockResponseStatus.NotFound);
 ```
 
 #### Stubbed Response Headers
 Headers can be added to a response stub like:
 ```Delphi
 WebMock.StubRequest('*', '*')
-  .ToReturn.WithHeader('Header1', 'Value1');
+  .ToRespond.WithHeader('Header1', 'Value1');
 ```
 
 As with request header matching multiple headers can be specified either through
 method chaining or by using the `WithHeaders` method.
 ```Delphi
-  WebMock.StubRequest('*', '*')
-    .ToReturn.WithHeader('Header1', 'Value1')
-    .ToReturn.WithHeader('Header2', 'Value2');
+  WebMock.StubRequest('*', '*').ToRespond
+    .WithHeader('Header1', 'Value1')
+    .WithHeader('Header2', 'Value2');
 
 /* or */
 
@@ -191,33 +191,33 @@ begin
   Headers.Values['Header2'] := 'Value2';
 
   WebMock.StubRequest('*', '*')
-    .ToReturn.WithHeaders(Headers);
+    .ToRespond.WithHeaders(Headers);
 end;
 ```
 
 #### Stubbed Response Content: String Values
 By default a stubbed response returns a zero length body with content-type
 `text/plain`. Simple response content that is easily represented as a `string`
-can be set with `WithContent`.
+can be set with `WithBody`.
 ```Delphi
 WebMock.StubRequest('GET', '/')
-  .ToReturn.WithContent('Text To Return');
+  .ToRespond.WithBody('Text To Return');
 ```
 
 If you want to return a specific content-type it can be specified as the second
 argument e.g.
 ```Delphi
 WebMock.StubRequest('GET', '/')
-  .ToReturn.WithContent('{ "status": "ok" }', 'application/json');
+  .ToRespond.WithBody('{ "status": "ok" }', 'application/json');
 ```
 
 #### Stubbed Response Content: Fixture Files
 When stubbing responses with binary or large content it is likely easier to
-provide the content as a file. This can be acheived using `WithContentFile`
-which has the same signature as `WithContent` but the first argument is the
+provide the content as a file. This can be acheived using `WithBodyFile`
+which has the same signature as `WithBody` but the first argument is the
 path to a file.
 ```Delphi
-WebMock.StubRequest('GET', '/').WithContentFile('image.jpg');
+WebMock.StubRequest('GET', '/').WithBodyFile('image.jpg');
 ```
 
 The Delphi-WebMocks will attempt to set the content-type according to the file
@@ -225,7 +225,7 @@ extension. If the file type is unknown then the content-type will default to
 `application/octet-stream`. The content-type can be overriden with the second
 argument. e.g.
 ```Delphi
-WebMock.StubRequest('GET', '/').WithContentFile('file.myext', 'application/xml');
+WebMock.StubRequest('GET', '/').WithBodyFile('file.myext', 'application/xml');
 ```
 
 **NOTE:** One "gotcha" accessing files in tests is the location of the file will

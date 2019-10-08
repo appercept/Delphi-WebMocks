@@ -22,15 +22,15 @@ type
     [Test]
     procedure Create_WithStatus_SetsStatus;
     [Test]
-    procedure ContentSource_WhenNotSet_ReturnsEmptyContentSource;
+    procedure BodySource_WhenNotSet_ReturnsEmptyContentSource;
     [Test]
-    procedure WithContent_Always_ReturnsSelf;
+    procedure WithBody_Always_ReturnsSelf;
     [Test]
-    procedure WithContent_WithString_SetsResponseContent;
+    procedure WithBody_WithString_SetsResponseContent;
     [Test]
-    procedure WithContentFile_Always_ReturnsSelf;
+    procedure WithBodyFile_Always_ReturnsSelf;
     [Test]
-    procedure WithContentFile_WithValidFile_SetsResponseContent;
+    procedure WithBodyFile_WithValidFile_SetsResponseContent;
     [Test]
     procedure WithHeader_Always_ReturnsSelf;
     [Test]
@@ -62,44 +62,44 @@ begin
   WebMockResponse.Free;
 end;
 
-procedure TWebMockResponseTests.WithContentFile_Always_ReturnsSelf;
+procedure TWebMockResponseTests.WithBodyFile_Always_ReturnsSelf;
 begin
-  Assert.AreSame(WebMockResponse, WebMockResponse.WithContentFile(FixturePath('Sample.txt')));
+  Assert.AreSame(WebMockResponse, WebMockResponse.WithBodyFile(FixturePath('Sample.txt')));
 end;
 
-procedure TWebMockResponseTests.WithContentFile_WithValidFile_SetsResponseContent;
+procedure TWebMockResponseTests.WithBodyFile_WithValidFile_SetsResponseContent;
 var
   LExpectedContent: string;
   LActualStream: TStringStream;
 begin
   LExpectedContent := 'Sample Text';
 
-  WebMockResponse.WithContentFile(FixturePath('Sample.txt'));
+  WebMockResponse.WithBodyFile(FixturePath('Sample.txt'));
 
   LActualStream := TStringStream.Create;
-  LActualStream.CopyFrom(WebMockResponse.ContentSource.ContentStream, 0);
+  LActualStream.CopyFrom(WebMockResponse.BodySource.ContentStream, 0);
   Assert.AreEqual(
     LExpectedContent,
     LActualStream.DataString
   );
 end;
 
-procedure TWebMockResponseTests.WithContent_Always_ReturnsSelf;
+procedure TWebMockResponseTests.WithBody_Always_ReturnsSelf;
 begin
-  Assert.AreSame(WebMockResponse, WebMockResponse.WithContent(''));
+  Assert.AreSame(WebMockResponse, WebMockResponse.WithBody(''));
 end;
 
-procedure TWebMockResponseTests.WithContent_WithString_SetsResponseContent;
+procedure TWebMockResponseTests.WithBody_WithString_SetsResponseContent;
 var
   LExpectedContent: string;
 begin
   LExpectedContent := 'Text Body.';
 
-  WebMockResponse.WithContent(LExpectedContent);
+  WebMockResponse.WithBody(LExpectedContent);
 
   Assert.AreEqual(
     LExpectedContent,
-    (WebMockResponse.ContentSource.ContentStream as TStringStream).DataString
+    (WebMockResponse.BodySource.ContentStream as TStringStream).DataString
   );
 end;
 
@@ -170,9 +170,9 @@ begin
   Assert.AreEqual(LHeaderValue, WebMockResponse.Headers.Values[LHeaderName]);
 end;
 
-procedure TWebMockResponseTests.ContentSource_WhenNotSet_ReturnsEmptyContentSource;
+procedure TWebMockResponseTests.BodySource_WhenNotSet_ReturnsEmptyContentSource;
 begin
-  Assert.AreEqual(Int64(0), WebMockResponse.ContentSource.ContentStream.Size);
+  Assert.AreEqual(Int64(0), WebMockResponse.BodySource.ContentStream.Size);
 end;
 
 procedure TWebMockResponseTests.Create_WithoutArguments_SetsStatusToOK;

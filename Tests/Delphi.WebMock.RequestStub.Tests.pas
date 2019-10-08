@@ -18,21 +18,21 @@ type
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure ToReturn_Always_ReturnsAResponseStub;
+    procedure ToRespond_Always_ReturnsAResponseStub;
     [Test]
-    procedure ToReturn_WithNoArguments_DoesNotRaiseException;
+    procedure ToRespond_WithNoArguments_DoesNotRaiseException;
     [Test]
-    procedure ToReturn_WithNoArguments_DoesNotChangeStatus;
+    procedure ToRespond_WithNoArguments_DoesNotChangeStatus;
     [Test]
-    procedure ToReturn_WithResponse_SetsResponseStatus;
+    procedure ToRespond_WithResponse_SetsResponseStatus;
     [Test]
-    procedure WithContent_GivenString_ReturnsSelf;
+    procedure WithBody_GivenString_ReturnsSelf;
     [Test]
-    procedure WithContent_GivenString_SetsValueForContent;
+    procedure WithBody_GivenString_SetsValueForContent;
     [Test]
-    procedure WithContent_GivenRegEx_ReturnsSelf;
+    procedure WithBody_GivenRegEx_ReturnsSelf;
     [Test]
-    procedure WithContent_GivenRegEx_SetsValueForContent;
+    procedure WithBody_GivenRegEx_SetsValueForContent;
     [Test]
     procedure WithHeader_GivenString_ReturnsSelf;
     [Test]
@@ -74,80 +74,80 @@ begin
   StubbedRequest := nil;
 end;
 
-procedure TWebMockRequestStubTests.ToReturn_Always_ReturnsAResponseStub;
+procedure TWebMockRequestStubTests.ToRespond_Always_ReturnsAResponseStub;
 begin
-  Assert.IsTrue(StubbedRequest.ToReturn is TWebMockResponse);
+  Assert.IsTrue(StubbedRequest.ToRespond is TWebMockResponse);
 end;
 
-procedure TWebMockRequestStubTests.ToReturn_WithNoArguments_DoesNotRaiseException;
+procedure TWebMockRequestStubTests.ToRespond_WithNoArguments_DoesNotRaiseException;
 begin
   Assert.WillNotRaiseAny(
   procedure
   begin
-    StubbedRequest.ToReturn;
+    StubbedRequest.ToRespond;
   end);
 end;
 
-procedure TWebMockRequestStubTests.ToReturn_WithNoArguments_DoesNotChangeStatus;
+procedure TWebMockRequestStubTests.ToRespond_WithNoArguments_DoesNotChangeStatus;
 var
   LExpectedStatus: TWebMockResponseStatus;
 begin
   LExpectedStatus := StubbedRequest.Response.Status;
 
-  StubbedRequest.ToReturn;
+  StubbedRequest.ToRespond;
 
   Assert.AreSame(LExpectedStatus, StubbedRequest.Response.Status);
 end;
 
-procedure TWebMockRequestStubTests.ToReturn_WithResponse_SetsResponseStatus;
+procedure TWebMockRequestStubTests.ToRespond_WithResponse_SetsResponseStatus;
 var
   LResponse: TWebMockResponseStatus;
 begin
   LResponse := TWebMockResponseStatus.Continue;
 
-  StubbedRequest.ToReturn(LResponse);
+  StubbedRequest.ToRespond(LResponse);
 
   Assert.AreSame(LResponse, StubbedRequest.Response.Status);
 end;
 
-procedure TWebMockRequestStubTests.WithContent_GivenRegEx_ReturnsSelf;
+procedure TWebMockRequestStubTests.WithBody_GivenRegEx_ReturnsSelf;
 begin
   Assert.AreSame(
     StubbedRequest,
-    StubbedRequest.WithContent(TRegEx.Create('Hello.'))
+    StubbedRequest.WithBody(TRegEx.Create('Hello.'))
   );
 end;
 
-procedure TWebMockRequestStubTests.WithContent_GivenRegEx_SetsValueForContent;
+procedure TWebMockRequestStubTests.WithBody_GivenRegEx_SetsValueForContent;
 var
   LPattern: TRegEx;
 begin
   LPattern := TRegEx.Create('.+');
 
-  StubbedRequest.WithContent(LPattern);
+  StubbedRequest.WithBody(LPattern);
 
   Assert.AreEqual(
     LPattern,
-    (StubbedRequest.Matcher.Content as TWebMockStringRegExMatcher).RegEx
+    (StubbedRequest.Matcher.Body as TWebMockStringRegExMatcher).RegEx
   );
 end;
 
-procedure TWebMockRequestStubTests.WithContent_GivenString_ReturnsSelf;
+procedure TWebMockRequestStubTests.WithBody_GivenString_ReturnsSelf;
 begin
-  Assert.AreSame(StubbedRequest, StubbedRequest.WithContent('Hello.'));
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithBody('Hello.'));
 end;
 
-procedure TWebMockRequestStubTests.WithContent_GivenString_SetsValueForContent;
+procedure TWebMockRequestStubTests.WithBody_GivenString_SetsValueForContent;
 var
   LContent: string;
 begin
   LContent := 'Welcome!';
 
-  StubbedRequest.WithContent(LContent);
+  StubbedRequest.WithBody(LContent);
 
   Assert.AreEqual(
     LContent,
-    (StubbedRequest.Matcher.Content as TWebMockStringWildcardMatcher).Value
+    (StubbedRequest.Matcher.Body as TWebMockStringWildcardMatcher).Value
   );
 end;
 

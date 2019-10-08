@@ -2,11 +2,11 @@ unit Delphi.WebMock.ResponseContentString;
 
 interface
 
-uses Delphi.WebMock.ResponseContentSource, System.Classes;
+uses Delphi.WebMock.ResponseBodySource, System.Classes;
 
 type
   TWebMockResponseContentString = class(TInterfacedObject,
-    IWebMockResponseContentSource)
+    IWebMockResponseBodySource)
   private
     FContentStream: TStream;
     FContentString: string;

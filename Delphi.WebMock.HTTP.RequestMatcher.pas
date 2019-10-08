@@ -24,7 +24,7 @@ type
     destructor Destroy; override;
     function IsMatch(ARequest: IHTTPRequest): Boolean;
     function ToString: string; override;
-    property Content: IStringMatcher read FContent write FContent;
+    property Body: IStringMatcher read FContent write FContent;
     property Headers: TDictionary<string, IStringMatcher> read FHeaders;
     property HTTPMethod: string read FHTTPMethod write FHTTPMethod;
     property URIMatcher: IStringMatcher read FURIMatcher;
@@ -93,7 +93,7 @@ begin
   Result := HTTPMethodMatches(ARequest.Method) and
     URIMatcher.IsMatch(ARequest.RequestURI) and
     HeadersMatches(ARequest.Headers) and
-    Content.IsMatch(StreamToString(ARequest.Body));
+    Body.IsMatch(StreamToString(ARequest.Body));
 end;
 
 function TWebMockHTTPRequestMatcher.StreamToString(AStream: TStream): string;

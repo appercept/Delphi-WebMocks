@@ -3,26 +3,26 @@ unit Delphi.WebMock.Response;
 interface
 
 uses
-  Delphi.WebMock.ResponseContentSource, Delphi.WebMock.ResponseStatus,
+  Delphi.WebMock.ResponseBodySource, Delphi.WebMock.ResponseStatus,
   System.Classes;
 
 type
   TWebMockResponse = class(TObject)
   private
-    FContentSource: IWebMockResponseContentSource;
+    FBodySource: IWebMockResponseBodySource;
     FHeaders: TStringList;
     FStatus: TWebMockResponseStatus;
   public
     constructor Create(const AStatus: TWebMockResponseStatus = nil);
     destructor Destroy; override;
     function ToString: string; override;
-    function WithContent(const AContent: string;
+    function WithBody(const AContent: string;
       const AContentType: string = 'text/plain; charset=utf-8'): TWebMockResponse;
-    function WithContentFile(const AFileName: string;
+    function WithBodyFile(const AFileName: string;
       const AContentType: string = ''): TWebMockResponse;
     function WithHeader(AHeaderName, AHeaderValue: string): TWebMockResponse;
     function WithHeaders(AHeaders: TStrings): TWebMockResponse;
-    property ContentSource: IWebMockResponseContentSource read FContentSource write FContentSource;
+    property BodySource: IWebMockResponseBodySource read FBodySource write FBodySource;
     property Headers: TStringList read FHeaders write FHeaders;
     property Status: TWebMockResponseStatus read FStatus write FStatus;
   end;
@@ -39,7 +39,7 @@ constructor TWebMockResponse.Create(const AStatus
   : TWebMockResponseStatus = nil);
 begin
   inherited Create;
-  FContentSource := TWebMockResponseContentString.Create;
+  FBodySource := TWebMockResponseContentString.Create;
   FHeaders := TStringList.Create;
   if Assigned(AStatus) then
     FStatus := AStatus
@@ -59,18 +59,18 @@ begin
   Result := Format('%s', [Status.ToString]);
 end;
 
-function TWebMockResponse.WithContent(const AContent: string;
+function TWebMockResponse.WithBody(const AContent: string;
   const AContentType: string = 'text/plain; charset=utf-8'): TWebMockResponse;
 begin
-  ContentSource := TWebMockResponseContentString.Create(AContent, AContentType);
+  BodySource := TWebMockResponseContentString.Create(AContent, AContentType);
 
   Result := Self;
 end;
 
-function TWebMockResponse.WithContentFile(const AFileName: string;
+function TWebMockResponse.WithBodyFile(const AFileName: string;
   const AContentType: string = ''): TWebMockResponse;
 begin
-  ContentSource := TWebMockResponseContentFile.Create(AFileName, AContentType);
+  BodySource := TWebMockResponseContentFile.Create(AFileName, AContentType);
 
   Result := Self;
 end;

@@ -2,10 +2,10 @@ unit Delphi.WebMock.ResponseContentFile;
 
 interface
 
-uses Delphi.WebMock.ResponseContentSource, IdCustomHTTPServer, System.Classes;
+uses Delphi.WebMock.ResponseBodySource, IdCustomHTTPServer, System.Classes;
 
 type
-  TWebMockResponseContentFile = class(TInterfacedObject, IWebMockResponseContentSource)
+  TWebMockResponseContentFile = class(TInterfacedObject, IWebMockResponseBodySource)
   private
     FContentStream: TStream;
     FContentType: string;

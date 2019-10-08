@@ -45,7 +45,7 @@ begin
   LHeaderName2 := 'Header2';
   LHeaderValue2 := 'Value2';
 
-  WebMock.StubRequest('*', '*').ToReturn
+  WebMock.StubRequest('*', '*').ToRespond
     .WithHeader(LHeaderName1, LHeaderValue1)
     .WithHeader(LHeaderName2, LHeaderValue2);
   LResponse := WebClient.Get(WebMock.BaseURL);
@@ -68,7 +68,7 @@ begin
   LHeaders.Values['Header3'] := 'Value3';
   LHeaders.Values['Header4'] := 'Value4';
 
-  WebMock.StubRequest('*', '*').ToReturn.WithHeaders(LHeaders);
+  WebMock.StubRequest('*', '*').ToRespond.WithHeaders(LHeaders);
   LResponse := WebClient.Get(WebMock.BaseURL);
 
   for I := 0 to LHeaders.Count - 1 do
@@ -89,7 +89,7 @@ begin
   LHeaderName := 'Header1';
   LHeaderValue := 'Value1';
 
-  WebMock.StubRequest('*', '*').ToReturn.WithHeader(LHeaderName, LHeaderValue);
+  WebMock.StubRequest('*', '*').ToRespond.WithHeader(LHeaderName, LHeaderValue);
   LResponse := WebClient.Get(WebMock.BaseURL);
 
   Assert.AreEqual(LHeaderValue, LResponse.RawHeaders.Values[LHeaderName]);

@@ -1,4 +1,4 @@
-unit Delphi.WebMock.MatchingContent.Tests;
+unit Delphi.WebMock.MatchingBody.Tests;
 
 interface
 
@@ -10,7 +10,7 @@ uses
 type
 
   [TestFixture]
-  TWebMockMatchingContentTests = class(TObject)
+  TWebMockMatchingBodyTests = class(TObject)
   private
     WebMock: TWebMock;
   public
@@ -19,32 +19,32 @@ type
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure Request_WithStringMatchingContentExactly_RespondsOK;
+    procedure Request_WithStringMatchingBodyExactly_RespondsOK;
     [Test]
-    procedure Request_WithStringNotMatchingContent_RespondsNotImplemented;
+    procedure Request_WithStringNotMatchingBody_RespondsNotImplemented;
     [Test]
-    procedure Request_WithPatternMatchingContent_RespondsOK;
+    procedure Request_WithPatternMatchingBody_RespondsOK;
     [Test]
-    procedure Request_WithPatternNotMatchingContent_RespondsNotImplemented;
+    procedure Request_WithPatternNotMatchingBody_RespondsNotImplemented;
   end;
 
 implementation
 
-{ TWebMockMatchingContentTests }
+{ TWebMockMatchingBodyTests }
 
 uses
   IdHTTP,
   TestHelpers,
   System.RegularExpressions;
 
-procedure TWebMockMatchingContentTests.Request_WithPatternMatchingContent_RespondsOK;
+procedure TWebMockMatchingBodyTests.Request_WithPatternMatchingBody_RespondsOK;
 var
   LContent: string;
   LResponse: TIdHTTPResponse;
 begin
   LContent := 'Hello world!';
 
-  WebMock.StubRequest('*', '*').WithContent(TRegEx.Create('Hello'));
+  WebMock.StubRequest('*', '*').WithBody(TRegEx.Create('Hello'));
   LResponse := WebClient.Post(WebMock.BaseURL, LContent);
 
   Assert.AreEqual(200, LResponse.ResponseCode);
@@ -52,14 +52,14 @@ begin
   LResponse.Free;
 end;
 
-procedure TWebMockMatchingContentTests.Request_WithPatternNotMatchingContent_RespondsNotImplemented;
+procedure TWebMockMatchingBodyTests.Request_WithPatternNotMatchingBody_RespondsNotImplemented;
 var
   LContent: string;
   LResponse: TIdHTTPResponse;
 begin
   LContent := 'Hello world!';
 
-  WebMock.StubRequest('*', '*').WithContent(TRegEx.Create('Goodbye'));
+  WebMock.StubRequest('*', '*').WithBody(TRegEx.Create('Goodbye'));
   LResponse := WebClient.Post(WebMock.BaseURL, LContent);
 
   Assert.AreEqual(501, LResponse.ResponseCode);
@@ -67,14 +67,14 @@ begin
   LResponse.Free;
 end;
 
-procedure TWebMockMatchingContentTests.Request_WithStringMatchingContentExactly_RespondsOK;
+procedure TWebMockMatchingBodyTests.Request_WithStringMatchingBodyExactly_RespondsOK;
 var
   LContent: string;
   LResponse: TIdHTTPResponse;
 begin
   LContent := 'Hello world!';
 
-  WebMock.StubRequest('*', '*').WithContent(LContent);
+  WebMock.StubRequest('*', '*').WithBody(LContent);
   LResponse := WebClient.Post(WebMock.BaseURL, LContent);
 
   Assert.AreEqual(200, LResponse.ResponseCode);
@@ -82,11 +82,11 @@ begin
   LResponse.Free;
 end;
 
-procedure TWebMockMatchingContentTests.Request_WithStringNotMatchingContent_RespondsNotImplemented;
+procedure TWebMockMatchingBodyTests.Request_WithStringNotMatchingBody_RespondsNotImplemented;
 var
   LResponse: TIdHTTPResponse;
 begin
-  WebMock.StubRequest('*', '*').WithContent('Hello!');
+  WebMock.StubRequest('*', '*').WithBody('Hello!');
   LResponse := WebClient.Post(WebMock.BaseURL, 'Goodbye!');
 
   Assert.AreEqual(501, LResponse.ResponseCode);
@@ -94,16 +94,16 @@ begin
   LResponse.Free;
 end;
 
-procedure TWebMockMatchingContentTests.Setup;
+procedure TWebMockMatchingBodyTests.Setup;
 begin
   WebMock := TWebMock.Create;
 end;
 
-procedure TWebMockMatchingContentTests.TearDown;
+procedure TWebMockMatchingBodyTests.TearDown;
 begin
   WebMock.Free;
 end;
 
 initialization
-  TDUnitX.RegisterTestFixture(TWebMockMatchingContentTests);
+  TDUnitX.RegisterTestFixture(TWebMockMatchingBodyTests);
 end.

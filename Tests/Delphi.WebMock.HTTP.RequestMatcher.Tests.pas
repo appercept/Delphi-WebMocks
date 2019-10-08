@@ -24,7 +24,7 @@ type
     [Test]
     procedure Headers_Always_IsADictionary;
     [Test]
-    procedure Content_ByDefault_MatchesAnyString;
+    procedure Body_ByDefault_MatchesAnyString;
     [Test]
     procedure IsMatch_GivenAMatchingRequest_ReturnsTrue;
     [Test]
@@ -67,9 +67,9 @@ begin
   RequestMatcher := nil;
 end;
 
-procedure TWebMockHTTPRequestMatcherTests.Content_ByDefault_MatchesAnyString;
+procedure TWebMockHTTPRequestMatcherTests.Body_ByDefault_MatchesAnyString;
 begin
-  Assert.IsTrue(RequestMatcher.Content.IsMatch('Any Value'));
+  Assert.IsTrue(RequestMatcher.Body.IsMatch('Any Value'));
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.Headers_Always_IsADictionary;
@@ -127,7 +127,7 @@ begin
   LRequestInfo.PostStream := LContentBody;
   LRequest := TWebMockHTTPRequest.Create(LRequestInfo);
   RequestMatcher := TWebMockHTTPRequestMatcher.Create('/', 'POST');
-  RequestMatcher.Content := TWebMockStringWildcardMatcher.Create('Other Value');
+  RequestMatcher.Body := TWebMockStringWildcardMatcher.Create('Other Value');
 
   Assert.IsFalse(RequestMatcher.IsMatch(LRequest));
 end;
@@ -143,7 +143,7 @@ begin
   LRequestInfo.PostStream := LContentBody;
   LRequest := TWebMockHTTPRequest.Create(LRequestInfo);
   RequestMatcher := TWebMockHTTPRequestMatcher.Create('/', 'POST');
-  RequestMatcher.Content := TWebMockStringWildcardMatcher.Create('Match');
+  RequestMatcher.Body := TWebMockStringWildcardMatcher.Create('Match');
 
   Assert.IsTrue(RequestMatcher.IsMatch(LRequest));
 end;

@@ -4,7 +4,7 @@ interface
 
 uses
   Delphi.WebMock.HTTP.Messages, Delphi.WebMock.RequestStub,
-  Delphi.WebMock.Response, Delphi.WebMock.ResponseContentSource,
+  Delphi.WebMock.Response, Delphi.WebMock.ResponseBodySource,
   Delphi.WebMock.ResponseStatus,
   IdContext, IdCustomHTTPServer, IdGlobal, IdHTTPServer,
   System.Classes, System.Generics.Collections, System.RegularExpressions;
@@ -25,7 +25,7 @@ type
     procedure RespondWith(AResponse: TWebMockResponse;
       AResponseInfo: TIdHTTPResponseInfo);
     procedure SetResponseContent(AResponseInfo: TIdHTTPResponseInfo;
-      const AResponseContent: IWebMockResponseContentSource);
+      const AResponseContent: IWebMockResponseBodySource);
     procedure SetResponseHeaders(AResponseInfo: TIdHTTPResponseInfo;
       const AResponseHeaders: TStrings);
     procedure SetResponseStatus(AResponseInfo: TIdHTTPResponseInfo;
@@ -149,11 +149,11 @@ procedure TWebMock.RespondWith(AResponse: TWebMockResponse;
 begin
   SetResponseStatus(AResponseInfo, AResponse.Status);
   SetResponseHeaders(AResponseInfo, AResponse.Headers);
-  SetResponseContent(AResponseInfo, AResponse.ContentSource);
+  SetResponseContent(AResponseInfo, AResponse.BodySource);
 end;
 
 procedure TWebMock.SetResponseContent(AResponseInfo: TIdHTTPResponseInfo;
-      const AResponseContent: IWebMockResponseContentSource);
+      const AResponseContent: IWebMockResponseBodySource);
 begin
   AResponseInfo.ContentType := AResponseContent.ContentType;
   AResponseInfo.ContentStream := AResponseContent.ContentStream;
