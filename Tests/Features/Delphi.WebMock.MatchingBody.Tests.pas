@@ -33,65 +33,56 @@ implementation
 { TWebMockMatchingBodyTests }
 
 uses
-  IdHTTP,
-  TestHelpers,
-  System.RegularExpressions;
+  System.Net.HttpClient, System.RegularExpressions,
+  TestHelpers;
 
 procedure TWebMockMatchingBodyTests.Request_WithPatternMatchingBody_RespondsOK;
 var
   LContent: string;
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   LContent := 'Hello world!';
 
   WebMock.StubRequest('*', '*').WithBody(TRegEx.Create('Hello'));
-  LResponse := WebClient.Post(WebMock.BaseURL, LContent);
+  LResponse := WebClient.Post(WebMock.BaseURL, TStringStream.Create(LContent));
 
-  Assert.AreEqual(200, LResponse.ResponseCode);
-
-  LResponse.Free;
+  Assert.AreEqual(200, LResponse.StatusCode);
 end;
 
 procedure TWebMockMatchingBodyTests.Request_WithPatternNotMatchingBody_RespondsNotImplemented;
 var
   LContent: string;
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   LContent := 'Hello world!';
 
   WebMock.StubRequest('*', '*').WithBody(TRegEx.Create('Goodbye'));
-  LResponse := WebClient.Post(WebMock.BaseURL, LContent);
+  LResponse := WebClient.Post(WebMock.BaseURL, TStringStream.Create(LContent));
 
-  Assert.AreEqual(501, LResponse.ResponseCode);
-
-  LResponse.Free;
+  Assert.AreEqual(501, LResponse.StatusCode);
 end;
 
 procedure TWebMockMatchingBodyTests.Request_WithStringMatchingBodyExactly_RespondsOK;
 var
   LContent: string;
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   LContent := 'Hello world!';
 
   WebMock.StubRequest('*', '*').WithBody(LContent);
-  LResponse := WebClient.Post(WebMock.BaseURL, LContent);
+  LResponse := WebClient.Post(WebMock.BaseURL, TStringStream.Create(LContent));
 
-  Assert.AreEqual(200, LResponse.ResponseCode);
-
-  LResponse.Free;
+  Assert.AreEqual(200, LResponse.StatusCode);
 end;
 
 procedure TWebMockMatchingBodyTests.Request_WithStringNotMatchingBody_RespondsNotImplemented;
 var
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   WebMock.StubRequest('*', '*').WithBody('Hello!');
-  LResponse := WebClient.Post(WebMock.BaseURL, 'Goodbye!');
+  LResponse := WebClient.Post(WebMock.BaseURL, TStringStream.Create('Goodbye!'));
 
-  Assert.AreEqual(501, LResponse.ResponseCode);
-
-  LResponse.Free;
+  Assert.AreEqual(501, LResponse.StatusCode);
 end;
 
 procedure TWebMockMatchingBodyTests.Setup;

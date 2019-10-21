@@ -37,60 +37,59 @@ implementation
 
 uses
   Delphi.WebMock.ResponseStatus,
-  IdGlobal, IdHTTP,
-  System.StrUtils,
+  System.Net.HttpClient, System.StrUtils,
   TestHelpers;
 
 procedure TWebMockResponsesTests.Response_WhenRequestIsNotStubbed_ReturnsNotImplemented;
 var
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   LResponse := WebClient.Get(WebMock.BaseURL);
 
-  Assert.AreEqual(501, LResponse.ResponseCode);
+  Assert.AreEqual(501, LResponse.StatusCode);
 end;
 
 procedure TWebMockResponsesTests.Response_WhenRequestStubbed_ReturnsOK;
 var
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   WebMock.StubRequest('GET', '/');
   LResponse := WebClient.Get(WebMock.BaseURL);
 
-  Assert.AreEqual(200, LResponse.ResponseCode);
+  Assert.AreEqual(200, LResponse.StatusCode);
 end;
 
 procedure TWebMockResponsesTests.Response_WhenToRespondSetsCustomStatus_ReturnsSpecifiedStatusText;
 var
   LExpectedStatus: TWebMockResponseStatus;
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   LExpectedStatus := TWebMockResponseStatus.Create(999, 'My Status');
 
   WebMock.StubRequest('POST', '/response').ToRespond(LExpectedStatus);
-  LResponse := WebClient.Post(WebMock.URLFor('response'), '');
+  LResponse := WebClient.Post(WebMock.URLFor('response'), TStringStream.Create(''));
 
-  Assert.IsTrue(EndsStr('My Status', LResponse.ResponseText));
+  Assert.IsTrue(EndsStr('My Status', LResponse.StatusText));
 end;
 
 procedure TWebMockResponsesTests.Response_WhenToRespondSetsStatus_ReturnsSpecifiedStatusCode;
 var
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   WebMock.StubRequest('POST', '/response').ToRespond(TWebMockResponseStatus.Created);
-  LResponse := WebClient.Post(WebMock.URLFor('response'), '');
+  LResponse := WebClient.Post(WebMock.URLFor('response'), TStringStream.Create(''));
 
-  Assert.AreEqual(201, LResponse.ResponseCode);
+  Assert.AreEqual(201, LResponse.StatusCode);
 end;
 
 procedure TWebMockResponsesTests.Response_WhenToRespondSetsStatus_ReturnsSpecifiedStatusText;
 var
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   WebMock.StubRequest('POST', '/response').ToRespond(TWebMockResponseStatus.Created);
-  LResponse := WebClient.Post(WebMock.URLFor('response'), '');
+  LResponse := WebClient.Post(WebMock.URLFor('response'), TStringStream.Create(''));
 
-  Assert.IsTrue(EndsStr('Created', LResponse.ResponseText));
+  Assert.IsTrue(EndsStr('Created', LResponse.StatusText));
 end;
 
 procedure TWebMockResponsesTests.Setup;

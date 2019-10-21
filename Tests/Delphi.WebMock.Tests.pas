@@ -51,8 +51,7 @@ implementation
 
 uses
   Delphi.WebMock.RequestStub,
-  IdGlobal, IdHTTP,
-  System.RegularExpressions, System.StrUtils,
+  System.Net.HttpClient, System.RegularExpressions, System.StrUtils,
   TestHelpers;
 
 procedure TWebMockTests.Setup;
@@ -95,23 +94,23 @@ end;
 
 procedure TWebMockTests.Create_WithNoArguments_StartsListeningOnPort8080;
 var
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   LResponse := WebClient.Get('http://localhost:8080/');
 
-  Assert.AreEqual('Delphi WebMocks', LResponse.Server);
+  Assert.AreEqual('Delphi WebMocks', LResponse.HeaderValue['Server']);
 end;
 
 procedure TWebMockTests.Create_WithPort_StartsListeningOnPortPort;
 var
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   WebMock.Free;
 
   WebMock := TWebMock.Create(8088);
   LResponse := WebClient.Get('http://localhost:8088/');
 
-  Assert.AreEqual('Delphi WebMocks', LResponse.Server);
+  Assert.AreEqual('Delphi WebMocks', LResponse.HeaderValue['Server']);
 end;
 
 procedure TWebMockTests.ResetHistory_Always_ClearsHistory;

@@ -8,7 +8,7 @@ uses
   System.Classes;
 
 type
-  TWebMockHTTPRequest = class(TInterfacedObject, IHTTPRequest)
+  TWebMockHTTPRequest = class(TInterfacedObject, IWebMockHTTPRequest)
   private
     FBody: TStream;
     FHeaders: TStringList;

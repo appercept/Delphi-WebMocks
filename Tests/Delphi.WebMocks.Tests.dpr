@@ -27,7 +27,6 @@ uses
   Delphi.WebMock.ResponseContentString.Tests in 'Delphi.WebMock.ResponseContentString.Tests.pas',
   Delphi.WebMock.ResponseContentString in '..\Delphi.WebMock.ResponseContentString.pas',
   Delphi.WebMock.ResponseBodySource in '..\Delphi.WebMock.ResponseBodySource.pas',
-  Delphi.WebMock.Tests.Client in 'Delphi.WebMock.Tests.Client.pas',
   Delphi.WebMock.ResponseContentFile.Tests in 'Delphi.WebMock.ResponseContentFile.Tests.pas',
   Delphi.WebMock.ResponseContentFile in '..\Delphi.WebMock.ResponseContentFile.pas',
   Delphi.WebMock.Matching.Tests in 'Features\Delphi.WebMock.Matching.Tests.pas',

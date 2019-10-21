@@ -6,7 +6,7 @@ uses
   System.Classes;
 
 type
-  IHTTPMessage = interface(IInterface)
+  IWebMockHTTPMessage = interface(IInterface)
     ['{04B4BDFB-761E-4E44-8C08-DADF4138C067}']
     function GetStartLine: string;
     function GetHeaders: TStrings;
@@ -16,7 +16,7 @@ type
     property Body: TStream read GetBody;
   end;
 
-  IHTTPRequest = interface(IHTTPMessage)
+  IWebMockHTTPRequest = interface(IWebMockHTTPMessage)
     ['{BE50127E-778C-46C8-B866-96C4124B606F}']
     function GetMethod: string;
     function GetRequestURI: string;
@@ -27,7 +27,7 @@ type
     property HTTPVersion: string read GetHTTPVersion;
   end;
 
-  IHTTPResponse = interface(IHTTPMessage)
+  IWebMockHTTPResponse = interface(IWebMockHTTPMessage)
     ['{C643273B-78EB-4BB8-9DA1-F256FA715BF1}']
     function GetHTTPVersion: string;
     function GetStatusCode: Integer;

@@ -32,12 +32,12 @@ implementation
 
 uses
   Delphi.WebMock.HTTP.Messages,
-  TestHelpers,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  TestHelpers;
 
 procedure TWebMockHistoryTests.History_AfterRequest_ContainsMatchingRequest;
 var
-  LastRequest: IHTTPRequest;
+  LastRequest: IWebMockHTTPRequest;
 begin
   WebClient.Get(WebMock.URLFor('resource'));
 
