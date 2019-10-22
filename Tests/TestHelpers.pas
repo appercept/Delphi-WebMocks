@@ -3,16 +3,16 @@ unit TestHelpers;
 interface
 
 uses
-  Delphi.WebMock.Tests.Client,
-  System.Rtti;
-
-type
-  WebClient = TWebMockTestsClient;
+  System.Classes, System.Net.HttpClient, System.Net.URLClient, System.Rtti;
 
 function FixturePath(const AFileName: string): string;
 function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
 procedure SetPropertyValue(AObject: TObject; APropertyName: string;
   AValue: TValue);
+function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
+
+var
+  WebClient: THTTPClient;
 
 implementation
 
@@ -47,4 +47,21 @@ begin
   LProperty.SetValue(AObject, AValue);
 end;
 
+function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
+var
+  LHeaders: TStringList;
+  LHeader: TNetHeader;
+begin
+  LHeaders := TStringList.Create;
+  for LHeader in ANetHeaders do
+  begin
+    LHeaders.AddPair(LHeader.Name, LHeader.Value);
+  end;
+  Result := LHeaders;
+end;
+
+initialization
+  WebClient := THTTPClient.Create;
+finalization
+  WebClient.Free;
 end.

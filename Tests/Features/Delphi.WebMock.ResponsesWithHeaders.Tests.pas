@@ -32,13 +32,13 @@ implementation
 { TWebMockResponsesWithHeadersTests }
 
 uses
-  IdHTTP,
+  System.Net.HttpClient,
   TestHelpers;
 
 procedure TWebMockResponsesWithHeadersTests.Response_WithHeaderChained_HasValueForEachHeader;
 var
   LHeaderName1, LHeaderName2, LHeaderValue1, LHeaderValue2: string;
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   LHeaderName1 := 'Header1';
   LHeaderValue1 := 'Value1';
@@ -50,16 +50,14 @@ begin
     .WithHeader(LHeaderName2, LHeaderValue2);
   LResponse := WebClient.Get(WebMock.BaseURL);
 
-  Assert.AreEqual(LHeaderValue1, LResponse.RawHeaders.Values[LHeaderName1]);
-  Assert.AreEqual(LHeaderValue2, LResponse.RawHeaders.Values[LHeaderName2]);
-
-  LResponse.Free;
+  Assert.AreEqual(LHeaderValue1, LResponse.HeaderValue[LHeaderName1]);
+  Assert.AreEqual(LHeaderValue2, LResponse.HeaderValue[LHeaderName2]);
 end;
 
 procedure TWebMockResponsesWithHeadersTests.Response_WithHeaders_HasValueForAllHeaders;
 var
   LHeaders: TStringList;
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
   I: Integer;
 begin
   LHeaders := TStringList.Create;
@@ -74,17 +72,16 @@ begin
   for I := 0 to LHeaders.Count - 1 do
     Assert.AreEqual(
       LHeaders.ValueFromIndex[I],
-      LResponse.RawHeaders.Values[LHeaders.Names[I]]
+      LResponse.HeaderValue[LHeaders.Names[I]]
     );
 
-  LResponse.Free;
   LHeaders.Free;
 end;
 
 procedure TWebMockResponsesWithHeadersTests.Response_WithHeader_HasValueForHeader;
 var
   LHeaderName, LHeaderValue: string;
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   LHeaderName := 'Header1';
   LHeaderValue := 'Value1';
@@ -92,7 +89,7 @@ begin
   WebMock.StubRequest('*', '*').ToRespond.WithHeader(LHeaderName, LHeaderValue);
   LResponse := WebClient.Get(WebMock.BaseURL);
 
-  Assert.AreEqual(LHeaderValue, LResponse.RawHeaders.Values[LHeaderName]);
+  Assert.AreEqual(LHeaderValue, LResponse.HeaderValue[LHeaderName]);
 end;
 
 procedure TWebMockResponsesWithHeadersTests.Setup;

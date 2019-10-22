@@ -22,7 +22,7 @@ type
     constructor Create(AURI: string; AHTTPMethod: string = 'GET'); overload;
     constructor Create(AURIPattern: TRegEx; AHTTPMethod: string = 'GET'); overload;
     destructor Destroy; override;
-    function IsMatch(ARequest: IHTTPRequest): Boolean;
+    function IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
     function ToString: string; override;
     property Body: IStringMatcher read FContent write FContent;
     property Headers: TDictionary<string, IStringMatcher> read FHeaders;
@@ -88,7 +88,7 @@ begin
   Result := (HTTPMethod = '*') or (AHTTPMethod = HTTPMethod);
 end;
 
-function TWebMockHTTPRequestMatcher.IsMatch(ARequest: IHTTPRequest): Boolean;
+function TWebMockHTTPRequestMatcher.IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
 begin
   Result := HTTPMethodMatches(ARequest.Method) and
     URIMatcher.IsMatch(ARequest.RequestURI) and

@@ -17,11 +17,11 @@ type
     FServer: TIdHTTPServer;
     FBaseURL: string;
     FStubRegistry: TObjectList<TWebMockRequestStub>;
-    FHistory: TList<IHTTPRequest>;
+    FHistory: TList<IWebMockHTTPRequest>;
     procedure InitializeServer(const APort: TWebWockPort);
     procedure OnServerRequest(AContext: TIdContext;
       ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
-    function GetRequestStub(ARequestInfo: IHTTPRequest) : TWebMockRequestStub;
+    function GetRequestStub(ARequestInfo: IWebMockHTTPRequest) : TWebMockRequestStub;
     procedure RespondWith(AResponse: TWebMockResponse;
       AResponseInfo: TIdHTTPResponseInfo);
     procedure SetResponseContent(AResponseInfo: TIdHTTPResponseInfo;
@@ -44,7 +44,7 @@ type
       : TWebMockRequestStub; overload;
     function URLFor(AURI: string): string;
     property BaseURL: string read FBaseURL;
-    property History: TList<IHTTPRequest> read FHistory;
+    property History: TList<IWebMockHTTPRequest> read FHistory;
     property StubRegistry: TObjectList<TWebMockRequestStub> read FStubRegistry;
   end;
 
@@ -63,7 +63,7 @@ constructor TWebMock.Create(const APort: TWebWockPort = 8080);
 begin
   inherited Create;
   FStubRegistry := TObjectList<TWebMockRequestStub>.Create;
-  FHistory := TList<IHTTPRequest>.Create;
+  FHistory := TList<IWebMockHTTPRequest>.Create;
   InitializeServer(APort);
 end;
 
@@ -75,7 +75,7 @@ begin
   inherited;
 end;
 
-function TWebMock.GetRequestStub(ARequestInfo: IHTTPRequest) : TWebMockRequestStub;
+function TWebMock.GetRequestStub(ARequestInfo: IWebMockHTTPRequest) : TWebMockRequestStub;
 var
   LRequestStub: TWebMockRequestStub;
 begin
@@ -106,7 +106,7 @@ end;
 procedure TWebMock.OnServerRequest(AContext: TIdContext;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
 var
-  LRequest: IHTTPRequest;
+  LRequest: IWebMockHTTPRequest;
   LRequestStub: TWebMockRequestStub;
 begin
   LRequest := TWebMockHTTPRequest.Create(ARequestInfo);

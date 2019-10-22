@@ -144,7 +144,6 @@
         <DCCReference Include="Delphi.WebMock.ResponseContentString.Tests.pas"/>
         <DCCReference Include="..\Delphi.WebMock.ResponseContentString.pas"/>
         <DCCReference Include="..\Delphi.WebMock.ResponseBodySource.pas"/>
-        <DCCReference Include="Delphi.WebMock.Tests.Client.pas"/>
         <DCCReference Include="Delphi.WebMock.ResponseContentFile.Tests.pas"/>
         <DCCReference Include="..\Delphi.WebMock.ResponseContentFile.pas"/>
         <DCCReference Include="Features\Delphi.WebMock.Matching.Tests.pas"/>

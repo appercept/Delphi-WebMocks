@@ -38,59 +38,60 @@ implementation
 { TWebMockResponsesWithBodyTests }
 
 uses
-  IdGlobal, IdHTTP,
+  IdGlobal,
+  System.Net.HttpClient,
   TestHelpers;
 
 procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyFileWithContentType_SetsContentType;
 var
   LExpected: string;
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   LExpected := 'application/xml';
 
   WebMock.StubRequest('GET', '/json').ToRespond.WithBodyFile(FixturePath('Response.json'), LExpected);
   LResponse := WebClient.Get(WebMock.URLFor('json'));
 
-  Assert.AreEqual(LExpected, LResponse.ContentType);
+  Assert.AreEqual(LExpected, LResponse.HeaderValue['Content-Type']);
 end;
 
 procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyFileWithoutContentType_SetsContentTypeToInferedType;
 var
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   WebMock.StubRequest('GET', '/json').ToRespond.WithBodyFile(FixturePath('Response.json'));
   LResponse := WebClient.Get(WebMock.URLFor('json'));
 
-  Assert.AreEqual('application/json', LResponse.ContentType);
+  Assert.AreEqual('application/json', LResponse.HeaderValue['Content-Type']);
 end;
 
 procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyIsAStringWithContentType_SetsContentType;
 var
   LExpected: string;
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   LExpected := 'text/rtf';
 
   WebMock.StubRequest('GET', '/text').ToRespond.WithBody('Text', LExpected);
   LResponse := WebClient.Get(WebMock.URLFor('text'));
 
-  Assert.AreEqual(LExpected, LResponse.ContentType);
+  Assert.StartsWith(LExpected, LResponse.HeaderValue['Content-Type']);
 end;
 
 procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyIsAStringWithoutContentType_SetsContentTypeToPlainText;
 var
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   WebMock.StubRequest('GET', '/text').ToRespond.WithBody('Text');
   LResponse := WebClient.Get(WebMock.URLFor('text'));
 
-  Assert.AreEqual('text/plain', LResponse.ContentType);
+  Assert.StartsWith('text/plain', LResponse.HeaderValue['Content-Type']);
 end;
 
 procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyIsAString_ReturnsStringAsContent;
 var
   LExpectedContent: string;
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
   LHeader: string;
   LContentText: string;
 begin
@@ -105,13 +106,13 @@ end;
 
 procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyIsString_ReturnsUTF8CharSet;
 var
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
   LHeader: string;
 begin
   WebMock.StubRequest('GET', '/text').ToRespond.WithBody('UTF-8 Text');
   LResponse := WebClient.Get(WebMock.URLFor('text'));
 
-  Assert.AreEqual('UTF-8', LResponse.CharSet);
+  Assert.EndsWith('utf-8', LResponse.HeaderValue['Content-Type']);
 end;
 
 procedure TWebMockResponsesWithBodyTests.Setup;

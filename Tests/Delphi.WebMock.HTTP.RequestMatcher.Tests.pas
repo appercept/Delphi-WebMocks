@@ -80,7 +80,7 @@ end;
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_GivenAMatchingRequest_ReturnsTrue;
 var
   LRequestInfo: TIdHTTPRequestInfo;
-  LRequest: IHTTPRequest;
+  LRequest: IWebMockHTTPRequest;
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/match');
   LRequest := TWebMockHTTPRequest.Create(LRequestInfo);
@@ -93,7 +93,7 @@ end;
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_GivenDifferingHTTPMethod_ReturnsFalse;
 var
   LRequestInfo: TIdHTTPRequestInfo;
-  LRequest: IHTTPRequest;
+  LRequest: IWebMockHTTPRequest;
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('HEAD');
   LRequest := TWebMockHTTPRequest.Create(LRequestInfo);
@@ -106,7 +106,7 @@ end;
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_GivenDifferingURI_ReturnsFalse;
 var
   LRequestInfo: TIdHTTPRequestInfo;
-  LRequest: IHTTPRequest;
+  LRequest: IWebMockHTTPRequest;
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/no-match');
   LRequest := TWebMockHTTPRequest.Create(LRequestInfo);
@@ -120,7 +120,7 @@ procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenContentMatcherDoesNotMatch
 var
   LRequestInfo: TIdHTTPRequestInfo;
   LContentBody: TStringStream;
-  LRequest: IHTTPRequest;
+  LRequest: IWebMockHTTPRequest;
 begin
   LContentBody := TStringStream.Create('No Match');
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('POST', '/');
@@ -136,7 +136,7 @@ procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenContentMatcherMatchesReque
 var
   LRequestInfo: TIdHTTPRequestInfo;
   LContentBody: TStringStream;
-  LRequest: IHTTPRequest;
+  LRequest: IWebMockHTTPRequest;
 begin
   LContentBody := TStringStream.Create('Match');
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('POST', '/');
@@ -152,7 +152,7 @@ procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenHeadersAreSetGivenMatching
 var
   LRequestInfo: TIdHTTPRequestInfo;
   LHeaderName, LHeaderValue: string;
-  LRequest: IHTTPRequest;
+  LRequest: IWebMockHTTPRequest;
 begin
   LHeaderName := 'Header1';
   LHeaderValue := 'Value1';
@@ -171,7 +171,7 @@ end;
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenHeadersAreSetGivenNonMatchingRequestInfo_ReturnsFalse;
 var
   LRequestInfo: TIdHTTPRequestInfo;
-  LRequest: IHTTPRequest;
+  LRequest: IWebMockHTTPRequest;
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/match');
   LRequest := TWebMockHTTPRequest.Create(LRequestInfo);
@@ -187,7 +187,7 @@ end;
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenMethodIsWildcardGivenAnyRequestInfoMethod_ReturnsTrue;
 var
   LRequestInfo: TIdHTTPRequestInfo;
-  LRequest: IHTTPRequest;
+  LRequest: IWebMockHTTPRequest;
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('HEAD');
   LRequest := TWebMockHTTPRequest.Create(LRequestInfo);
@@ -200,7 +200,7 @@ end;
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenURIIsWildcardGivenAnyRequestInfoURI_ReturnsTrue;
 var
   LRequestInfo: TIdHTTPRequestInfo;
-  LRequest: IHTTPRequest;
+  LRequest: IWebMockHTTPRequest;
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/match');
   LRequest := TWebMockHTTPRequest.Create(LRequestInfo);
