@@ -105,6 +105,7 @@ begin
   Server.ServerSoftware := 'Delphi WebMocks';
   Server.DefaultPort := APort;
   Server.OnCommandGet := OnServerRequest;
+  Server.OnCommandOther := OnServerRequest;
   Server.Active := True;
   FBaseURL := Format('http://127.0.0.1:%d/', [Server.DefaultPort]);
 end;
