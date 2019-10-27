@@ -3,9 +3,9 @@ unit Delphi.WebMock;
 interface
 
 uses
-  Delphi.WebMock.HTTP.Messages, Delphi.WebMock.RequestStub,
-  Delphi.WebMock.Response, Delphi.WebMock.ResponseBodySource,
-  Delphi.WebMock.ResponseStatus,
+  Delphi.WebMock.Assertion, Delphi.WebMock.HTTP.Messages,
+  Delphi.WebMock.RequestStub, Delphi.WebMock.Response,
+  Delphi.WebMock.ResponseBodySource, Delphi.WebMock.ResponseStatus,
   IdContext, IdCustomHTTPServer, IdGlobal, IdHTTPServer,
   System.Classes, System.Generics.Collections, System.RegularExpressions;
 
@@ -34,6 +34,7 @@ type
   public
     constructor Create(const APort: TWebWockPort = 8080);
     destructor Destroy; override;
+    function Assert: TWebMockAssertion;
     procedure PrintStubRegistry;
     procedure Reset;
     procedure ResetHistory;
@@ -58,6 +59,11 @@ uses
   System.SysUtils;
 
 { TWebMock }
+
+function TWebMock.Assert: TWebMockAssertion;
+begin
+  Result := TWebMockAssertion.Create(History);
+end;
 
 constructor TWebMock.Create(const APort: TWebWockPort = 8080);
 begin

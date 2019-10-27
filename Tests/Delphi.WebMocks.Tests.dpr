@@ -44,7 +44,10 @@ uses
   Delphi.WebMock.HTTP.Messages in '..\Delphi.WebMock.HTTP.Messages.pas',
   Delphi.WebMock.HTTP.Request.Tests in 'Delphi.WebMock.HTTP.Request.Tests.pas',
   Delphi.WebMock.HTTP.Request in '..\Delphi.WebMock.HTTP.Request.pas',
-  Delphi.WebMock.Responses.Tests in 'Features\Delphi.WebMock.Responses.Tests.pas';
+  Delphi.WebMock.Responses.Tests in 'Features\Delphi.WebMock.Responses.Tests.pas',
+  Delphi.WebMock.Assertions.Tests in 'Features\Delphi.WebMock.Assertions.Tests.pas',
+  Delphi.WebMock.Assertion in '..\Delphi.WebMock.Assertion.pas',
+  Delphi.WebMock.Assertion.Tests in 'Delphi.WebMock.Assertion.Tests.pas';
 
 var
   Runner: ITestRunner;

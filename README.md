@@ -106,15 +106,15 @@ and document path.
 #### Request matching by header value
 HTTP request headers can be matched like:
 ```Delphi
-WebMock.StubRequest('*', '*').WithHeader('Header-Name', 'Header-Value');
+WebMock.StubRequest('*', '*').WithHeader('Name', 'Value');
 ```
 
 Matching multiple headers can be achieved in 2 ways. The first is to simply
 chain `WithHeader` calls e.g.:
 ```Delphi
 WebMock.StubRequest('*', '*')
-  .WithHeader('Header-1', 'Header-Value-1')
-  .WithHeader('Header-2', 'Header-Value-2');
+  .WithHeader('Header-1', 'Value-1')
+  .WithHeader('Header-2', 'Value-2');
 ```
 
 Alternatively, `WithHeaders` accepts a `TStringList` of key-value pairs e.g.:
@@ -171,15 +171,15 @@ WebMock.StubRequest('GET', '/').ToRespond(TWebMockResponseStatus.NotFound);
 Headers can be added to a response stub like:
 ```Delphi
 WebMock.StubRequest('*', '*')
-  .ToRespond.WithHeader('Header1', 'Value1');
+  .ToRespond.WithHeader('Header-1', 'Value-1');
 ```
 
 As with request header matching multiple headers can be specified either through
 method chaining or by using the `WithHeaders` method.
 ```Delphi
   WebMock.StubRequest('*', '*').ToRespond
-    .WithHeader('Header1', 'Value1')
-    .WithHeader('Header2', 'Value2');
+    .WithHeader('Header-1', 'Value-1')
+    .WithHeader('Header-2', 'Value-2');
 
 /* or */
 
@@ -187,8 +187,8 @@ var
   Headers: TStringList;
 begin
   Headers := TStringList.Create;
-  Headers.Values['Header1'] := 'Value1';
-  Headers.Values['Header2'] := 'Value2';
+  Headers.Values['Header-1'] := 'Value-1';
+  Headers.Values['Header-2'] := 'Value-2';
 
   WebMock.StubRequest('*', '*')
     .ToRespond.WithHeaders(Headers);
@@ -254,37 +254,42 @@ Assert.AreEqual('GET', WebMock.History.Last.Method);
 Assert.AreEqual('/document', WebMock.History.Last.RequestURI);
 ```
 
+**NOTE:** Should you find yourself writing assertions in this manor you should
+take a look at [Request Assertions](#request-assertions) which provides a more
+concise way of defining these assertions.
+
 ### Resetting Request History
 If you need to clear request history you can call `ResetHistory` or `Reset` on
 the instance of TWebMock. The general `Reset` method will return the TWebMock
 instance to a blank state including emptying the history. The more specific
 `ResetHistory` will as suggested clear only the history.
 
-## Planned Features
-* [x] Static Request Matchers
-  - [x] ~~HTTP Verbs by:~~
-    - [x] ~~Exact Matching~~
-    - [x] ~~Simple wild-card `*`~~
-  - [x] Path by:
-    - [x] ~~Exact Matching~~
-    - [x] ~~Regular Expressions~~
-    - [x] ~~Simple wild-card `*`~~
-  - [x] Headers by:
-    - [x] ~~Exact Matching~~
-    - [x] ~~Regular Expressions~~
-  - [x] ~~Content by:~~
-    - [x] ~~Exact Matching~~
-    - [x] ~~Regular Expressions~~
-* [x] ~~Static Response Stubs~~
-  - [x] ~~Status Codes~~
-  - [x] ~~Content~~
-    - [x] ~~Simple Text~~
-    - [x] ~~Fixture Files~~
-  - [x] ~~Headers~~
-* [x] ~~Request History~~
-* [ ] Assertions/Expectations
-* [ ] Dynamic Response Stubs
-* [ ] Dynamic Port Binding
+## Request Assertions
+In addition to using DUnitX assertions to validate your code behaved as expected
+you can also use request assertions to check whether requests you expect your
+code to perform where executed as expected.
+
+A simple request assertion:
+```Delphi
+WebClient.Get(WebMock.URLFor('/'));
+
+WebMock.Assert.Get('/').WasRequested; // Passes
+```
+
+As with request stubbing you can match requests by HTTP Method, URI, Headers,
+and Body content.
+```Delphi
+WebMock.Assert
+  .Patch('/resource`)
+  .WithHeader('Content-Type', 'application/json')
+  .WithBody('{ "resource": { "propertyA": "Value" } }')
+  .WasRequested;
+```
+
+### Negative Assertions
+Anything that can be asserted positively (`WasRequested`) can also be asserted
+negatively with `WasNotRequested`. This is useful to check your code is not
+performing extra unwanted requests.
 
 ## License
 Copyright ©2019 Richard Hatherall <richard@appercept.com>
