@@ -117,7 +117,7 @@ end;
 
 function TWebMockHTTPRequestMatcher.ToString: string;
 begin
-  Result := Format('%s' + ^I + '%s', [HTTPMethod, URIMatcher]);
+  Result := Format('%s' + ^I + '%s', [HTTPMethod, URIMatcher.ToString]);
 end;
 
 end.

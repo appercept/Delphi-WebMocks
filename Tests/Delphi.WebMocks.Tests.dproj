@@ -162,6 +162,9 @@
         <DCCReference Include="Delphi.WebMock.HTTP.Request.Tests.pas"/>
         <DCCReference Include="..\Delphi.WebMock.HTTP.Request.pas"/>
         <DCCReference Include="Features\Delphi.WebMock.Responses.Tests.pas"/>
+        <DCCReference Include="Features\Delphi.WebMock.Assertions.Tests.pas"/>
+        <DCCReference Include="..\Delphi.WebMock.Assertion.pas"/>
+        <DCCReference Include="Delphi.WebMock.Assertion.Tests.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
