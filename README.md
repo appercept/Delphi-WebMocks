@@ -1,8 +1,6 @@
 # Delphi-WebMocks
 Library for stubbing and setting expectations on HTTP requests in Delphi with [DUnitX](https://github.com/VSoftTechnologies/DUnitX).
 
-Delphi WebMocks
-
 ## Setup
 In your test unit file a couple of simple steps are required.
 1. Add `Delphi.WebMock` to your interface `uses`.
