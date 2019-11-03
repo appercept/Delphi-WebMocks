@@ -1,3 +1,28 @@
+{******************************************************************************}
+{                                                                              }
+{           Delphi-WebMocks                                                    }
+{                                                                              }
+{           Copyright (c) 2019 Richard Hatherall                               }
+{                                                                              }
+{           richard@appercept.com                                              }
+{           https://appercept.com                                              }
+{                                                                              }
+{******************************************************************************}
+{                                                                              }
+{   Licensed under the Apache License, Version 2.0 (the "License");            }
+{   you may not use this file except in compliance with the License.           }
+{   You may obtain a copy of the License at                                    }
+{                                                                              }
+{       http://www.apache.org/licenses/LICENSE-2.0                             }
+{                                                                              }
+{   Unless required by applicable law or agreed to in writing, software        }
+{   distributed under the License is distributed on an "AS IS" BASIS,          }
+{   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   }
+{   See the License for the specific language governing permissions and        }
+{   limitations under the License.                                             }
+{                                                                              }
+{******************************************************************************}
+
 unit Delphi.WebMock.RequestStub.Tests;
 
 interface
@@ -18,21 +43,21 @@ type
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure ToReturn_Always_ReturnsAResponseStub;
+    procedure ToRespond_Always_ReturnsAResponseStub;
     [Test]
-    procedure ToReturn_WithNoArguments_DoesNotRaiseException;
+    procedure ToRespond_WithNoArguments_DoesNotRaiseException;
     [Test]
-    procedure ToReturn_WithNoArguments_DoesNotChangeStatus;
+    procedure ToRespond_WithNoArguments_DoesNotChangeStatus;
     [Test]
-    procedure ToReturn_WithResponse_SetsResponseStatus;
+    procedure ToRespond_WithResponse_SetsResponseStatus;
     [Test]
-    procedure WithContent_GivenString_ReturnsSelf;
+    procedure WithBody_GivenString_ReturnsSelf;
     [Test]
-    procedure WithContent_GivenString_SetsValueForContent;
+    procedure WithBody_GivenString_SetsValueForContent;
     [Test]
-    procedure WithContent_GivenRegEx_ReturnsSelf;
+    procedure WithBody_GivenRegEx_ReturnsSelf;
     [Test]
-    procedure WithContent_GivenRegEx_SetsValueForContent;
+    procedure WithBody_GivenRegEx_SetsValueForContent;
     [Test]
     procedure WithHeader_GivenString_ReturnsSelf;
     [Test]
@@ -52,7 +77,7 @@ type
 implementation
 
 uses
-  Delphi.WebMock.Indy.RequestMatcher, Delphi.WebMock.Response,
+  Delphi.WebMock.HTTP.RequestMatcher, Delphi.WebMock.Response,
   Delphi.WebMock.ResponseStatus, Delphi.WebMock.StringMatcher,
   Delphi.WebMock.StringWildcardMatcher, Delphi.WebMock.StringRegExMatcher,
   IdCustomHTTPServer,
@@ -63,9 +88,9 @@ uses
 
 procedure TWebMockRequestStubTests.Setup;
 var
-  LMatcher: TWebMockIndyRequestMatcher;
+  LMatcher: TWebMockHTTPRequestMatcher;
 begin
-  LMatcher := TWebMockIndyRequestMatcher.Create('');
+  LMatcher := TWebMockHTTPRequestMatcher.Create('');
   StubbedRequest := TWebMockRequestStub.Create(LMatcher);
 end;
 
@@ -74,80 +99,80 @@ begin
   StubbedRequest := nil;
 end;
 
-procedure TWebMockRequestStubTests.ToReturn_Always_ReturnsAResponseStub;
+procedure TWebMockRequestStubTests.ToRespond_Always_ReturnsAResponseStub;
 begin
-  Assert.IsTrue(StubbedRequest.ToReturn is TWebMockResponse);
+  Assert.IsTrue(StubbedRequest.ToRespond is TWebMockResponse);
 end;
 
-procedure TWebMockRequestStubTests.ToReturn_WithNoArguments_DoesNotRaiseException;
+procedure TWebMockRequestStubTests.ToRespond_WithNoArguments_DoesNotRaiseException;
 begin
   Assert.WillNotRaiseAny(
   procedure
   begin
-    StubbedRequest.ToReturn;
+    StubbedRequest.ToRespond;
   end);
 end;
 
-procedure TWebMockRequestStubTests.ToReturn_WithNoArguments_DoesNotChangeStatus;
+procedure TWebMockRequestStubTests.ToRespond_WithNoArguments_DoesNotChangeStatus;
 var
   LExpectedStatus: TWebMockResponseStatus;
 begin
   LExpectedStatus := StubbedRequest.Response.Status;
 
-  StubbedRequest.ToReturn;
+  StubbedRequest.ToRespond;
 
   Assert.AreSame(LExpectedStatus, StubbedRequest.Response.Status);
 end;
 
-procedure TWebMockRequestStubTests.ToReturn_WithResponse_SetsResponseStatus;
+procedure TWebMockRequestStubTests.ToRespond_WithResponse_SetsResponseStatus;
 var
   LResponse: TWebMockResponseStatus;
 begin
   LResponse := TWebMockResponseStatus.Continue;
 
-  StubbedRequest.ToReturn(LResponse);
+  StubbedRequest.ToRespond(LResponse);
 
   Assert.AreSame(LResponse, StubbedRequest.Response.Status);
 end;
 
-procedure TWebMockRequestStubTests.WithContent_GivenRegEx_ReturnsSelf;
+procedure TWebMockRequestStubTests.WithBody_GivenRegEx_ReturnsSelf;
 begin
   Assert.AreSame(
     StubbedRequest,
-    StubbedRequest.WithContent(TRegEx.Create('Hello.'))
+    StubbedRequest.WithBody(TRegEx.Create('Hello.'))
   );
 end;
 
-procedure TWebMockRequestStubTests.WithContent_GivenRegEx_SetsValueForContent;
+procedure TWebMockRequestStubTests.WithBody_GivenRegEx_SetsValueForContent;
 var
   LPattern: TRegEx;
 begin
   LPattern := TRegEx.Create('.+');
 
-  StubbedRequest.WithContent(LPattern);
+  StubbedRequest.WithBody(LPattern);
 
   Assert.AreEqual(
     LPattern,
-    (StubbedRequest.Matcher.Content as TWebMockStringRegExMatcher).RegEx
+    (StubbedRequest.Matcher.Body as TWebMockStringRegExMatcher).RegEx
   );
 end;
 
-procedure TWebMockRequestStubTests.WithContent_GivenString_ReturnsSelf;
+procedure TWebMockRequestStubTests.WithBody_GivenString_ReturnsSelf;
 begin
-  Assert.AreSame(StubbedRequest, StubbedRequest.WithContent('Hello.'));
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithBody('Hello.'));
 end;
 
-procedure TWebMockRequestStubTests.WithContent_GivenString_SetsValueForContent;
+procedure TWebMockRequestStubTests.WithBody_GivenString_SetsValueForContent;
 var
   LContent: string;
 begin
   LContent := 'Welcome!';
 
-  StubbedRequest.WithContent(LContent);
+  StubbedRequest.WithBody(LContent);
 
   Assert.AreEqual(
     LContent,
-    (StubbedRequest.Matcher.Content as TWebMockStringWildcardMatcher).Value
+    (StubbedRequest.Matcher.Body as TWebMockStringWildcardMatcher).Value
   );
 end;
 

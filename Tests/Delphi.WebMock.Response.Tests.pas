@@ -1,3 +1,28 @@
+{******************************************************************************}
+{                                                                              }
+{           Delphi-WebMocks                                                    }
+{                                                                              }
+{           Copyright (c) 2019 Richard Hatherall                               }
+{                                                                              }
+{           richard@appercept.com                                              }
+{           https://appercept.com                                              }
+{                                                                              }
+{******************************************************************************}
+{                                                                              }
+{   Licensed under the Apache License, Version 2.0 (the "License");            }
+{   you may not use this file except in compliance with the License.           }
+{   You may obtain a copy of the License at                                    }
+{                                                                              }
+{       http://www.apache.org/licenses/LICENSE-2.0                             }
+{                                                                              }
+{   Unless required by applicable law or agreed to in writing, software        }
+{   distributed under the License is distributed on an "AS IS" BASIS,          }
+{   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   }
+{   See the License for the specific language governing permissions and        }
+{   limitations under the License.                                             }
+{                                                                              }
+{******************************************************************************}
+
 unit Delphi.WebMock.Response.Tests;
 
 interface
@@ -22,15 +47,15 @@ type
     [Test]
     procedure Create_WithStatus_SetsStatus;
     [Test]
-    procedure ContentSource_WhenNotSet_ReturnsEmptyContentSource;
+    procedure BodySource_WhenNotSet_ReturnsEmptyContentSource;
     [Test]
-    procedure WithContent_Always_ReturnsSelf;
+    procedure WithBody_Always_ReturnsSelf;
     [Test]
-    procedure WithContent_WithString_SetsResponseContent;
+    procedure WithBody_WithString_SetsResponseContent;
     [Test]
-    procedure WithContentFile_Always_ReturnsSelf;
+    procedure WithBodyFile_Always_ReturnsSelf;
     [Test]
-    procedure WithContentFile_WithValidFile_SetsResponseContent;
+    procedure WithBodyFile_WithValidFile_SetsResponseContent;
     [Test]
     procedure WithHeader_Always_ReturnsSelf;
     [Test]
@@ -62,44 +87,44 @@ begin
   WebMockResponse.Free;
 end;
 
-procedure TWebMockResponseTests.WithContentFile_Always_ReturnsSelf;
+procedure TWebMockResponseTests.WithBodyFile_Always_ReturnsSelf;
 begin
-  Assert.AreSame(WebMockResponse, WebMockResponse.WithContentFile(FixturePath('Sample.txt')));
+  Assert.AreSame(WebMockResponse, WebMockResponse.WithBodyFile(FixturePath('Sample.txt')));
 end;
 
-procedure TWebMockResponseTests.WithContentFile_WithValidFile_SetsResponseContent;
+procedure TWebMockResponseTests.WithBodyFile_WithValidFile_SetsResponseContent;
 var
   LExpectedContent: string;
   LActualStream: TStringStream;
 begin
   LExpectedContent := 'Sample Text';
 
-  WebMockResponse.WithContentFile(FixturePath('Sample.txt'));
+  WebMockResponse.WithBodyFile(FixturePath('Sample.txt'));
 
   LActualStream := TStringStream.Create;
-  LActualStream.CopyFrom(WebMockResponse.ContentSource.ContentStream, 0);
+  LActualStream.CopyFrom(WebMockResponse.BodySource.ContentStream, 0);
   Assert.AreEqual(
     LExpectedContent,
     LActualStream.DataString
   );
 end;
 
-procedure TWebMockResponseTests.WithContent_Always_ReturnsSelf;
+procedure TWebMockResponseTests.WithBody_Always_ReturnsSelf;
 begin
-  Assert.AreSame(WebMockResponse, WebMockResponse.WithContent(''));
+  Assert.AreSame(WebMockResponse, WebMockResponse.WithBody(''));
 end;
 
-procedure TWebMockResponseTests.WithContent_WithString_SetsResponseContent;
+procedure TWebMockResponseTests.WithBody_WithString_SetsResponseContent;
 var
   LExpectedContent: string;
 begin
   LExpectedContent := 'Text Body.';
 
-  WebMockResponse.WithContent(LExpectedContent);
+  WebMockResponse.WithBody(LExpectedContent);
 
   Assert.AreEqual(
     LExpectedContent,
-    (WebMockResponse.ContentSource.ContentStream as TStringStream).DataString
+    (WebMockResponse.BodySource.ContentStream as TStringStream).DataString
   );
 end;
 
@@ -170,9 +195,9 @@ begin
   Assert.AreEqual(LHeaderValue, WebMockResponse.Headers.Values[LHeaderName]);
 end;
 
-procedure TWebMockResponseTests.ContentSource_WhenNotSet_ReturnsEmptyContentSource;
+procedure TWebMockResponseTests.BodySource_WhenNotSet_ReturnsEmptyContentSource;
 begin
-  Assert.AreEqual(Int64(0), WebMockResponse.ContentSource.ContentStream.Size);
+  Assert.AreEqual(Int64(0), WebMockResponse.BodySource.ContentStream.Size);
 end;
 
 procedure TWebMockResponseTests.Create_WithoutArguments_SetsStatusToOK;

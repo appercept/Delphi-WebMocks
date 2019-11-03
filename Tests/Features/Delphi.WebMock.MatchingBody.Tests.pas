@@ -23,93 +23,103 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Delphi.WebMock.StringRegExMatcher.Tests;
+unit Delphi.WebMock.MatchingBody.Tests;
 
 interface
 
 uses
   DUnitX.TestFramework,
-  Delphi.WebMock.StringRegExMatcher,
-  IdCustomHTTPServer;
+  Delphi.WebMock,
+  System.Classes, System.SysUtils;
 
 type
 
   [TestFixture]
-  TWebMockStringRegExMatcherTests = class(TObject)
+  TWebMockMatchingBodyTests = class(TObject)
   private
-    StringRegExMatcher: TWebMockStringRegExMatcher;
+    WebMock: TWebMock;
   public
     [Setup]
     procedure Setup;
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure Class_Always_ImplementsStringMatcher;
+    procedure Request_WithStringMatchingBodyExactly_RespondsOK;
     [Test]
-    procedure IsMatch_WhenGivenValueMatchesRegEx_ReturnsTrue;
+    procedure Request_WithStringNotMatchingBody_RespondsNotImplemented;
     [Test]
-    procedure IsMatch_WhenGivenValueDoesNotMatchRegEx_ReturnsFalse;
+    procedure Request_WithPatternMatchingBody_RespondsOK;
     [Test]
-    procedure ToString_Always_ReturnsRegularExpression;
+    procedure Request_WithPatternNotMatchingBody_RespondsNotImplemented;
   end;
 
 implementation
 
-{ TWebMockStringRegExMatcherTests }
+{ TWebMockMatchingBodyTests }
 
 uses
-  Delphi.WebMock.StringMatcher,
-  System.RegularExpressions;
+  System.Net.HttpClient, System.RegularExpressions,
+  TestHelpers;
 
-procedure TWebMockStringRegExMatcherTests.Class_Always_ImplementsStringMatcher;
+procedure TWebMockMatchingBodyTests.Request_WithPatternMatchingBody_RespondsOK;
 var
-  Subject: IInterface;
+  LContent: string;
+  LResponse: IHTTPResponse;
 begin
-  Subject := TWebMockStringRegExMatcher.Create(TRegEx.Create(''));
+  LContent := 'Hello world!';
 
-  Assert.Implements<IStringMatcher>(Subject);
+  WebMock.StubRequest('*', '*').WithBody(TRegEx.Create('Hello'));
+  LResponse := WebClient.Post(WebMock.BaseURL, TStringStream.Create(LContent));
+
+  Assert.AreEqual(200, LResponse.StatusCode);
 end;
 
-procedure TWebMockStringRegExMatcherTests.IsMatch_WhenGivenValueDoesNotMatchRegEx_ReturnsFalse;
+procedure TWebMockMatchingBodyTests.Request_WithPatternNotMatchingBody_RespondsNotImplemented;
 var
-  LRegEx: TRegEx;
+  LContent: string;
+  LResponse: IHTTPResponse;
 begin
-  LRegEx := TRegEx.Create('A\ Value');
-  StringRegExMatcher := TWebMockStringRegExMatcher.Create(LRegEx);
+  LContent := 'Hello world!';
 
-  Assert.IsFalse(StringRegExMatcher.IsMatch('Other Value'));
+  WebMock.StubRequest('*', '*').WithBody(TRegEx.Create('Goodbye'));
+  LResponse := WebClient.Post(WebMock.BaseURL, TStringStream.Create(LContent));
+
+  Assert.AreEqual(501, LResponse.StatusCode);
 end;
 
-procedure TWebMockStringRegExMatcherTests.IsMatch_WhenGivenValueMatchesRegEx_ReturnsTrue;
+procedure TWebMockMatchingBodyTests.Request_WithStringMatchingBodyExactly_RespondsOK;
 var
-  LRegEx: TRegEx;
+  LContent: string;
+  LResponse: IHTTPResponse;
 begin
-  LRegEx := TRegEx.Create('A\ Value');
-  StringRegExMatcher := TWebMockStringRegExMatcher.Create(LRegEx);
+  LContent := 'Hello world!';
 
-  Assert.IsTrue(StringRegExMatcher.IsMatch('A Value'));
+  WebMock.StubRequest('*', '*').WithBody(LContent);
+  LResponse := WebClient.Post(WebMock.BaseURL, TStringStream.Create(LContent));
+
+  Assert.AreEqual(200, LResponse.StatusCode);
 end;
 
-procedure TWebMockStringRegExMatcherTests.Setup;
-begin
-
-end;
-
-procedure TWebMockStringRegExMatcherTests.TearDown;
-begin
-  StringRegExMatcher.Free;
-end;
-
-procedure TWebMockStringRegExMatcherTests.ToString_Always_ReturnsRegularExpression;
+procedure TWebMockMatchingBodyTests.Request_WithStringNotMatchingBody_RespondsNotImplemented;
 var
-  LRegEx: TRegEx;
+  LResponse: IHTTPResponse;
 begin
-  LRegEx := TRegEx.Create('');
-  StringRegExMatcher := TWebMockStringRegExMatcher.Create(LRegEx);
+  WebMock.StubRequest('*', '*').WithBody('Hello!');
+  LResponse := WebClient.Post(WebMock.BaseURL, TStringStream.Create('Goodbye!'));
 
-  Assert.AreEqual('Regular Expression', StringRegExMatcher.ToString);
+  Assert.AreEqual(501, LResponse.StatusCode);
+end;
+
+procedure TWebMockMatchingBodyTests.Setup;
+begin
+  WebMock := TWebMock.Create;
+end;
+
+procedure TWebMockMatchingBodyTests.TearDown;
+begin
+  WebMock.Free;
 end;
 
 initialization
-  TDUnitX.RegisterTestFixture(TWebMockStringRegExMatcherTests);
+  TDUnitX.RegisterTestFixture(TWebMockMatchingBodyTests);
 end.

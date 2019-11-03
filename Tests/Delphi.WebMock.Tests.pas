@@ -1,3 +1,28 @@
+{******************************************************************************}
+{                                                                              }
+{           Delphi-WebMocks                                                    }
+{                                                                              }
+{           Copyright (c) 2019 Richard Hatherall                               }
+{                                                                              }
+{           richard@appercept.com                                              }
+{           https://appercept.com                                              }
+{                                                                              }
+{******************************************************************************}
+{                                                                              }
+{   Licensed under the Apache License, Version 2.0 (the "License");            }
+{   you may not use this file except in compliance with the License.           }
+{   You may obtain a copy of the License at                                    }
+{                                                                              }
+{       http://www.apache.org/licenses/LICENSE-2.0                             }
+{                                                                              }
+{   Unless required by applicable law or agreed to in writing, software        }
+{   distributed under the License is distributed on an "AS IS" BASIS,          }
+{   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   }
+{   See the License for the specific language governing permissions and        }
+{   limitations under the License.                                             }
+{                                                                              }
+{******************************************************************************}
+
 unit Delphi.WebMock.Tests;
 
 interface
@@ -28,28 +53,30 @@ type
     [Test]
     procedure BaseURL_WhenPortIsNotDefault_ReturnsLocalHostURLWithPort;
     [Test]
+    procedure Reset_Always_ClearsHistory;
+    [Test]
+    procedure Reset_Always_ClearsStubRegistry;
+    [Test]
+    procedure ResetHistory_Always_ClearsHistory;
+    [Test]
+    procedure ResetStubRegistry_Always_ClearsStubRegistry;
+    [Test]
     procedure StubRequest_WithStringURI_ReturnsARequestStub;
     [Test]
     procedure StubRequest_WithRegExURI_ReturnsARequestStub;
     [Test]
-    procedure Response_WhenRequestStubbed_ReturnsOK;
+    procedure URLFor_GivenEmptyString_ReturnsBaseURL;
     [Test]
-    procedure Response_WhenRequestIsNotStubbed_ReturnsNotImplemented;
+    procedure URLFor_GivenStringWithoutLeadingSlash_ReturnsCorrectlyJoinedURL;
     [Test]
-    procedure Response_WhenToReturnSetsStatus_ReturnsSpecifiedStatusCode;
-    [Test]
-    procedure Response_WhenToReturnSetsStatus_ReturnsSpecifiedStatusText;
-    [Test]
-    procedure Response_WhenToReturnSetsCustomStatus_ReturnsSpecifiedStatusText;
+    procedure URLFor_GivenStringWithLeadingSlash_ReturnsCorrectlyJoinedURL;
   end;
 
 implementation
 
 uses
   Delphi.WebMock.RequestStub,
-  Delphi.WebMock.ResponseStatus,
-  IdGlobal, IdHTTP,
-  System.RegularExpressions, System.StrUtils,
+  System.Net.HttpClient, System.RegularExpressions, System.StrUtils,
   TestHelpers;
 
 procedure TWebMockTests.Setup;
@@ -60,6 +87,21 @@ end;
 procedure TWebMockTests.TearDown;
 begin
   WebMock.Free;
+end;
+
+procedure TWebMockTests.URLFor_GivenEmptyString_ReturnsBaseURL;
+begin
+  Assert.AreEqual(WebMock.BaseURL, WebMock.URLFor(''));
+end;
+
+procedure TWebMockTests.URLFor_GivenStringWithLeadingSlash_ReturnsCorrectlyJoinedURL;
+begin
+  Assert.AreEqual('http://127.0.0.1:8080/file', WebMock.URLFor('/file'));
+end;
+
+procedure TWebMockTests.URLFor_GivenStringWithoutLeadingSlash_ReturnsCorrectlyJoinedURL;
+begin
+  Assert.AreEqual('http://127.0.0.1:8080/file', WebMock.URLFor('file'));
 end;
 
 procedure TWebMockTests.BaseURL_ByDefault_ReturnsLocalHostURLWithDefaultPort;
@@ -77,62 +119,59 @@ end;
 
 procedure TWebMockTests.Create_WithNoArguments_StartsListeningOnPort8080;
 var
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   LResponse := WebClient.Get('http://localhost:8080/');
 
-  Assert.AreEqual('Delphi WebMocks', LResponse.Server);
+  Assert.AreEqual('Delphi WebMocks', LResponse.HeaderValue['Server']);
 end;
 
 procedure TWebMockTests.Create_WithPort_StartsListeningOnPortPort;
 var
-  LResponse: TIdHTTPResponse;
+  LResponse: IHTTPResponse;
 begin
   WebMock.Free;
 
   WebMock := TWebMock.Create(8088);
   LResponse := WebClient.Get('http://localhost:8088/');
 
-  Assert.AreEqual('Delphi WebMocks', LResponse.Server);
+  Assert.AreEqual('Delphi WebMocks', LResponse.HeaderValue['Server']);
 end;
 
-procedure TWebMockTests.Response_WhenRequestIsNotStubbed_ReturnsNotImplemented;
-var
-  LResponse: TIdHTTPResponse;
+procedure TWebMockTests.ResetHistory_Always_ClearsHistory;
 begin
-  LResponse := WebClient.Get(WebMock.BaseURL);
+  WebClient.Get(WebMock.URLFor('history'));
 
-  Assert.AreEqual(501, LResponse.ResponseCode);
+  WebMock.ResetHistory;
+
+  Assert.AreEqual(0, WebMock.History.Count);
 end;
 
-procedure TWebMockTests.Response_WhenRequestStubbed_ReturnsOK;
-var
-  LResponse: TIdHTTPResponse;
+procedure TWebMockTests.Reset_Always_ClearsHistory;
 begin
-  WebMock.StubRequest('GET', '/');
-  LResponse := WebClient.Get(WebMock.BaseURL);
+  WebClient.Get(WebMock.URLFor('history'));
 
-  Assert.AreEqual(200, LResponse.ResponseCode);
+  WebMock.Reset;
+
+  Assert.AreEqual(0, WebMock.History.Count);
 end;
 
-procedure TWebMockTests.Response_WhenToReturnSetsStatus_ReturnsSpecifiedStatusCode;
-var
-  LResponse: TIdHTTPResponse;
+procedure TWebMockTests.Reset_Always_ClearsStubRegistry;
 begin
-  WebMock.StubRequest('POST', '/response').ToReturn(TWebMockResponseStatus.Created);
-  LResponse := WebClient.Post(WebMock.BaseURL + 'response', '');
+  WebMock.StubRequest('GET', 'document');
 
-  Assert.AreEqual(201, LResponse.ResponseCode);
+  WebMock.Reset;
+
+  Assert.AreEqual(0, WebMock.StubRegistry.Count);
 end;
 
-procedure TWebMockTests.Response_WhenToReturnSetsStatus_ReturnsSpecifiedStatusText;
-var
-  LResponse: TIdHTTPResponse;
+procedure TWebMockTests.ResetStubRegistry_Always_ClearsStubRegistry;
 begin
-  WebMock.StubRequest('POST', '/response').ToReturn(TWebMockResponseStatus.Created);
-  LResponse := WebClient.Post(WebMock.BaseURL + 'response', '');
+  WebMock.StubRequest('GET', 'document');
 
-  Assert.IsTrue(EndsStr('Created', LResponse.ResponseText));
+  WebMock.ResetStubRegistry;
+
+  Assert.AreEqual(0, WebMock.StubRegistry.Count);
 end;
 
 procedure TWebMockTests.StubRequest_WithRegExURI_ReturnsARequestStub;
@@ -143,19 +182,6 @@ end;
 procedure TWebMockTests.StubRequest_WithStringURI_ReturnsARequestStub;
 begin
   Assert.IsTrue(WebMock.StubRequest('GET', '/') is TWebMockRequestStub);
-end;
-
-procedure TWebMockTests.Response_WhenToReturnSetsCustomStatus_ReturnsSpecifiedStatusText;
-var
-  LExpectedStatus: TWebMockResponseStatus;
-  LResponse: TIdHTTPResponse;
-begin
-  LExpectedStatus := TWebMockResponseStatus.Create(999, 'My Status');
-
-  WebMock.StubRequest('POST', '/response').ToReturn(LExpectedStatus);
-  LResponse := WebClient.Post(WebMock.BaseURL + 'response', '');
-
-  Assert.IsTrue(EndsStr('My Status', LResponse.ResponseText));
 end;
 
 initialization

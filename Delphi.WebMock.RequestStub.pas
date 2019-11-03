@@ -1,9 +1,34 @@
+{******************************************************************************}
+{                                                                              }
+{           Delphi-WebMocks                                                    }
+{                                                                              }
+{           Copyright (c) 2019 Richard Hatherall                               }
+{                                                                              }
+{           richard@appercept.com                                              }
+{           https://appercept.com                                              }
+{                                                                              }
+{******************************************************************************}
+{                                                                              }
+{   Licensed under the Apache License, Version 2.0 (the "License");            }
+{   you may not use this file except in compliance with the License.           }
+{   You may obtain a copy of the License at                                    }
+{                                                                              }
+{       http://www.apache.org/licenses/LICENSE-2.0                             }
+{                                                                              }
+{   Unless required by applicable law or agreed to in writing, software        }
+{   distributed under the License is distributed on an "AS IS" BASIS,          }
+{   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   }
+{   See the License for the specific language governing permissions and        }
+{   limitations under the License.                                             }
+{                                                                              }
+{******************************************************************************}
+
 unit Delphi.WebMock.RequestStub;
 
 interface
 
 uses
-  Delphi.WebMock.Indy.RequestMatcher, Delphi.WebMock.Response,
+  Delphi.WebMock.HTTP.RequestMatcher, Delphi.WebMock.Response,
   Delphi.WebMock.ResponseStatus,
   IdCustomHTTPServer,
   System.Classes, System.Generics.Collections, System.RegularExpressions;
@@ -11,21 +36,21 @@ uses
 type
   TWebMockRequestStub = class(TObject)
   private
-    FMatcher: TWebMockIndyRequestMatcher;
+    FMatcher: TWebMockHTTPRequestMatcher;
     FResponse: TWebMockResponse;
   public
-    constructor Create(AMatcher: TWebMockIndyRequestMatcher);
+    constructor Create(AMatcher: TWebMockHTTPRequestMatcher);
     destructor Destroy; override;
     function ToString: string; override;
-    function ToReturn(AResponseStatus: TWebMockResponseStatus = nil)
+    function ToRespond(AResponseStatus: TWebMockResponseStatus = nil)
       : TWebMockResponse;
-    function WithContent(const AContent: string): TWebMockRequestStub; overload;
-    function WithContent(const APattern: TRegEx): TWebMockRequestStub; overload;
+    function WithBody(const AContent: string): TWebMockRequestStub; overload;
+    function WithBody(const APattern: TRegEx): TWebMockRequestStub; overload;
     function WithHeader(AName, AValue: string): TWebMockRequestStub; overload;
     function WithHeader(AName: string; APattern: TRegEx)
       : TWebMockRequestStub; overload;
     function WithHeaders(AHeaders: TStringList): TWebMockRequestStub;
-    property Matcher: TWebMockIndyRequestMatcher read FMatcher;
+    property Matcher: TWebMockHTTPRequestMatcher read FMatcher;
     property Response: TWebMockResponse read FResponse write FResponse;
   end;
 
@@ -37,7 +62,7 @@ uses
 
 { TWebMockRequestStub }
 
-constructor TWebMockRequestStub.Create(AMatcher: TWebMockIndyRequestMatcher);
+constructor TWebMockRequestStub.Create(AMatcher: TWebMockHTTPRequestMatcher);
 begin
   inherited Create;
   FMatcher := AMatcher;
@@ -52,7 +77,7 @@ begin
   inherited;
 end;
 
-function TWebMockRequestStub.ToReturn(
+function TWebMockRequestStub.ToRespond(
   AResponseStatus: TWebMockResponseStatus = nil): TWebMockResponse;
 begin
   if Assigned(AResponseStatus) then
@@ -76,18 +101,18 @@ begin
   Result := Self;
 end;
 
-function TWebMockRequestStub.WithContent(
+function TWebMockRequestStub.WithBody(
   const AContent: string): TWebMockRequestStub;
 begin
-  Matcher.Content := TWebMockStringWildcardMatcher.Create(AContent);
+  Matcher.Body := TWebMockStringWildcardMatcher.Create(AContent);
 
   Result := Self;
 end;
 
-function TWebMockRequestStub.WithContent(
+function TWebMockRequestStub.WithBody(
   const APattern: TRegEx): TWebMockRequestStub;
 begin
-  Matcher.Content := TWebMockStringRegExMatcher.Create(APattern);
+  Matcher.Body := TWebMockStringRegExMatcher.Create(APattern);
 
   Result := Self;
 end;

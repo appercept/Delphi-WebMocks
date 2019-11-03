@@ -1,8 +1,6 @@
 # Delphi-WebMocks
 Library for stubbing and setting expectations on HTTP requests in Delphi with [DUnitX](https://github.com/VSoftTechnologies/DUnitX).
 
-Delphi WebMocks
-
 ## Setup
 In your test unit file a couple of simple steps are required.
 1. Add `Delphi.WebMock` to your interface `uses`.
@@ -53,7 +51,7 @@ begin
   WebMock.StubRequest('GET', '/endpoint');
 
   // Point your subject at the endpoint
-  Subject := TMyTestObject.Create(WebMock.BaseURL + 'endpoint');
+  Subject := TMyTestObject.Create(WebMock.URLFor('endpoint'));
 
   // Act
   Subject.Get;
@@ -74,8 +72,9 @@ creation.
 WebMock := TWebMock.Create(8088);
 ```
 
-The use of `WebMock.BaseURL` property within your tests is to simplify
-constructing a valid URL.
+The use of `WebMock.URLFor` function within your tests is to simplify
+constructing a valid URL. The `BaseURL` property contains a valid URL for the
+server root.
 
 ## Examples
 ### Stubbing
@@ -105,15 +104,15 @@ and document path.
 #### Request matching by header value
 HTTP request headers can be matched like:
 ```Delphi
-WebMock.StubRequest('*', '*').WithHeader('Header-Name', 'Header-Value');
+WebMock.StubRequest('*', '*').WithHeader('Name', 'Value');
 ```
 
 Matching multiple headers can be achieved in 2 ways. The first is to simply
 chain `WithHeader` calls e.g.:
 ```Delphi
 WebMock.StubRequest('*', '*')
-  .WithHeader('Header-1', 'Header-Value-1')
-  .WithHeader('Header-2', 'Header-Value-2');
+  .WithHeader('Header-1', 'Value-1')
+  .WithHeader('Header-2', 'Value-2');
 ```
 
 Alternatively, `WithHeaders` accepts a `TStringList` of key-value pairs e.g.:
@@ -133,7 +132,7 @@ end;
 #### Request matching by header value
 HTTP request can be matched by content like:
 ```Delphi
-WebMock.StubRequest('*', '*').WithContent('String content.');
+WebMock.StubRequest('*', '*').WithBody('String content.');
 ```
 
 #### Matching request document path, headers, or content by regular-expression
@@ -153,7 +152,7 @@ WebMock.StubRequest('*', '*')
 Matching content can be performed like:
 ```Delphi
 WebMock.StubRequest('*', '*')
-  .WithContent(TRegEx.Create('Hello'));
+  .WithBody(TRegEx.Create('Hello'));
 ```
 
 NOTE: Be sure to add `System.RegularExpressions` to your uses clause.
@@ -161,24 +160,24 @@ NOTE: Be sure to add `System.RegularExpressions` to your uses clause.
 #### Stubbed Response Codes
 By default a response status will be `200 OK` for a stubbed request. If a
 request is made to `TWebMock` without a registered stub it will respond
-`501 Not Implemented`. To specify the response status use `ToReturn`.
+`501 Not Implemented`. To specify the response status use `ToRespond`.
 ```Delphi
-WebMock.StubRequest('GET', '/').ToReturn(TWebMockResponseStatus.NotFound);
+WebMock.StubRequest('GET', '/').ToRespond(TWebMockResponseStatus.NotFound);
 ```
 
 #### Stubbed Response Headers
 Headers can be added to a response stub like:
 ```Delphi
 WebMock.StubRequest('*', '*')
-  .ToReturn.WithHeader('Header1', 'Value1');
+  .ToRespond.WithHeader('Header-1', 'Value-1');
 ```
 
 As with request header matching multiple headers can be specified either through
 method chaining or by using the `WithHeaders` method.
 ```Delphi
-  WebMock.StubRequest('*', '*')
-    .ToReturn.WithHeader('Header1', 'Value1')
-    .ToReturn.WithHeader('Header2', 'Value2');
+  WebMock.StubRequest('*', '*').ToRespond
+    .WithHeader('Header-1', 'Value-1')
+    .WithHeader('Header-2', 'Value-2');
 
 /* or */
 
@@ -186,37 +185,37 @@ var
   Headers: TStringList;
 begin
   Headers := TStringList.Create;
-  Headers.Values['Header1'] := 'Value1';
-  Headers.Values['Header2'] := 'Value2';
+  Headers.Values['Header-1'] := 'Value-1';
+  Headers.Values['Header-2'] := 'Value-2';
 
   WebMock.StubRequest('*', '*')
-    .ToReturn.WithHeaders(Headers);
+    .ToRespond.WithHeaders(Headers);
 end;
 ```
 
 #### Stubbed Response Content: String Values
 By default a stubbed response returns a zero length body with content-type
 `text/plain`. Simple response content that is easily represented as a `string`
-can be set with `WithContent`.
+can be set with `WithBody`.
 ```Delphi
 WebMock.StubRequest('GET', '/')
-  .ToReturn.WithContent('Text To Return');
+  .ToRespond.WithBody('Text To Return');
 ```
 
 If you want to return a specific content-type it can be specified as the second
 argument e.g.
 ```Delphi
 WebMock.StubRequest('GET', '/')
-  .ToReturn.WithContent('{ "status": "ok" }', 'application/json');
+  .ToRespond.WithBody('{ "status": "ok" }', 'application/json');
 ```
 
 #### Stubbed Response Content: Fixture Files
 When stubbing responses with binary or large content it is likely easier to
-provide the content as a file. This can be acheived using `WithContentFile`
-which has the same signature as `WithContent` but the first argument is the
+provide the content as a file. This can be acheived using `WithBodyFile`
+which has the same signature as `WithBody` but the first argument is the
 path to a file.
 ```Delphi
-WebMock.StubRequest('GET', '/').WithContentFile('image.jpg');
+WebMock.StubRequest('GET', '/').WithBodyFile('image.jpg');
 ```
 
 The Delphi-WebMocks will attempt to set the content-type according to the file
@@ -224,7 +223,7 @@ extension. If the file type is unknown then the content-type will default to
 `application/octet-stream`. The content-type can be overriden with the second
 argument. e.g.
 ```Delphi
-WebMock.StubRequest('GET', '/').WithContentFile('file.myext', 'application/xml');
+WebMock.StubRequest('GET', '/').WithBodyFile('file.myext', 'application/xml');
 ```
 
 **NOTE:** One "gotcha" accessing files in tests is the location of the file will
@@ -233,31 +232,62 @@ compiler will be output to the `Win32\Debug` folder. To correctly reference a
 file named `Content.txt` in the project folder, the path will be
 `..\..\Content.txt`.
 
-## Planned Features
-* [x] Static Request Matchers
-  - [x] ~~HTTP Verbs by:~~
-    - [x] ~~Exact Matching~~
-    - [x] ~~Simple wild-card `*`~~
-  - [x] Path by:
-    - [x] ~~Exact Matching~~
-    - [x] ~~Regular Expressions~~
-    - [x] ~~Simple wild-card `*`~~
-  - [x] Headers by:
-    - [x] ~~Exact Matching~~
-    - [x] ~~Regular Expressions~~
-  - [ ] Content by:
-    - [x] ~~Exact Matching~~
-    - [x] ~~Regular Expressions~~
-* [x] ~~Static Response Stubs~~
-  - [x] ~~Status Codes~~
-  - [x] ~~Content~~
-    - [x] ~~Simple Text~~
-    - [x] ~~Fixture Files~~
-  - [x] ~~Headers~~
-* [ ] Request History
-* [ ] Assertions/Expectations
-* [ ] Dynamic Response Stubs
-* [ ] Dynamic Port Binding
+### Resetting Registered Stubs
+If you need to clear the current registered stubs you can call
+`ResetStubRegistry` or `Reset` on the instance of TWebMock. The general `Reset`
+method will return the TWebMock instance to a blank state including emptying the
+stub registry. The more specific `ResetStubRegistry` will as suggested clear
+only the stub registry.
+
+## Request History
+Each and every request made of the TWebMock instance is recorded in the
+`History` property. History entries contain all the key web request information:
+Method; RequestURI; Headers; and Body.
+
+It is possible to write assertions based upon the request history e.g.:
+```Delphi
+WebClient.Get(WebMock.URLFor('document'));
+
+Assert.AreEqual('GET', WebMock.History.Last.Method);
+Assert.AreEqual('/document', WebMock.History.Last.RequestURI);
+```
+
+**NOTE:** Should you find yourself writing assertions in this manor you should
+take a look at [Request Assertions](#request-assertions) which provides a more
+concise way of defining these assertions.
+
+### Resetting Request History
+If you need to clear request history you can call `ResetHistory` or `Reset` on
+the instance of TWebMock. The general `Reset` method will return the TWebMock
+instance to a blank state including emptying the history. The more specific
+`ResetHistory` will as suggested clear only the history.
+
+## Request Assertions
+In addition to using DUnitX assertions to validate your code behaved as expected
+you can also use request assertions to check whether requests you expect your
+code to perform where executed as expected.
+
+A simple request assertion:
+```Delphi
+WebClient.Get(WebMock.URLFor('/'));
+
+WebMock.Assert.Get('/').WasRequested; // Passes
+```
+
+As with request stubbing you can match requests by HTTP Method, URI, Headers,
+and Body content.
+```Delphi
+WebMock.Assert
+  .Patch('/resource`)
+  .WithHeader('Content-Type', 'application/json')
+  .WithBody('{ "resource": { "propertyA": "Value" } }')
+  .WasRequested;
+```
+
+### Negative Assertions
+Anything that can be asserted positively (`WasRequested`) can also be asserted
+negatively with `WasNotRequested`. This is useful to check your code is not
+performing extra unwanted requests.
 
 ## License
 Copyright ©2019 Richard Hatherall <richard@appercept.com>

@@ -23,7 +23,7 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Delphi.WebMock.ResponsesWithHeaders.Tests;
+unit Delphi.WebMock.Responses.Tests;
 
 interface
 
@@ -36,7 +36,7 @@ uses
 type
 
   [TestFixture]
-  TWebMockResponsesWithHeadersTests = class(TObject)
+  TWebMockResponsesTests = class(TObject)
   private
     WebMock: TWebMock;
   public
@@ -45,88 +45,88 @@ type
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure Response_WithHeader_HasValueForHeader;
+    procedure Response_WhenRequestStubbed_ReturnsOK;
     [Test]
-    procedure Response_WithHeaderChained_HasValueForEachHeader;
+    procedure Response_WhenRequestIsNotStubbed_ReturnsNotImplemented;
     [Test]
-    procedure Response_WithHeaders_HasValueForAllHeaders;
+    procedure Response_WhenToRespondSetsStatus_ReturnsSpecifiedStatusCode;
+    [Test]
+    procedure Response_WhenToRespondSetsStatus_ReturnsSpecifiedStatusText;
+    [Test]
+    procedure Response_WhenToRespondSetsCustomStatus_ReturnsSpecifiedStatusText;
   end;
 
 implementation
 
-{ TWebMockResponsesWithHeadersTests }
+{ TWebMockResponsesTests }
 
 uses
-  System.Net.HttpClient,
+  Delphi.WebMock.ResponseStatus,
+  System.Net.HttpClient, System.StrUtils,
   TestHelpers;
 
-procedure TWebMockResponsesWithHeadersTests.Response_WithHeaderChained_HasValueForEachHeader;
+procedure TWebMockResponsesTests.Response_WhenRequestIsNotStubbed_ReturnsNotImplemented;
 var
-  LHeaderName1, LHeaderName2, LHeaderValue1, LHeaderValue2: string;
   LResponse: IHTTPResponse;
 begin
-  LHeaderName1 := 'Header1';
-  LHeaderValue1 := 'Value1';
-  LHeaderName2 := 'Header2';
-  LHeaderValue2 := 'Value2';
-
-  WebMock.StubRequest('*', '*').ToRespond
-    .WithHeader(LHeaderName1, LHeaderValue1)
-    .WithHeader(LHeaderName2, LHeaderValue2);
   LResponse := WebClient.Get(WebMock.BaseURL);
 
-  Assert.AreEqual(LHeaderValue1, LResponse.HeaderValue[LHeaderName1]);
-  Assert.AreEqual(LHeaderValue2, LResponse.HeaderValue[LHeaderName2]);
+  Assert.AreEqual(501, LResponse.StatusCode);
 end;
 
-procedure TWebMockResponsesWithHeadersTests.Response_WithHeaders_HasValueForAllHeaders;
+procedure TWebMockResponsesTests.Response_WhenRequestStubbed_ReturnsOK;
 var
-  LHeaders: TStringList;
-  LResponse: IHTTPResponse;
-  I: Integer;
-begin
-  LHeaders := TStringList.Create;
-  LHeaders.Values['Header1'] := 'Value1';
-  LHeaders.Values['Header2'] := 'Value2';
-  LHeaders.Values['Header3'] := 'Value3';
-  LHeaders.Values['Header4'] := 'Value4';
-
-  WebMock.StubRequest('*', '*').ToRespond.WithHeaders(LHeaders);
-  LResponse := WebClient.Get(WebMock.BaseURL);
-
-  for I := 0 to LHeaders.Count - 1 do
-    Assert.AreEqual(
-      LHeaders.ValueFromIndex[I],
-      LResponse.HeaderValue[LHeaders.Names[I]]
-    );
-
-  LHeaders.Free;
-end;
-
-procedure TWebMockResponsesWithHeadersTests.Response_WithHeader_HasValueForHeader;
-var
-  LHeaderName, LHeaderValue: string;
   LResponse: IHTTPResponse;
 begin
-  LHeaderName := 'Header1';
-  LHeaderValue := 'Value1';
-
-  WebMock.StubRequest('*', '*').ToRespond.WithHeader(LHeaderName, LHeaderValue);
+  WebMock.StubRequest('GET', '/');
   LResponse := WebClient.Get(WebMock.BaseURL);
 
-  Assert.AreEqual(LHeaderValue, LResponse.HeaderValue[LHeaderName]);
+  Assert.AreEqual(200, LResponse.StatusCode);
 end;
 
-procedure TWebMockResponsesWithHeadersTests.Setup;
+procedure TWebMockResponsesTests.Response_WhenToRespondSetsCustomStatus_ReturnsSpecifiedStatusText;
+var
+  LExpectedStatus: TWebMockResponseStatus;
+  LResponse: IHTTPResponse;
+begin
+  LExpectedStatus := TWebMockResponseStatus.Create(999, 'My Status');
+
+  WebMock.StubRequest('POST', '/response').ToRespond(LExpectedStatus);
+  LResponse := WebClient.Post(WebMock.URLFor('response'), TStringStream.Create(''));
+
+  Assert.IsTrue(EndsStr('My Status', LResponse.StatusText));
+end;
+
+procedure TWebMockResponsesTests.Response_WhenToRespondSetsStatus_ReturnsSpecifiedStatusCode;
+var
+  LResponse: IHTTPResponse;
+begin
+  WebMock.StubRequest('POST', '/response').ToRespond(TWebMockResponseStatus.Created);
+  LResponse := WebClient.Post(WebMock.URLFor('response'), TStringStream.Create(''));
+
+  Assert.AreEqual(201, LResponse.StatusCode);
+end;
+
+procedure TWebMockResponsesTests.Response_WhenToRespondSetsStatus_ReturnsSpecifiedStatusText;
+var
+  LResponse: IHTTPResponse;
+begin
+  WebMock.StubRequest('POST', '/response').ToRespond(TWebMockResponseStatus.Created);
+  LResponse := WebClient.Post(WebMock.URLFor('response'), TStringStream.Create(''));
+
+  Assert.IsTrue(EndsStr('Created', LResponse.StatusText));
+end;
+
+procedure TWebMockResponsesTests.Setup;
 begin
   WebMock := TWebMock.Create;
 end;
 
-procedure TWebMockResponsesWithHeadersTests.TearDown;
+procedure TWebMockResponsesTests.TearDown;
 begin
   WebMock.Free;
 end;
 
 initialization
-  TDUnitX.RegisterTestFixture(TWebMockResponsesWithHeadersTests);
+  TDUnitX.RegisterTestFixture(TWebMockResponsesTests);
 end.

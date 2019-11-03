@@ -23,96 +23,103 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Delphi.WebMock.Response;
+unit Delphi.WebMock.HTTP.Request;
 
 interface
 
 uses
-  Delphi.WebMock.ResponseBodySource, Delphi.WebMock.ResponseStatus,
+  Delphi.WebMock.HTTP.Messages,
+  IdCustomHTTPServer, IdHeaderList,
   System.Classes;
 
 type
-  TWebMockResponse = class(TObject)
+  TWebMockHTTPRequest = class(TInterfacedObject, IWebMockHTTPRequest)
   private
-    FBodySource: IWebMockResponseBodySource;
+    FBody: TStream;
     FHeaders: TStringList;
-    FStatus: TWebMockResponseStatus;
+    FHTTPVersion: string;
+    FMethod: string;
+    FStartLine: string;
+    FRequestURI: string;
+    function CloneHeaders(AHeaders: TIdHeaderList): TStringList;
   public
-    constructor Create(const AStatus: TWebMockResponseStatus = nil);
+    constructor Create(ARequestInfo: TIdHTTPRequestInfo);
     destructor Destroy; override;
-    function ToString: string; override;
-    function WithBody(const AContent: string;
-      const AContentType: string = 'text/plain; charset=utf-8'): TWebMockResponse;
-    function WithBodyFile(const AFileName: string;
-      const AContentType: string = ''): TWebMockResponse;
-    function WithHeader(AHeaderName, AHeaderValue: string): TWebMockResponse;
-    function WithHeaders(AHeaders: TStrings): TWebMockResponse;
-    property BodySource: IWebMockResponseBodySource read FBodySource write FBodySource;
-    property Headers: TStringList read FHeaders write FHeaders;
-    property Status: TWebMockResponseStatus read FStatus write FStatus;
+    function GetStartLine: string;
+    function GetMethod: string;
+    function GetRequestURI: string;
+    function GetHTTPVersion: string;
+    function GetHeaders: TStrings;
+    function GetBody: TStream;
+    property Body: TStream read GetBody;
+    property Headers: TStrings read GetHeaders;
+    property HTTPVersion: string read GetHTTPVersion;
+    property Method: string read GetMethod;
+    property StartLine: string read GetStartLine;
+    property RequestLine: string read GetStartLine;
+    property RequestURI: string read GetRequestURI;
   end;
 
 implementation
 
-{ TWebMockResponse }
+{ TWebMockHTTPRequest }
 
-uses
-  Delphi.WebMock.ResponseContentFile, Delphi.WebMock.ResponseContentString,
-  System.SysUtils;
-
-constructor TWebMockResponse.Create(const AStatus
-  : TWebMockResponseStatus = nil);
+function TWebMockHTTPRequest.CloneHeaders(AHeaders: TIdHeaderList): TStringList;
 begin
-  inherited Create;
-  FBodySource := TWebMockResponseContentString.Create;
-  FHeaders := TStringList.Create;
-  if Assigned(AStatus) then
-    FStatus := AStatus
-  else
-    FStatus := TWebMockResponseStatus.OK;
+  Result := TStringList.Create;
+  AHeaders.ConvertToStdValues(Result);
 end;
 
-destructor TWebMockResponse.Destroy;
+constructor TWebMockHTTPRequest.Create(ARequestInfo: TIdHTTPRequestInfo);
 begin
+  inherited Create;
+  if Assigned(ARequestInfo.PostStream) then
+  begin
+    FBody := TMemoryStream.Create;
+    Body.CopyFrom(ARequestInfo.PostStream, 0);
+  end;
+  FHeaders := CloneHeaders(ARequestInfo.RawHeaders);
+  FHTTPVersion := ARequestInfo.Version;
+  FMethod := ARequestInfo.Command;
+  FRequestURI := ARequestInfo.URI;
+  FStartLine := ARequestInfo.RawHTTPCommand;
+end;
+
+destructor TWebMockHTTPRequest.Destroy;
+begin
+  FBody.Free;
   FHeaders.Free;
-  FStatus.Free;
   inherited;
 end;
 
-function TWebMockResponse.ToString: string;
+function TWebMockHTTPRequest.GetBody: TStream;
 begin
-  Result := Format('%s', [Status.ToString]);
+  Result := FBody;
 end;
 
-function TWebMockResponse.WithBody(const AContent: string;
-  const AContentType: string = 'text/plain; charset=utf-8'): TWebMockResponse;
+function TWebMockHTTPRequest.GetHeaders: TStrings;
 begin
-  BodySource := TWebMockResponseContentString.Create(AContent, AContentType);
-
-  Result := Self;
+  Result := FHeaders;
 end;
 
-function TWebMockResponse.WithBodyFile(const AFileName: string;
-  const AContentType: string = ''): TWebMockResponse;
+function TWebMockHTTPRequest.GetHTTPVersion: string;
 begin
-  BodySource := TWebMockResponseContentFile.Create(AFileName, AContentType);
-
-  Result := Self;
+  Result := FHTTPVersion;
 end;
 
-function TWebMockResponse.WithHeader(AHeaderName,
-  AHeaderValue: string): TWebMockResponse;
+function TWebMockHTTPRequest.GetMethod: string;
 begin
-  Headers.Values[AHeaderName] := AHeaderValue;
-
-  Result := Self;
+  Result := FMethod;
 end;
 
-function TWebMockResponse.WithHeaders(AHeaders: TStrings): TWebMockResponse;
+function TWebMockHTTPRequest.GetRequestURI: string;
 begin
-  Headers.AddStrings(AHeaders);
+  Result := FRequestURI;
+end;
 
-  Result := Self;
+function TWebMockHTTPRequest.GetStartLine: string;
+begin
+  Result := FStartLine;
 end;
 
 end.

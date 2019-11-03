@@ -134,8 +134,8 @@
         <DCCReference Include="TestHelpers.pas"/>
         <DCCReference Include="Delphi.WebMock.RequestStub.Tests.pas"/>
         <DCCReference Include="..\Delphi.WebMock.RequestStub.pas"/>
-        <DCCReference Include="Delphi.WebMock.Indy.RequestMatcher.Tests.pas"/>
-        <DCCReference Include="..\Delphi.WebMock.Indy.RequestMatcher.pas"/>
+        <DCCReference Include="Delphi.WebMock.HTTP.RequestMatcher.Tests.pas"/>
+        <DCCReference Include="..\Delphi.WebMock.HTTP.RequestMatcher.pas"/>
         <DCCReference Include="Mock.Indy.HTTPRequestInfo.pas"/>
         <DCCReference Include="Delphi.WebMock.ResponseStatus.Tests.pas"/>
         <DCCReference Include="..\Delphi.WebMock.ResponseStatus.pas"/>
@@ -143,8 +143,7 @@
         <DCCReference Include="..\Delphi.WebMock.Response.pas"/>
         <DCCReference Include="Delphi.WebMock.ResponseContentString.Tests.pas"/>
         <DCCReference Include="..\Delphi.WebMock.ResponseContentString.pas"/>
-        <DCCReference Include="..\Delphi.WebMock.ResponseContentSource.pas"/>
-        <DCCReference Include="Delphi.WebMock.Tests.Client.pas"/>
+        <DCCReference Include="..\Delphi.WebMock.ResponseBodySource.pas"/>
         <DCCReference Include="Delphi.WebMock.ResponseContentFile.Tests.pas"/>
         <DCCReference Include="..\Delphi.WebMock.ResponseContentFile.pas"/>
         <DCCReference Include="Features\Delphi.WebMock.Matching.Tests.pas"/>
@@ -154,10 +153,18 @@
         <DCCReference Include="Delphi.WebMock.StringRegExMatcher.Tests.pas"/>
         <DCCReference Include="..\Delphi.WebMock.StringRegExMatcher.pas"/>
         <DCCReference Include="Features\Delphi.WebMock.ResponsesWithHeaders.Tests.pas"/>
-        <DCCReference Include="Features\Delphi.WebMock.ResponsesWithContent.Tests.pas"/>
-        <DCCReference Include="Features\Delphi.WebMock.MatchingContent.Tests.pas"/>
+        <DCCReference Include="Features\Delphi.WebMock.ResponsesWithBody.Tests.pas"/>
+        <DCCReference Include="Features\Delphi.WebMock.MatchingBody.Tests.pas"/>
         <DCCReference Include="Delphi.WebMock.StringAnyMatcher.Tests.pas"/>
         <DCCReference Include="..\Delphi.WebMock.StringAnyMatcher.pas"/>
+        <DCCReference Include="Features\Delphi.WebMock.History.Tests.pas"/>
+        <DCCReference Include="..\Delphi.WebMock.HTTP.Messages.pas"/>
+        <DCCReference Include="Delphi.WebMock.HTTP.Request.Tests.pas"/>
+        <DCCReference Include="..\Delphi.WebMock.HTTP.Request.pas"/>
+        <DCCReference Include="Features\Delphi.WebMock.Responses.Tests.pas"/>
+        <DCCReference Include="Features\Delphi.WebMock.Assertions.Tests.pas"/>
+        <DCCReference Include="..\Delphi.WebMock.Assertion.pas"/>
+        <DCCReference Include="Delphi.WebMock.Assertion.Tests.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
