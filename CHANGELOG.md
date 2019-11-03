@@ -1,12 +1,30 @@
 # Change Log
 
+## [1.0.0](https://github.com/appercept/Delphi-WebMocks/tree/1.0.0) (2019-11-03)
+
+[Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/0.2.0...1.0.0)
+
+**Implemented enhancements:**
+
+- Request assertions [\#15](https://github.com/appercept/Delphi-WebMocks/issues/15)
+- TWebMockTestsClient should be replaced with THTTPClient [\#13](https://github.com/appercept/Delphi-WebMocks/issues/13)
+- Add `URLFor` method [\#12](https://github.com/appercept/Delphi-WebMocks/issues/12)
+- Replace usages of Indy HTTP terms with terms used in the RFCs [\#11](https://github.com/appercept/Delphi-WebMocks/issues/11)
+- Request history logging [\#10](https://github.com/appercept/Delphi-WebMocks/issues/10)
+
+**Merged pull requests:**
+
+- Replace TWebMockTestsClient with THTTPClient [\#14](https://github.com/appercept/Delphi-WebMocks/pull/14) ([rhatherall](https://github.com/rhatherall))
+
 ## [0.2.0](https://github.com/appercept/Delphi-WebMocks/tree/0.2.0) (2019-09-13)
 
 [Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/0.1.0...0.2.0)
 
 **Implemented enhancements:**
 
+- Request content matching by regular-expressions [\#9](https://github.com/appercept/Delphi-WebMocks/issues/9)
 - Request content matching by value [\#8](https://github.com/appercept/Delphi-WebMocks/issues/8)
+- Response headers [\#7](https://github.com/appercept/Delphi-WebMocks/issues/7)
 - Request header matching by regular-expressions [\#5](https://github.com/appercept/Delphi-WebMocks/issues/5)
 - Request path matching by regular-expressions [\#4](https://github.com/appercept/Delphi-WebMocks/issues/4)
 - Delphi 10.3.2 is out [\#2](https://github.com/appercept/Delphi-WebMocks/issues/2)
@@ -15,8 +33,6 @@
 
 **Closed issues:**
 
-- Request content matching by regular-expressions [\#9](https://github.com/appercept/Delphi-WebMocks/issues/9)
-- Response headers [\#7](https://github.com/appercept/Delphi-WebMocks/issues/7)
 - Documentation of request header matching is missing from README [\#6](https://github.com/appercept/Delphi-WebMocks/issues/6)
 
 ## [0.1.0](https://github.com/appercept/Delphi-WebMocks/tree/0.1.0) (2019-07-17)
