@@ -321,7 +321,6 @@ end;
 procedure TWebMockAssertionsTests.WasRequestedWithHeaderRegEx_MatchingRequest_Passes;
 var
   LHeaderName: string;
-  LPattern: TRegEx;
 begin
   LHeaderName := 'Header-1';
   WebClient.Get(
@@ -347,7 +346,6 @@ end;
 procedure TWebMockAssertionsTests.WasRequestedWithHeaderRegEx_NotMatchingRequest_Fails;
 var
   LHeaderName: string;
-  LPattern: TRegEx;
 begin
   LHeaderName := 'Header-1';
   WebClient.Get(

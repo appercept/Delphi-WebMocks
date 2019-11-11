@@ -121,7 +121,7 @@ end;
 
 procedure TWebMockAssertionTests.Delete_GivenMethodAndURI_SetsMatcherValues;
 var
-  LMethod, LURI: string;
+  LURI: string;
 begin
   LURI := '/resource';
 
@@ -141,7 +141,7 @@ end;
 
 procedure TWebMockAssertionTests.Get_GivenMethodAndURI_SetsMatcherValues;
 var
-  LMethod, LURI: string;
+  LURI: string;
 begin
   LURI := '/resource';
 
@@ -161,7 +161,7 @@ end;
 
 procedure TWebMockAssertionTests.Patch_GivenMethodAndURI_SetsMatcherValues;
 var
-  LMethod, LURI: string;
+  LURI: string;
 begin
   LURI := '/resource';
 
@@ -181,7 +181,7 @@ end;
 
 procedure TWebMockAssertionTests.Post_GivenMethodAndURI_SetsMatcherValues;
 var
-  LMethod, LURI: string;
+  LURI: string;
 begin
   LURI := '/resource';
 
@@ -201,7 +201,7 @@ end;
 
 procedure TWebMockAssertionTests.Put_GivenMethodAndURI_SetsMatcherValues;
 var
-  LMethod, LURI: string;
+  LURI: string;
 begin
   LURI := '/resource';
 
@@ -328,8 +328,6 @@ end;
 procedure TWebMockAssertionTests.WithHeaders_Always_ReturnsSelf;
 var
   LHeaders: TStringList;
-  LHeaderName, LHeaderValue: string;
-  I: Integer;
 begin
   LHeaders := TStringList.Create;
 
