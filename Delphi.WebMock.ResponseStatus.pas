@@ -26,6 +26,7 @@
 unit Delphi.WebMock.ResponseStatus;
 
 interface
+{$WARN DUPLICATE_CTOR_DTOR OFF}
 
 type
   TWebMockResponseStatus = class(TObject)
@@ -437,3 +438,4 @@ begin
 end;
 
 end.
+
