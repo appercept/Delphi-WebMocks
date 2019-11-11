@@ -25,6 +25,8 @@
 
 unit Delphi.WebMock.ResponseStatus;
 
+{$WARN DUPLICATE_CTOR_DTOR OFF}
+
 interface
 
 type
