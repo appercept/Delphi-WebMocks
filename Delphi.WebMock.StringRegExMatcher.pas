@@ -38,7 +38,7 @@ type
   public
     constructor Create(ARegEx: TRegEx);
     function IsMatch(AValue: string): Boolean;
-    function ToString: string;
+    function ToString: string; reintroduce;
     property RegEx: TRegEx read FRegEx;
   end;
 
