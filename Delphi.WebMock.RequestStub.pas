@@ -46,9 +46,18 @@ type
       : TWebMockResponse;
     function WithBody(const AContent: string): TWebMockRequestStub; overload;
     function WithBody(const APattern: TRegEx): TWebMockRequestStub; overload;
+    /// <summary>
+    ///   Works with TMultipartFormData Fields
+    /// </summary>
+    /// <example>
+    ///   <code lang="Delphi">// FogBugz submission
+    /// WebMock.StubRequest('POST', '/api')
+    ///     .WithBody('cmd', 'new')
+    ///     .ToRespond.WithBody('&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;response&gt;&lt;case ixBug="459" operations="edit,spam,assign,resolve"&gt;&lt;/case&gt;&lt;/response&gt;');</code>
+    /// </example>
+    function WithBody(const ADataName, ADataValue: string): TWebMockRequestStub; overload;
     function WithHeader(AName, AValue: string): TWebMockRequestStub; overload;
-    function WithHeader(AName: string; APattern: TRegEx)
-      : TWebMockRequestStub; overload;
+    function WithHeader(AName: string; APattern: TRegEx) : TWebMockRequestStub; overload;
     function WithHeaders(AHeaders: TStringList): TWebMockRequestStub;
     property Matcher: TWebMockHTTPRequestMatcher read FMatcher;
     property Response: TWebMockResponse read FResponse write FResponse;
@@ -115,6 +124,14 @@ begin
   Matcher.Body := TWebMockStringRegExMatcher.Create(APattern);
 
   Result := Self;
+end;
+
+function TWebMockRequestStub.WithBody(const ADataName, ADataValue: string): TWebMockRequestStub;
+var LValue: string;
+begin
+  LValue := 'form-data; name="%s"' + sLineBreak + sLineBreak + '%s' + sLineBreak;
+  LValue := Format(LValue, [ADataName, ADataValue]);
+  WithBody(TRegEx.Create(LValue));
 end;
 
 function TWebMockRequestStub.WithHeader(AName: string;
