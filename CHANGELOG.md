@@ -1,5 +1,17 @@
 # Change Log
 
+## [1.0.1](https://github.com/appercept/Delphi-WebMocks/tree/1.0.1) (2019-11-12)
+
+[Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/1.0.0...1.0.1)
+
+**Fixed bugs:**
+
+- Some warnings in Berlin [\#17](https://github.com/appercept/Delphi-WebMocks/issues/17)
+
+**Merged pull requests:**
+
+- Clean up warning \(W1010\) and silence warnings \(W1029\) [\#18](https://github.com/appercept/Delphi-WebMocks/pull/18) ([rhatherall](https://github.com/rhatherall))
+
 ## [1.0.0](https://github.com/appercept/Delphi-WebMocks/tree/1.0.0) (2019-11-03)
 
 [Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/0.2.0...1.0.0)
