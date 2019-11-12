@@ -131,7 +131,7 @@ var LValue: string;
 begin
   LValue := 'form-data; name="%s"' + sLineBreak + sLineBreak + '%s' + sLineBreak;
   LValue := Format(LValue, [ADataName, ADataValue]);
-  WithBody(TRegEx.Create(LValue));
+  Result := WithBody(TRegEx.Create(LValue));
 end;
 
 function TWebMockRequestStub.WithHeader(AName: string;
