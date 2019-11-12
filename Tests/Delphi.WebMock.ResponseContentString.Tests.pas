@@ -76,7 +76,6 @@ end;
 procedure TWebMockResponseContentStringTests.ContentStream_Always_ReturnsAStringStreamContainingString;
 var
   LExpected: string;
-  LStream: TStream;
 begin
   LExpected := 'A String Value';
   WebMockResponseContentString := TWebMockResponseContentString.Create(LExpected);

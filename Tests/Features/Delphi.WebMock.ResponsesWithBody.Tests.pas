@@ -117,7 +117,6 @@ procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyIsAString_ReturnsS
 var
   LExpectedContent: string;
   LResponse: IHTTPResponse;
-  LHeader: string;
   LContentText: string;
 begin
   LExpectedContent := 'Body Text';
@@ -132,7 +131,6 @@ end;
 procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyIsString_ReturnsUTF8CharSet;
 var
   LResponse: IHTTPResponse;
-  LHeader: string;
 begin
   WebMock.StubRequest('GET', '/text').ToRespond.WithBody('UTF-8 Text');
   LResponse := WebClient.Get(WebMock.URLFor('text'));
