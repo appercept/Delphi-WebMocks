@@ -179,8 +179,6 @@ end;
 procedure TWebMockRequestStubTests.WithHeaders_Always_ReturnsSelf;
 var
   LHeaders: TStringList;
-  LHeaderName, LHeaderValue: string;
-  I: Integer;
 begin
   LHeaders := TStringList.Create;
 
