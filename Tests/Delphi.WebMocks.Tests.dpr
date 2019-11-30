@@ -4,6 +4,8 @@ program Delphi.WebMocks.Tests;
 {$APPTYPE CONSOLE}
 {$ENDIF}{$STRONGLINKTYPES ON}
 
+{$WARN DUPLICATE_CTOR_DTOR OFF}
+
 uses
   System.SysUtils,
   {$IFDEF TESTINSIGHT}
