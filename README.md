@@ -12,6 +12,12 @@ working on 10.1 (Berlin). I'd be interested to hear from anyone working on other
 versions. As Delphi-WebMocks makes use of the `System.Net` library introduced
 with XE8 it will not be compatible with earlier versions.
 
+## Optional Dependencies
+* [TestInsight](https://bitbucket.org/sglienke/testinsight/wiki/Home) is
+  required to run the Delphi-WebMocks test suite, so, if you're considering
+  contributing and need to run the test suite, install it. If you do TDD in
+  Delphi I would recommend installing and using it in your own projects.
+
 ## Setup
 In your test unit file a couple of simple steps are required.
 1. Add `Delphi.WebMock` to your interface `uses`.
