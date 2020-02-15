@@ -23,25 +23,27 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Delphi.WebMock.RequestStub.Tests;
+unit Delphi.WebMock.Static.RequestStub.Tests;
 
 interface
 
 uses
   DUnitX.TestFramework,
-  Delphi.WebMock.RequestStub;
+  Delphi.WebMock.Static.RequestStub;
 
 type
 
   [TestFixture]
-  TWebMockRequestStubTests = class(TObject)
+  TWebMockStaticRequestStubTests = class(TObject)
   private
-    StubbedRequest: TWebMockRequestStub;
+    StubbedRequest: TWebMockStaticRequestStub;
   public
     [Setup]
     procedure Setup;
     [TearDown]
     procedure TearDown;
+    [Test]
+    procedure Class_Always_ImplementsIWebMockRequestStub;
     [Test]
     procedure ToRespond_Always_ReturnsAResponseStub;
     [Test]
@@ -77,34 +79,44 @@ type
 implementation
 
 uses
-  Delphi.WebMock.HTTP.RequestMatcher, Delphi.WebMock.Response,
-  Delphi.WebMock.ResponseStatus, Delphi.WebMock.StringMatcher,
-  Delphi.WebMock.StringWildcardMatcher, Delphi.WebMock.StringRegExMatcher,
+  Delphi.WebMock.HTTP.RequestMatcher, Delphi.WebMock.RequestStub,
+  Delphi.WebMock.Response, Delphi.WebMock.ResponseStatus,
+  Delphi.WebMock.StringMatcher, Delphi.WebMock.StringWildcardMatcher,
+  Delphi.WebMock.StringRegExMatcher,
   IdCustomHTTPServer,
   Mock.Indy.HTTPRequestInfo,
   System.Classes, System.RegularExpressions;
 
 { TWebMockRequestStubTests }
 
-procedure TWebMockRequestStubTests.Setup;
+procedure TWebMockStaticRequestStubTests.Class_Always_ImplementsIWebMockRequestStub;
+var
+  LSubject: IInterface;
+begin
+  LSubject := StubbedRequest;
+
+  Assert.Implements<IWebMockRequestStub>(LSubject);
+end;
+
+procedure TWebMockStaticRequestStubTests.Setup;
 var
   LMatcher: TWebMockHTTPRequestMatcher;
 begin
   LMatcher := TWebMockHTTPRequestMatcher.Create('');
-  StubbedRequest := TWebMockRequestStub.Create(LMatcher);
+  StubbedRequest := TWebMockStaticRequestStub.Create(LMatcher);
 end;
 
-procedure TWebMockRequestStubTests.TearDown;
+procedure TWebMockStaticRequestStubTests.TearDown;
 begin
   StubbedRequest := nil;
 end;
 
-procedure TWebMockRequestStubTests.ToRespond_Always_ReturnsAResponseStub;
+procedure TWebMockStaticRequestStubTests.ToRespond_Always_ReturnsAResponseStub;
 begin
   Assert.IsTrue(StubbedRequest.ToRespond is TWebMockResponse);
 end;
 
-procedure TWebMockRequestStubTests.ToRespond_WithNoArguments_DoesNotRaiseException;
+procedure TWebMockStaticRequestStubTests.ToRespond_WithNoArguments_DoesNotRaiseException;
 begin
   Assert.WillNotRaiseAny(
   procedure
@@ -113,7 +125,7 @@ begin
   end);
 end;
 
-procedure TWebMockRequestStubTests.ToRespond_WithNoArguments_DoesNotChangeStatus;
+procedure TWebMockStaticRequestStubTests.ToRespond_WithNoArguments_DoesNotChangeStatus;
 var
   LExpectedStatus: TWebMockResponseStatus;
 begin
@@ -124,7 +136,7 @@ begin
   Assert.AreSame(LExpectedStatus, StubbedRequest.Response.Status);
 end;
 
-procedure TWebMockRequestStubTests.ToRespond_WithResponse_SetsResponseStatus;
+procedure TWebMockStaticRequestStubTests.ToRespond_WithResponse_SetsResponseStatus;
 var
   LResponse: TWebMockResponseStatus;
 begin
@@ -135,7 +147,7 @@ begin
   Assert.AreSame(LResponse, StubbedRequest.Response.Status);
 end;
 
-procedure TWebMockRequestStubTests.WithBody_GivenRegEx_ReturnsSelf;
+procedure TWebMockStaticRequestStubTests.WithBody_GivenRegEx_ReturnsSelf;
 begin
   Assert.AreSame(
     StubbedRequest,
@@ -143,7 +155,7 @@ begin
   );
 end;
 
-procedure TWebMockRequestStubTests.WithBody_GivenRegEx_SetsValueForContent;
+procedure TWebMockStaticRequestStubTests.WithBody_GivenRegEx_SetsValueForContent;
 var
   LPattern: TRegEx;
 begin
@@ -157,12 +169,12 @@ begin
   );
 end;
 
-procedure TWebMockRequestStubTests.WithBody_GivenString_ReturnsSelf;
+procedure TWebMockStaticRequestStubTests.WithBody_GivenString_ReturnsSelf;
 begin
   Assert.AreSame(StubbedRequest, StubbedRequest.WithBody('Hello.'));
 end;
 
-procedure TWebMockRequestStubTests.WithBody_GivenString_SetsValueForContent;
+procedure TWebMockStaticRequestStubTests.WithBody_GivenString_SetsValueForContent;
 var
   LContent: string;
 begin
@@ -176,7 +188,7 @@ begin
   );
 end;
 
-procedure TWebMockRequestStubTests.WithHeaders_Always_ReturnsSelf;
+procedure TWebMockStaticRequestStubTests.WithHeaders_Always_ReturnsSelf;
 var
   LHeaders: TStringList;
 begin
@@ -187,7 +199,7 @@ begin
   LHeaders.Free;
 end;
 
-procedure TWebMockRequestStubTests.WithHeaders_Always_SetsAllValues;
+procedure TWebMockStaticRequestStubTests.WithHeaders_Always_SetsAllValues;
 var
   LHeaders: TStringList;
   LHeaderName, LHeaderValue: string;
@@ -212,7 +224,7 @@ begin
   LHeaders.Free;
 end;
 
-procedure TWebMockRequestStubTests.WithHeader_Always_OverwritesExistingValues;
+procedure TWebMockStaticRequestStubTests.WithHeader_Always_OverwritesExistingValues;
 var
   LHeaderName, LHeaderValue1, LHeaderValue2: string;
   LMatcher: IStringMatcher;
@@ -228,7 +240,7 @@ begin
   Assert.AreNotSame(LMatcher, StubbedRequest.Matcher.Headers[LHeaderName]);
 end;
 
-procedure TWebMockRequestStubTests.WithHeader_GivenRegEx_ReturnsSelf;
+procedure TWebMockStaticRequestStubTests.WithHeader_GivenRegEx_ReturnsSelf;
 begin
   Assert.AreSame(
     StubbedRequest,
@@ -236,7 +248,7 @@ begin
   );
 end;
 
-procedure TWebMockRequestStubTests.WithHeader_GivenRegEx_SetsPatternForHeader;
+procedure TWebMockStaticRequestStubTests.WithHeader_GivenRegEx_SetsPatternForHeader;
 var
   LHeaderName: string;
   LHeaderPattern: TRegEx;
@@ -252,12 +264,12 @@ begin
   );
 end;
 
-procedure TWebMockRequestStubTests.WithHeader_GivenString_ReturnsSelf;
+procedure TWebMockStaticRequestStubTests.WithHeader_GivenString_ReturnsSelf;
 begin
   Assert.AreSame(StubbedRequest, StubbedRequest.WithHeader('Header', 'Value'));
 end;
 
-procedure TWebMockRequestStubTests.WithHeader_GivenString_SetsValueForHeader;
+procedure TWebMockStaticRequestStubTests.WithHeader_GivenString_SetsValueForHeader;
 var
   LHeaderName, LHeaderValue: string;
 begin
@@ -273,5 +285,5 @@ begin
 end;
 
 initialization
-  TDUnitX.RegisterTestFixture(TWebMockRequestStubTests);
+  TDUnitX.RegisterTestFixture(TWebMockStaticRequestStubTests);
 end.

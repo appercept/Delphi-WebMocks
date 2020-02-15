@@ -23,24 +23,82 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Delphi.WebMock.RequestStub;
+unit Delphi.WebMock.Dynamic.RequestStub;
 
 interface
 
 uses
-  Delphi.WebMock.HTTP.Messages, Delphi.WebMock.Response,
-  System.Classes;
+  Delphi.WebMock.HTTP.Messages, Delphi.WebMock.RequestStub,
+  Delphi.WebMock.Response, Delphi.WebMock.ResponseStatus;
 
 type
-  IWebMockRequestStub = interface(IInterface)
-    ['{AA474C0C-CA37-44CF-A66A-3B024CC79BE6}']
+  TWebMockDynamicRequestMatcher = reference to function(
+    ARequest: IWebMockHTTPRequest
+  ): Boolean;
+
+  TWebMockDynamicRequestStub = class(TInterfacedObject, IWebMockRequestStub)
+  private
+    FMatcher: TWebMockDynamicRequestMatcher;
+    FResponse: TWebMockResponse;
+  public
+    constructor Create(const AMatcher: TWebMockDynamicRequestMatcher);
+    function ToRespond(AResponseStatus: TWebMockResponseStatus = nil)
+      : TWebMockResponse;
+
+    // IWebMockRequestStub
     function IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
     function GetResponse: TWebMockResponse;
     procedure SetResponse(const AResponse: TWebMockResponse);
-    function ToString: string;
+    function ToString: string; override;
     property Response: TWebMockResponse read GetResponse write SetResponse;
+
+    property Matcher: TWebMockDynamicRequestMatcher read FMatcher;
   end;
 
 implementation
+
+uses
+  System.SysUtils;
+
+{ TWebMockDynamicRequestStub }
+
+constructor TWebMockDynamicRequestStub.Create(
+  const AMatcher: TWebMockDynamicRequestMatcher);
+begin
+  inherited Create;
+  FMatcher := AMatcher;
+  FResponse := TWebMockResponse.Create;
+end;
+
+function TWebMockDynamicRequestStub.GetResponse: TWebMockResponse;
+begin
+  Result := FResponse;
+end;
+
+function TWebMockDynamicRequestStub.IsMatch(
+  ARequest: IWebMockHTTPRequest): Boolean;
+begin
+  Result := Matcher(ARequest);
+end;
+
+procedure TWebMockDynamicRequestStub.SetResponse(
+  const AResponse: TWebMockResponse);
+begin
+  FResponse := AResponse;
+end;
+
+function TWebMockDynamicRequestStub.ToRespond(
+  AResponseStatus: TWebMockResponseStatus): TWebMockResponse;
+begin
+  if Assigned(AResponseStatus) then
+    Response.Status := AResponseStatus;
+
+  Result := Response;
+end;
+
+function TWebMockDynamicRequestStub.ToString: string;
+begin
+  Result := Format('(Dynamic Matcher)' + ^I + '%s', [Response.ToString]);
+end;
 
 end.
