@@ -174,6 +174,24 @@ WebMock.StubRequest('*', '*')
 
 NOTE: Be sure to add `System.RegularExpressions` to your uses clause.
 
+#### Request matching by predicate function
+If matching logic is required to be more complex than the simple matching, a
+predicate function can be provided in the test to allow custom inspection/logic
+for matching a request. The anonymous predicate function will receive an
+`IWebMockHTTPRequest` object for inspecting the request. If the predicate
+function returns `True` then the stub will be regarded as a match, if returning
+`False` it will not be matched.
+
+Example stub with predicate function:
+```Delphi
+WebMock.StubRequest(
+  function(ARequest: IWebMockHTTPRequest): Boolean
+  begin
+    Result := True; // Return False to ignore request.
+  end
+);
+```
+
 #### Stubbed Response Codes
 By default a response status will be `200 OK` for a stubbed request. If a
 request is made to `TWebMock` without a registered stub it will respond

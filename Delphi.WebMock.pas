@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2019-2020 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -29,7 +29,8 @@ interface
 
 uses
   Delphi.WebMock.Assertion, Delphi.WebMock.HTTP.Messages,
-  Delphi.WebMock.RequestStub, Delphi.WebMock.Response,
+  Delphi.WebMock.RequestStub, Delphi.WebMock.Static.RequestStub,
+  Delphi.WebMock.Dynamic.RequestStub, Delphi.WebMock.Response,
   Delphi.WebMock.ResponseBodySource, Delphi.WebMock.ResponseStatus,
   IdContext, IdCustomHTTPServer, IdGlobal, IdHTTPServer,
   System.Classes, System.Generics.Collections, System.RegularExpressions;
@@ -41,12 +42,12 @@ type
   private
     FServer: TIdHTTPServer;
     FBaseURL: string;
-    FStubRegistry: TObjectList<TWebMockRequestStub>;
+    FStubRegistry: TList<IWebMockRequestStub>;
     FHistory: TList<IWebMockHTTPRequest>;
     procedure InitializeServer(const APort: TWebWockPort);
     procedure OnServerRequest(AContext: TIdContext;
       ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
-    function GetRequestStub(ARequestInfo: IWebMockHTTPRequest) : TWebMockRequestStub;
+    function GetRequestStub(ARequestInfo: IWebMockHTTPRequest) : IWebMockRequestStub;
     procedure RespondWith(AResponse: TWebMockResponse;
       AResponseInfo: TIdHTTPResponseInfo);
     procedure SetResponseContent(AResponseInfo: TIdHTTPResponseInfo;
@@ -65,13 +66,15 @@ type
     procedure ResetHistory;
     procedure ResetStubRegistry;
     function StubRequest(const AMethod: string; const AURI: string)
-      : TWebMockRequestStub; overload;
+      : TWebMockStaticRequestStub; overload;
     function StubRequest(const AMethod: string; const AURIPattern: TRegEx)
-      : TWebMockRequestStub; overload;
+      : TWebMockStaticRequestStub; overload;
+    function StubRequest(const AMatcher: TWebMockDynamicRequestMatcher)
+      : TWebMockDynamicRequestStub; overload;
     function URLFor(AURI: string): string;
     property BaseURL: string read FBaseURL;
     property History: TList<IWebMockHTTPRequest> read FHistory;
-    property StubRegistry: TObjectList<TWebMockRequestStub> read FStubRegistry;
+    property StubRegistry: TList<IWebMockRequestStub> read FStubRegistry;
   end;
 
 implementation
@@ -93,7 +96,7 @@ end;
 constructor TWebMock.Create(const APort: TWebWockPort = 8080);
 begin
   inherited Create;
-  FStubRegistry := TObjectList<TWebMockRequestStub>.Create;
+  FStubRegistry := TList<IWebMockRequestStub>.Create;
   FHistory := TList<IWebMockHTTPRequest>.Create;
   InitializeServer(APort);
 end;
@@ -106,13 +109,13 @@ begin
   inherited;
 end;
 
-function TWebMock.GetRequestStub(ARequestInfo: IWebMockHTTPRequest) : TWebMockRequestStub;
+function TWebMock.GetRequestStub(ARequestInfo: IWebMockHTTPRequest) : IWebMockRequestStub;
 var
-  LRequestStub: TWebMockRequestStub;
+  LRequestStub: IWebMockRequestStub;
 begin
   for LRequestStub in StubRegistry do
   begin
-    if LRequestStub.Matcher.IsMatch(ARequestInfo) then
+    if LRequestStub.IsMatch(ARequestInfo) then
       Exit(LRequestStub);
   end;
   Result := nil;
@@ -139,7 +142,7 @@ procedure TWebMock.OnServerRequest(AContext: TIdContext;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
 var
   LRequest: IWebMockHTTPRequest;
-  LRequestStub: TWebMockRequestStub;
+  LRequestStub: IWebMockRequestStub;
 begin
   LRequest := TWebMockHTTPRequest.Create(ARequestInfo);
   History.Add(LRequest);
@@ -152,7 +155,7 @@ end;
 
 procedure TWebMock.PrintStubRegistry;
 var
-  LRequestStub: TWebMockRequestStub;
+  LRequestStub: IWebMockRequestStub;
 begin
   System.Writeln;
   System.Writeln('Registered Request Stubs');
@@ -206,14 +209,25 @@ begin
     AResponseInfo.ResponseText := AResponseStatus.Text;
 end;
 
+function TWebMock.StubRequest(
+  const AMatcher: TWebMockDynamicRequestMatcher): TWebMockDynamicRequestStub;
+var
+  LRequestStub: TWebMockDynamicRequestStub;
+begin
+  LRequestStub := TWebMockDynamicRequestStub.Create(AMatcher);
+  StubRegistry.Add(LRequestStub);
+
+  Result := LRequestStub;
+end;
+
 function TWebMock.StubRequest(const AMethod: string;
-  const AURIPattern: TRegEx): TWebMockRequestStub;
+  const AURIPattern: TRegEx): TWebMockStaticRequestStub;
 var
   LMatcher: TWebMockHTTPRequestMatcher;
-  LRequestStub: TWebMockRequestStub;
+  LRequestStub: TWebMockStaticRequestStub;
 begin
   LMatcher := TWebMockHTTPRequestMatcher.Create(AURIPattern, AMethod);
-  LRequestStub := TWebMockRequestStub.Create(LMatcher);
+  LRequestStub := TWebMockStaticRequestStub.Create(LMatcher);
   StubRegistry.Add(LRequestStub);
 
   Result := LRequestStub;
@@ -232,13 +246,13 @@ begin
 end;
 
 function TWebMock.StubRequest(const AMethod: string; const AURI: string)
-  : TWebMockRequestStub;
+  : TWebMockStaticRequestStub;
 var
   LMatcher: TWebMockHTTPRequestMatcher;
-  LRequestStub: TWebMockRequestStub;
+  LRequestStub: TWebMockStaticRequestStub;
 begin
   LMatcher := TWebMockHTTPRequestMatcher.Create(AURI, AMethod);
-  LRequestStub := TWebMockRequestStub.Create(LMatcher);
+  LRequestStub := TWebMockStaticRequestStub.Create(LMatcher);
   StubRegistry.Add(LRequestStub);
 
   Result := LRequestStub;

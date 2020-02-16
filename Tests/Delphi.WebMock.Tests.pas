@@ -75,7 +75,7 @@ type
 implementation
 
 uses
-  Delphi.WebMock.RequestStub,
+  Delphi.WebMock.RequestStub, Delphi.WebMock.Static.RequestStub,
   System.Net.HttpClient, System.RegularExpressions, System.StrUtils,
   TestHelpers;
 
@@ -176,12 +176,12 @@ end;
 
 procedure TWebMockTests.StubRequest_WithRegExURI_ReturnsARequestStub;
 begin
-  Assert.IsTrue(WebMock.StubRequest('GET', TRegEx.Create('.*')) is TWebMockRequestStub);
+  Assert.IsTrue(WebMock.StubRequest('GET', TRegEx.Create('.*')) is TWebMockStaticRequestStub);
 end;
 
 procedure TWebMockTests.StubRequest_WithStringURI_ReturnsARequestStub;
 begin
-  Assert.IsTrue(WebMock.StubRequest('GET', '/') is TWebMockRequestStub);
+  Assert.IsTrue(WebMock.StubRequest('GET', '/') is TWebMockStaticRequestStub);
 end;
 
 initialization
