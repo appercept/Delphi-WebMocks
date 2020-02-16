@@ -4,6 +4,8 @@ program Delphi.WebMocks.Tests;
 {$APPTYPE CONSOLE}
 {$ENDIF}{$STRONGLINKTYPES ON}
 
+{$WARN DUPLICATE_CTOR_DTOR OFF}
+
 uses
   System.SysUtils,
   {$IFDEF TESTINSIGHT}
@@ -15,8 +17,8 @@ uses
   Delphi.WebMock.Tests in 'Delphi.WebMock.Tests.pas',
   Delphi.WebMock in '..\Delphi.WebMock.pas',
   TestHelpers in 'TestHelpers.pas',
-  Delphi.WebMock.RequestStub.Tests in 'Delphi.WebMock.RequestStub.Tests.pas',
-  Delphi.WebMock.RequestStub in '..\Delphi.WebMock.RequestStub.pas',
+  Delphi.WebMock.Static.RequestStub.Tests in 'Delphi.WebMock.Static.RequestStub.Tests.pas',
+  Delphi.WebMock.Static.RequestStub in '..\Delphi.WebMock.Static.RequestStub.pas',
   Delphi.WebMock.HTTP.RequestMatcher.Tests in 'Delphi.WebMock.HTTP.RequestMatcher.Tests.pas',
   Delphi.WebMock.HTTP.RequestMatcher in '..\Delphi.WebMock.HTTP.RequestMatcher.pas',
   Mock.Indy.HTTPRequestInfo in 'Mock.Indy.HTTPRequestInfo.pas',
@@ -47,7 +49,11 @@ uses
   Delphi.WebMock.Responses.Tests in 'Features\Delphi.WebMock.Responses.Tests.pas',
   Delphi.WebMock.Assertions.Tests in 'Features\Delphi.WebMock.Assertions.Tests.pas',
   Delphi.WebMock.Assertion in '..\Delphi.WebMock.Assertion.pas',
-  Delphi.WebMock.Assertion.Tests in 'Delphi.WebMock.Assertion.Tests.pas';
+  Delphi.WebMock.Assertion.Tests in 'Delphi.WebMock.Assertion.Tests.pas',
+  Delphi.WebMock.DynamicMatching.Tests in 'Features\Delphi.WebMock.DynamicMatching.Tests.pas',
+  Delphi.WebMock.Dynamic.RequestStub.Tests in 'Delphi.WebMock.Dynamic.RequestStub.Tests.pas',
+  Delphi.WebMock.Dynamic.RequestStub in '..\Delphi.WebMock.Dynamic.RequestStub.pas',
+  Delphi.WebMock.RequestStub in '..\Delphi.WebMock.RequestStub.pas';
 
 var
   Runner: ITestRunner;

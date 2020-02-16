@@ -67,3 +67,5 @@ __recovery/
 
 # Ignore Build outputs
 Build
+Tests/Win32
+Tests/Win64

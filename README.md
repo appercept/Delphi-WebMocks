@@ -1,5 +1,22 @@
 # Delphi-WebMocks
-Library for stubbing and setting expectations on HTTP requests in Delphi with [DUnitX](https://github.com/VSoftTechnologies/DUnitX).
+Library for stubbing and setting expectations on HTTP requests in Delphi with
+[DUnitX](https://github.com/VSoftTechnologies/DUnitX).
+
+## Requirements
+* [Delphi](https://www.embarcadero.com/products/delphi) XE8 or later*
+* [DUnitX](https://github.com/VSoftTechnologies/DUnitX)
+* [Indy](https://www.indyproject.org)
+
+\* Delphi-WebMocks was developed in Delphi 10.3 (Rio) and has been reported
+working on 10.1 (Berlin). I'd be interested to hear from anyone working on other
+versions. As Delphi-WebMocks makes use of the `System.Net` library introduced
+with XE8 it will not be compatible with earlier versions.
+
+## Optional Dependencies
+* [TestInsight](https://bitbucket.org/sglienke/testinsight/wiki/Home) is
+  required to run the Delphi-WebMocks test suite, so, if you're considering
+  contributing and need to run the test suite, install it. If you do TDD in
+  Delphi I would recommend installing and using it in your own projects.
 
 ## Setup
 In your test unit file a couple of simple steps are required.
@@ -156,6 +173,24 @@ WebMock.StubRequest('*', '*')
 ```
 
 NOTE: Be sure to add `System.RegularExpressions` to your uses clause.
+
+#### Request matching by predicate function
+If matching logic is required to be more complex than the simple matching, a
+predicate function can be provided in the test to allow custom inspection/logic
+for matching a request. The anonymous predicate function will receive an
+`IWebMockHTTPRequest` object for inspecting the request. If the predicate
+function returns `True` then the stub will be regarded as a match, if returning
+`False` it will not be matched.
+
+Example stub with predicate function:
+```Delphi
+WebMock.StubRequest(
+  function(ARequest: IWebMockHTTPRequest): Boolean
+  begin
+    Result := True; // Return False to ignore request.
+  end
+);
+```
 
 #### Stubbed Response Codes
 By default a response status will be `200 OK` for a stubbed request. If a
