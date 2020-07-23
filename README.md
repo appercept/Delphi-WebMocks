@@ -7,16 +7,28 @@ Library for stubbing and setting expectations on HTTP requests in Delphi with
 * [DUnitX](https://github.com/VSoftTechnologies/DUnitX)
 * [Indy](https://www.indyproject.org)
 
-\* Delphi-WebMocks was developed in Delphi 10.3 (Rio) and has been reported
-working on 10.1 (Berlin). I'd be interested to hear from anyone working on other
-versions. As Delphi-WebMocks makes use of the `System.Net` library introduced
-with XE8 it will not be compatible with earlier versions.
+\* Delphi-WebMocks was developed in Delphi 10.3 (Rio) and 10.4 (Sydney) and has
+been reported working on 10.1 (Berlin). I'd be interested to hear from anyone
+working on other versions. As Delphi-WebMocks makes use of the `System.Net
+library introduced with XE8 it will not be compatible with earlier versions.
 
 ## Optional Dependencies
 * [TestInsight](https://bitbucket.org/sglienke/testinsight/wiki/Home) is
   required to run the Delphi-WebMocks test suite, so, if you're considering
   contributing and need to run the test suite, install it. If you do TDD in
   Delphi I would recommend installing and using it in your own projects.
+
+## Installation: Delphinus-Support
+WebMocks should now be listed in
+[Delphinus](https://github.com/Memnarch/Delphinus) package manager.
+
+## Installation: Manual
+WebMocks is a source only library. You do not need to compile any packages.
+Steps:
+1. Download and extract the latest version
+   [1.2.0](https://github.com/appercept/Delphi-WebMocks/archive/1.2.0.zip).
+2. Add the extracted folder to Delphi's "Library path" under "Tools >
+   Options... > Language > Delphi > Library".
 
 ## Setup
 In your test unit file a couple of simple steps are required.

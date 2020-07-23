@@ -1,0 +1,8 @@
+{
+  "search_pathes": [
+    { "pathes": ".", "platforms": "Win32;Win64" }
+  ],
+  "source_folders": [
+    { "folder": ".", "recursive": false, "filter": "*.pas" }
+  ]
+}
