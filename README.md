@@ -26,7 +26,7 @@ WebMocks should now be listed in
 WebMocks is a source only library. You do not need to compile any packages.
 Steps:
 1. Download and extract the latest version
-   [1.2.0](https://github.com/appercept/Delphi-WebMocks/archive/1.2.0.zip).
+   [1.2.1](https://github.com/appercept/Delphi-WebMocks/archive/1.2.1.zip).
 2. Add the extracted folder to Delphi's "Library path" under "Tools >
    Options... > Language > Delphi > Library".
 
