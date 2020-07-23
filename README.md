@@ -18,6 +18,18 @@ library introduced with XE8 it will not be compatible with earlier versions.
   contributing and need to run the test suite, install it. If you do TDD in
   Delphi I would recommend installing and using it in your own projects.
 
+## Installation: Delphinus-Support
+WebMocks should now be listed in
+[Delphinus](https://github.com/Memnarch/Delphinus) package manager.
+
+## Installation: Manual
+WebMocks is a source only library. You do not need to compile any packages.
+Steps:
+1. Download and extract the latest version
+   [1.1.0](https://github.com/appercept/Delphi-WebMocks/archive/1.1.0.zip).
+2. Add the extracted folder to Delphi's "Library path" under "Tools >
+   Options... > Language > Delphi > Library".
+
 ## Setup
 In your test unit file a couple of simple steps are required.
 1. Add `Delphi.WebMock` to your interface `uses`.
