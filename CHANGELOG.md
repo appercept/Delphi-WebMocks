@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.2.0](https://github.com/appercept/Delphi-WebMocks/tree/1.2.0) (2020-07-24)
+
+[Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/1.1.0...1.2.0)
+
+**Implemented enhancements:**
+
+- Add Delphinus support [\#26](https://github.com/appercept/Delphi-WebMocks/pull/26) ([rhatherall](https://github.com/rhatherall))
+
+**Fixed bugs:**
+
+- Project is not showing in Delphinus [\#27](https://github.com/appercept/Delphi-WebMocks/issues/27)
+
+**Closed issues:**
+
+- Delphinus support would be good [\#25](https://github.com/appercept/Delphi-WebMocks/issues/25)
+- Delphi 10.4 Sydney has been released [\#24](https://github.com/appercept/Delphi-WebMocks/issues/24)
+
 ## [1.1.0](https://github.com/appercept/Delphi-WebMocks/tree/1.1.0) (2020-02-16)
 
 [Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/1.0.1...1.1.0)
