@@ -11,6 +11,10 @@
   ],
   "projects": [
     {
+      "project": "Packages\\Delphi10Rio\\WebMocks.dproj",
+      "compiler": 33
+    },
+    {
       "project": "Packages\\Delphi10Sydney\\WebMocks.dproj",
       "compiler": 34
     }
