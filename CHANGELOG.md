@@ -1,6 +1,14 @@
 # Changelog
 
-## [1.2.1](https://github.com/appercept/Delphi-WebMocks/tree/1.2.1) (2020-07-24)
+## [1.2.2](https://github.com/appercept/Delphi-WebMocks/tree/1.2.2) (2020-07-25)
+
+[Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/1.2.1...1.2.2)
+
+**Fixed bugs:**
+
+- Delphinus installation needs packages [\#29](https://github.com/appercept/Delphi-WebMocks/issues/29)
+
+## [1.2.1](https://github.com/appercept/Delphi-WebMocks/tree/1.2.1) (2020-07-23)
 
 [Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/1.2.0...1.2.1)
 

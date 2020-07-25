@@ -27,7 +27,7 @@ WebMocks should now be listed in
 
 ## Installation: Manual
 1. Download and extract the latest version
-   [1.2.1](https://github.com/appercept/Delphi-WebMocks/archive/1.2.1.zip).
+   [1.2.2](https://github.com/appercept/Delphi-WebMocks/archive/1.2.2.zip).
 2. Open the package appropriate for your Delphi version in the `Packages`
    folder.
 3. Build and install the package.
