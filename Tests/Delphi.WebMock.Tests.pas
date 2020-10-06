@@ -45,13 +45,15 @@ type
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure Create_WithNoArguments_StartsListeningOnPort8080;
+    procedure Create_WithNoArguments_StartsListeningOnPortGreaterThan8080;
+    [Test]
+    procedure Create_WithNoArgumentsWhenRepeated_StartsListeningOnDifferentPorts;
     [Test]
     procedure Create_WithPort_StartsListeningOnPortPort;
     [Test]
-    procedure BaseURL_ByDefault_ReturnsLocalHostURLWithDefaultPort;
+    procedure BaseURL_ByDefault_ReturnsLocalHostURLWithPort;
     [Test]
-    procedure BaseURL_WhenPortIsNotDefault_ReturnsLocalHostURLWithPort;
+    procedure Port_Always_ReturnsTheListeningPort;
     [Test]
     procedure Reset_Always_ClearsHistory;
     [Test]
@@ -96,34 +98,36 @@ end;
 
 procedure TWebMockTests.URLFor_GivenStringWithLeadingSlash_ReturnsCorrectlyJoinedURL;
 begin
-  Assert.AreEqual('http://127.0.0.1:8080/file', WebMock.URLFor('/file'));
+  Assert.AreEqual(Format('http://127.0.0.1:%d/file', [WebMock.Port]), WebMock.URLFor('/file'));
 end;
 
 procedure TWebMockTests.URLFor_GivenStringWithoutLeadingSlash_ReturnsCorrectlyJoinedURL;
 begin
-  Assert.AreEqual('http://127.0.0.1:8080/file', WebMock.URLFor('file'));
+  Assert.AreEqual(Format('http://127.0.0.1:%d/file', [WebMock.Port]), WebMock.URLFor('file'));
 end;
 
-procedure TWebMockTests.BaseURL_ByDefault_ReturnsLocalHostURLWithDefaultPort;
+procedure TWebMockTests.BaseURL_ByDefault_ReturnsLocalHostURLWithPort;
 begin
-  Assert.AreEqual('http://127.0.0.1:8080/', WebMock.BaseURL);
+  Assert.AreEqual(Format('http://127.0.0.1:%d/', [WebMock.Port]), WebMock.BaseURL);
 end;
 
-procedure TWebMockTests.BaseURL_WhenPortIsNotDefault_ReturnsLocalHostURLWithPort;
+procedure TWebMockTests.Create_WithNoArgumentsWhenRepeated_StartsListeningOnDifferentPorts;
+var
+  LWebMock1, LWebMock2: TWebMock;
 begin
-  WebMock.Free;
-  WebMock := TWebMock.Create(8088);
+  LWebMock1 := TWebMock.Create;
+  LWebMock2 := TWebMock.Create;
 
-  Assert.AreEqual('http://127.0.0.1:8088/', WebMock.BaseURL);
+  Assert.IsTrue(LWebMock2.Port > LWebMock1.Port);
 end;
 
-procedure TWebMockTests.Create_WithNoArguments_StartsListeningOnPort8080;
+procedure TWebMockTests.Create_WithNoArguments_StartsListeningOnPortGreaterThan8080;
 var
   LResponse: IHTTPResponse;
 begin
-  LResponse := WebClient.Get('http://localhost:8080/');
+  LResponse := WebClient.Get(WebMock.URLFor('/'));
 
-  Assert.AreEqual('Delphi WebMocks', LResponse.HeaderValue['Server']);
+  Assert.IsTrue(WebMock.Port > 8080);
 end;
 
 procedure TWebMockTests.Create_WithPort_StartsListeningOnPortPort;
@@ -132,10 +136,15 @@ var
 begin
   WebMock.Free;
 
-  WebMock := TWebMock.Create(8088);
-  LResponse := WebClient.Get('http://localhost:8088/');
+  WebMock := TWebMock.Create(8079);
+  LResponse := WebClient.Get('http://localhost:8079/');
 
   Assert.AreEqual('Delphi WebMocks', LResponse.HeaderValue['Server']);
+end;
+
+procedure TWebMockTests.Port_Always_ReturnsTheListeningPort;
+begin
+  Assert.IsTrue(WebMock.Port > 0);
 end;
 
 procedure TWebMockTests.ResetHistory_Always_ClearsHistory;

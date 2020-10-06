@@ -97,15 +97,15 @@ initialization
 end.
 ```
 
-By default `TWebMock` will bind to port `8080`. The port can be specified at
-creation.
+By default `TWebMock` will bind to a port dynamically assigned start at `8080`.
+This behaviour can be overriden by sepcifying a port at creation.
 ```Delphi
 WebMock := TWebMock.Create(8088);
 ```
 
 The use of `WebMock.URLFor` function within your tests is to simplify
-constructing a valid URL. The `BaseURL` property contains a valid URL for the
-server root.
+constructing a valid URL. The `Port` property containes the current bound port
+and `BaseURL` property contains a valid URL for the server root.
 
 ## Examples
 ### Stubbing

@@ -33,18 +33,24 @@ uses
   Delphi.WebMock.Dynamic.RequestStub, Delphi.WebMock.Response,
   Delphi.WebMock.ResponseBodySource, Delphi.WebMock.ResponseStatus,
   IdContext, IdCustomHTTPServer, IdGlobal, IdHTTPServer,
-  System.Classes, System.Generics.Collections, System.RegularExpressions;
+  System.Classes, System.Generics.Collections, System.RegularExpressions,
+  System.SysUtils;
 
 type
+  EWebMockError = class(Exception);
+  EWebMockExceededBindAttempts = class(EWebMockError);
+
   TWebWockPort = TIdPort;
 
   TWebMock = class(TObject)
+  class var NextPort: Integer;
   private
     FServer: TIdHTTPServer;
     FBaseURL: string;
     FStubRegistry: TList<IWebMockRequestStub>;
     FHistory: TList<IWebMockHTTPRequest>;
     procedure InitializeServer(const APort: TWebWockPort);
+    procedure StartServer(const APort: TWebWockPort);
     procedure OnServerRequest(AContext: TIdContext;
       ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
     function GetRequestStub(ARequestInfo: IWebMockHTTPRequest) : IWebMockRequestStub;
@@ -56,9 +62,11 @@ type
       const AResponseHeaders: TStrings);
     procedure SetResponseStatus(AResponseInfo: TIdHTTPResponseInfo;
       const AResponseStatus: TWebMockResponseStatus);
+    function GetNextPort: Integer;
+    function GetPort: Integer;
     property Server: TIdHTTPServer read FServer write FServer;
   public
-    constructor Create(const APort: TWebWockPort = 8080);
+    constructor Create(const APort: TWebWockPort = 0);
     destructor Destroy; override;
     function Assert: TWebMockAssertion;
     procedure PrintStubRegistry;
@@ -75,6 +83,7 @@ type
     property BaseURL: string read FBaseURL;
     property History: TList<IWebMockHTTPRequest> read FHistory;
     property StubRegistry: TList<IWebMockRequestStub> read FStubRegistry;
+    property Port: Integer read GetPort;
   end;
 
 implementation
@@ -82,9 +91,10 @@ implementation
 uses
   Delphi.WebMock.HTTP.Request,
   Delphi.WebMock.HTTP.RequestMatcher,
+  IdException,
   IdHTTP,
   IdSocketHandle,
-  System.SysUtils;
+  IdStack;
 
 { TWebMock }
 
@@ -93,7 +103,7 @@ begin
   Result := TWebMockAssertion.Create(History);
 end;
 
-constructor TWebMock.Create(const APort: TWebWockPort = 8080);
+constructor TWebMock.Create(const APort: TWebWockPort = 0);
 begin
   inherited Create;
   FStubRegistry := TList<IWebMockRequestStub>.Create;
@@ -107,6 +117,22 @@ begin
   FStubRegistry.Free;
   FServer.Free;
   inherited;
+end;
+
+function TWebMock.GetNextPort: Integer;
+var
+  FIsInitial: Boolean;
+begin
+  AtomicCmpExchange(NextPort, 8080, 0, FIsInitial);
+  if FIsInitial then
+    Exit(NextPort);
+
+  Result := AtomicIncrement(NextPort);
+end;
+
+function TWebMock.GetPort: Integer;
+begin
+  Result := Server.Bindings.Items[0].Port;
 end;
 
 function TWebMock.GetRequestStub(ARequestInfo: IWebMockHTTPRequest) : IWebMockRequestStub;
@@ -131,11 +157,9 @@ begin
 
   FServer := TIdHTTPServer.Create;
   Server.ServerSoftware := 'Delphi WebMocks';
-  Server.DefaultPort := APort;
   Server.OnCommandGet := OnServerRequest;
   Server.OnCommandOther := OnServerRequest;
-  Server.Active := True;
-  FBaseURL := Format('http://127.0.0.1:%d/', [Server.DefaultPort]);
+  StartServer(APort);
 end;
 
 procedure TWebMock.OnServerRequest(AContext: TIdContext;
@@ -207,6 +231,44 @@ begin
   AResponseInfo.ResponseNo := AResponseStatus.Code;
   if not AResponseStatus.Text.IsEmpty then
     AResponseInfo.ResponseText := AResponseStatus.Text;
+end;
+
+procedure TWebMock.StartServer(const APort: TWebWockPort);
+var
+  LAttempt, LMaxAttempts: Integer;
+  LPort: Integer;
+  LSocketHandle: TIdSocketHandle;
+begin
+  LAttempt := 0;
+  LMaxAttempts := 3;
+  while not Server.Active do
+  begin
+    Inc(LAttempt);
+    if LAttempt >= LMaxAttempts then
+      raise EWebMockExceededBindAttempts.Create('Exceeded attempts to bind port.');
+    if APort > 0 then
+      LPort := APort
+    else
+      LPort := GetNextPort;
+    Server.Bindings.Clear;
+    LSocketHandle := Server.Bindings.Add;
+    LSocketHandle.Port := LPort;
+    try
+      Server.Active := True;
+      FBaseURL := Format('http://127.0.0.1:%d/', [LSocketHandle.Port]);
+    except
+      on E: EIdCouldNotBindSocket do
+      begin
+        Server.Active := False;
+        StartServer(APort);
+      end;
+      on E: EIdSocketError do
+      begin
+        Server.Active := False;
+        StartServer(APort);
+      end;
+    end;
+  end;
 end;
 
 function TWebMock.StubRequest(
