@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/appercept/Delphi-WebMocks/tree/1.3.0) (2020-10-07)
+
+[Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/1.2.2...1.3.0)
+
+**Implemented enhancements:**
+
+- Add auto-port allocation [\#31](https://github.com/appercept/Delphi-WebMocks/pull/31) ([rhatherall](https://github.com/rhatherall))
+
+**Closed issues:**
+
+- In large projects you can frequently hit port clashes [\#30](https://github.com/appercept/Delphi-WebMocks/issues/30)
+
 ## [1.2.2](https://github.com/appercept/Delphi-WebMocks/tree/1.2.2) (2020-07-25)
 
 [Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/1.2.1...1.2.2)
