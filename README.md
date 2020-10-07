@@ -27,7 +27,7 @@ WebMocks should now be listed in
 
 ## Installation: Manual
 1. Download and extract the latest version
-   [1.2.2](https://github.com/appercept/Delphi-WebMocks/archive/1.2.2.zip).
+   [1.3.0](https://github.com/appercept/Delphi-WebMocks/archive/1.3.0.zip).
 2. Open the package appropriate for your Delphi version in the `Packages`
    folder.
 3. Build and install the package.
@@ -97,15 +97,15 @@ initialization
 end.
 ```
 
-By default `TWebMock` will bind to port `8080`. The port can be specified at
-creation.
+By default `TWebMock` will bind to a port dynamically assigned start at `8080`.
+This behaviour can be overriden by sepcifying a port at creation.
 ```Delphi
 WebMock := TWebMock.Create(8088);
 ```
 
 The use of `WebMock.URLFor` function within your tests is to simplify
-constructing a valid URL. The `BaseURL` property contains a valid URL for the
-server root.
+constructing a valid URL. The `Port` property containes the current bound port
+and `BaseURL` property contains a valid URL for the server root.
 
 ## Examples
 ### Stubbing
