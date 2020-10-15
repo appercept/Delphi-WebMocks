@@ -78,8 +78,12 @@ begin
 end;
 
 function TWebMockResponseContentFile.GetContentStream: TStream;
+var
+  LContentStream: TMemoryStream;
 begin
-  Result := FContentStream;
+  LContentStream := TMemoryStream.Create;
+  LContentStream.CopyFrom(FContentStream, 0);
+  Result := LContentStream;
 end;
 
 function TWebMockResponseContentFile.GetContentType: string;
