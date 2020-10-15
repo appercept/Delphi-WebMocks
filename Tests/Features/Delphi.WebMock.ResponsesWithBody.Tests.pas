@@ -53,9 +53,13 @@ type
     [Test]
     procedure Response_WhenWithBodyIsString_ReturnsUTF8CharSet;
     [Test]
+    procedure Response_WhenWithBodyIsStringOnMultipleCalls_Succeeds;
+    [Test]
     procedure Response_WhenWithBodyFileWithoutContentType_SetsContentTypeToInferedType;
     [Test]
     procedure Response_WhenWithBodyFileWithContentType_SetsContentType;
+    [Test]
+    procedure Response_WhenWithBodyFileOnMultipleCalls_Succeeds;
   end;
 
 implementation
@@ -66,6 +70,23 @@ uses
   IdGlobal,
   System.Net.HttpClient,
   TestHelpers;
+
+procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyFileOnMultipleCalls_Succeeds;
+var
+  LExpected: string;
+  LResponse: IHTTPResponse;
+begin
+  LExpected := '{ "key": "value" }'#10;
+  WebMock.StubRequest('GET', '/json').ToRespond.WithBodyFile(FixturePath('Response.json'));
+
+  // First request
+  LResponse := WebClient.Get(WebMock.URLFor('json'));
+  Assert.AreEqual(LExpected, LResponse.ContentAsString);
+
+  // Second request
+  LResponse := WebClient.Get(WebMock.URLFor('json'));
+  Assert.AreEqual(LExpected, LResponse.ContentAsString);
+end;
 
 procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyFileWithContentType_SetsContentType;
 var
@@ -126,6 +147,23 @@ begin
 
   LContentText := ReadStringFromStream(LResponse.ContentStream);
   Assert.AreEqual(LExpectedContent, LContentText);
+end;
+
+procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyIsStringOnMultipleCalls_Succeeds;
+var
+  LContent: string;
+  LResponse: IHTTPResponse;
+begin
+  LContent := 'Some text...';
+  WebMock.StubRequest('GET', '/text').ToRespond.WithBody(LContent);
+
+  // First request
+  LResponse := WebClient.Get(WebMock.URLFor('text'));
+  Assert.EndsWith(LContent, LResponse.ContentAsString);
+
+  // Second request
+  LResponse := WebClient.Get(WebMock.URLFor('text'));
+  Assert.EndsWith(LContent, LResponse.ContentAsString);
 end;
 
 procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyIsString_ReturnsUTF8CharSet;

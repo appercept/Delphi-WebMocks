@@ -33,7 +33,6 @@ type
   TWebMockResponseContentString = class(TInterfacedObject,
     IWebMockResponseBodySource)
   private
-    FContentStream: TStream;
     FContentString: string;
     FContentType: string;
     procedure SetContentType(const Value: string);
@@ -72,10 +71,7 @@ end;
 
 function TWebMockResponseContentString.GetContentStream: TStream;
 begin
-  if not Assigned(FContentStream) then
-    FContentStream := TStringStream.Create(ContentString);
-
-  Result := FContentStream;
+  Result := TStringStream.Create(ContentString);
 end;
 
 function TWebMockResponseContentString.GetContentString: string;

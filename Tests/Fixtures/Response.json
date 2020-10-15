@@ -1,3 +1,1 @@
-{
-  "key": "value"
-}
+{ "key": "value" }
