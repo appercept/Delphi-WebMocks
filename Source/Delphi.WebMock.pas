@@ -53,6 +53,9 @@ type
     procedure StartServer(const APort: TWebWockPort);
     procedure OnServerRequest(AContext: TIdContext;
       ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
+    procedure AllowAnyAuth(AContext: TIdContext;
+      const AAuthType, AAuthData: String; var VUsername, VPassword: String;
+      var VHandled: Boolean);
     function GetRequestStub(ARequestInfo: IWebMockHTTPRequest) : IWebMockRequestStub;
     procedure RespondWith(AResponse: TWebMockResponse;
       AResponseInfo: TIdHTTPResponseInfo);
@@ -97,6 +100,12 @@ uses
   IdStack;
 
 { TWebMock }
+
+procedure TWebMock.AllowAnyAuth(AContext: TIdContext; const AAuthType,
+  AAuthData: String; var VUsername, VPassword: String; var VHandled: Boolean);
+begin
+  VHandled := True;
+end;
 
 function TWebMock.Assert: TWebMockAssertion;
 begin
@@ -159,6 +168,7 @@ begin
   Server.ServerSoftware := 'Delphi WebMocks';
   Server.OnCommandGet := OnServerRequest;
   Server.OnCommandOther := OnServerRequest;
+  Server.OnParseAuthentication := AllowAnyAuth;
   StartServer(APort);
 end;
 
