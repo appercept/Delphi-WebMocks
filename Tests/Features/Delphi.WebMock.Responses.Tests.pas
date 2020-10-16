@@ -54,6 +54,8 @@ type
     procedure Response_WhenToRespondSetsStatus_ReturnsSpecifiedStatusText;
     [Test]
     procedure Response_WhenToRespondSetsCustomStatus_ReturnsSpecifiedStatusText;
+    [Test]
+    procedure Response_WhenRequestAuthorizationHeaderIsNotBasic_ItRespondsWithoutError;
   end;
 
 implementation
@@ -62,8 +64,23 @@ implementation
 
 uses
   Delphi.WebMock.ResponseStatus,
-  System.Net.HttpClient, System.StrUtils,
+  System.Net.HttpClient, System.Net.URLClient, System.StrUtils,
   TestHelpers;
+
+procedure TWebMockResponsesTests.Response_WhenRequestAuthorizationHeaderIsNotBasic_ItRespondsWithoutError;
+var
+  LHeaders: TNetHeaders;
+  LResponse: IHTTPResponse;
+begin
+  WebMock.StubRequest('*', '*');
+
+  LHeaders := TNetHeaders.Create(
+    TNetHeader.Create('Authorization', 'NonStandardAuthScheme')
+  );
+  LResponse := WebClient.Get(WebMock.BaseURL, nil, LHeaders);
+
+  Assert.AreEqual(200, LResponse.StatusCode);
+end;
 
 procedure TWebMockResponsesTests.Response_WhenRequestIsNotStubbed_ReturnsNotImplemented;
 var
