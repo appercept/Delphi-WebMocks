@@ -23,70 +23,46 @@
 {                                                                              }
 {******************************************************************************}
 
-unit TestHelpers;
+unit WebMock.HTTP.Messages;
 
 interface
 
 uses
-  System.Classes, System.Net.HttpClient, System.Net.URLClient, System.Rtti;
+  System.Classes;
 
-function FixturePath(const AFileName: string): string;
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
+type
+  IWebMockHTTPMessage = interface(IInterface)
+    ['{04B4BDFB-761E-4E44-8C08-DADF4138C067}']
+    function GetStartLine: string;
+    function GetHeaders: TStrings;
+    function GetBody: TStream;
+    property StartLine: string read GetStartLine;
+    property Headers: TStrings read GetHeaders;
+    property Body: TStream read GetBody;
+  end;
 
-var
-  WebClient: THTTPClient;
+  IWebMockHTTPRequest = interface(IWebMockHTTPMessage)
+    ['{BE50127E-778C-46C8-B866-96C4124B606F}']
+    function GetMethod: string;
+    function GetRequestURI: string;
+    function GetHTTPVersion: string;
+    property RequestLine: string read GetStartLine;
+    property Method: string read GetMethod;
+    property RequestURI: string read GetRequestURI;
+    property HTTPVersion: string read GetHTTPVersion;
+  end;
+
+  IWebMockHTTPResponse = interface(IWebMockHTTPMessage)
+    ['{C643273B-78EB-4BB8-9DA1-F256FA715BF1}']
+    function GetHTTPVersion: string;
+    function GetStatusCode: Integer;
+    function GetReasonPhrase: string;
+    property StatusLine: string read GetStartLine;
+    property HTTPVersion: string read GetHTTPVersion;
+    property StatusCode: Integer read GetStatusCode;
+    property ReasonPhrase: string read GetReasonPhrase;
+  end;
 
 implementation
 
-uses
-  System.SysUtils;
-
-function FixturePath(const AFileName: string): string;
-begin
-  Result := Format('../../Fixtures/%s', [AFileName]);
-end;
-
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
-begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  Result := LProperty.GetValue(AObject);
-end;
-
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
-begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  LProperty.SetValue(AObject, AValue);
-end;
-
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
-var
-  LHeaders: TStringList;
-  LHeader: TNetHeader;
-begin
-  LHeaders := TStringList.Create;
-  for LHeader in ANetHeaders do
-  begin
-    LHeaders.AddPair(LHeader.Name, LHeader.Value);
-  end;
-  Result := LHeaders;
-end;
-
-initialization
-  WebClient := THTTPClient.Create;
-finalization
-  WebClient.Free;
 end.

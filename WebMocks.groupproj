@@ -1,0 +1,36 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{1A5C44C7-B911-4E71-968A-1EDEC6B6689A}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Tests\WebMocks.Tests.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="WebMocks_Tests">
+        <MSBuild Projects="Tests\WebMocks.Tests.dproj"/>
+    </Target>
+    <Target Name="WebMocks_Tests:Clean">
+        <MSBuild Projects="Tests\WebMocks.Tests.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="WebMocks_Tests:Make">
+        <MSBuild Projects="Tests\WebMocks.Tests.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="WebMocks_Tests"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="WebMocks_Tests:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="WebMocks_Tests:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

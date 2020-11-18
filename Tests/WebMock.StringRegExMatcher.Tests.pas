@@ -23,70 +23,93 @@
 {                                                                              }
 {******************************************************************************}
 
-unit TestHelpers;
+unit WebMock.StringRegExMatcher.Tests;
 
 interface
 
 uses
-  System.Classes, System.Net.HttpClient, System.Net.URLClient, System.Rtti;
+  DUnitX.TestFramework,
+  IdCustomHTTPServer,
+  WebMock.StringRegExMatcher;
 
-function FixturePath(const AFileName: string): string;
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
+type
 
-var
-  WebClient: THTTPClient;
+  [TestFixture]
+  TWebMockStringRegExMatcherTests = class(TObject)
+  private
+    StringRegExMatcher: TWebMockStringRegExMatcher;
+  public
+    [Setup]
+    procedure Setup;
+    [TearDown]
+    procedure TearDown;
+    [Test]
+    procedure Class_Always_ImplementsStringMatcher;
+    [Test]
+    procedure IsMatch_WhenGivenValueMatchesRegEx_ReturnsTrue;
+    [Test]
+    procedure IsMatch_WhenGivenValueDoesNotMatchRegEx_ReturnsFalse;
+    [Test]
+    procedure ToString_Always_ReturnsRegularExpression;
+  end;
 
 implementation
 
+{ TWebMockStringRegExMatcherTests }
+
 uses
-  System.SysUtils;
+  System.RegularExpressions,
+  WebMock.StringMatcher;
 
-function FixturePath(const AFileName: string): string;
+procedure TWebMockStringRegExMatcherTests.Class_Always_ImplementsStringMatcher;
+var
+  Subject: IInterface;
 begin
-  Result := Format('../../Fixtures/%s', [AFileName]);
+  Subject := TWebMockStringRegExMatcher.Create(TRegEx.Create(''));
+
+  Assert.Implements<IStringMatcher>(Subject);
 end;
 
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
+procedure TWebMockStringRegExMatcherTests.IsMatch_WhenGivenValueDoesNotMatchRegEx_ReturnsFalse;
 var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
+  LRegEx: TRegEx;
 begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  Result := LProperty.GetValue(AObject);
+  LRegEx := TRegEx.Create('A\ Value');
+  StringRegExMatcher := TWebMockStringRegExMatcher.Create(LRegEx);
+
+  Assert.IsFalse(StringRegExMatcher.IsMatch('Other Value'));
 end;
 
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
+procedure TWebMockStringRegExMatcherTests.IsMatch_WhenGivenValueMatchesRegEx_ReturnsTrue;
 var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
+  LRegEx: TRegEx;
 begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  LProperty.SetValue(AObject, AValue);
+  LRegEx := TRegEx.Create('A\ Value');
+  StringRegExMatcher := TWebMockStringRegExMatcher.Create(LRegEx);
+
+  Assert.IsTrue(StringRegExMatcher.IsMatch('A Value'));
 end;
 
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
-var
-  LHeaders: TStringList;
-  LHeader: TNetHeader;
+procedure TWebMockStringRegExMatcherTests.Setup;
 begin
-  LHeaders := TStringList.Create;
-  for LHeader in ANetHeaders do
-  begin
-    LHeaders.AddPair(LHeader.Name, LHeader.Value);
-  end;
-  Result := LHeaders;
+
+end;
+
+procedure TWebMockStringRegExMatcherTests.TearDown;
+begin
+  StringRegExMatcher.Free;
+end;
+
+procedure TWebMockStringRegExMatcherTests.ToString_Always_ReturnsRegularExpression;
+var
+  LRegEx: TRegEx;
+begin
+  LRegEx := TRegEx.Create('');
+  StringRegExMatcher := TWebMockStringRegExMatcher.Create(LRegEx);
+
+  Assert.AreEqual('Regular Expression', StringRegExMatcher.ToString);
 end;
 
 initialization
-  WebClient := THTTPClient.Create;
-finalization
-  WebClient.Free;
+  TDUnitX.RegisterTestFixture(TWebMockStringRegExMatcherTests);
 end.

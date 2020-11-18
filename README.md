@@ -34,7 +34,7 @@ WebMocks should now be listed in
 
 ## Setup
 In your test unit file a couple of simple steps are required.
-1. Add `Delphi.WebMock` to your interface `uses`.
+1. Add `WebMock` to your interface `uses`.
 2. In your `TestFixture` class use `Setup` and `TearDown` to create/destroy an
   instance of `TWebMock`.
 
@@ -46,8 +46,8 @@ interface
 
 uses
   DUnitX.TestFramework,
-  Delphi.WebMock,
-  MyTestObjectUnit;
+  MyTestObjectUnit,
+  WebMock;
 
 type
   TMyTestObjectTests = class(TObject)

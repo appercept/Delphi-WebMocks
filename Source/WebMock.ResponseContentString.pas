@@ -23,70 +23,60 @@
 {                                                                              }
 {******************************************************************************}
 
-unit TestHelpers;
+unit WebMock.ResponseContentString;
 
 interface
 
-uses
-  System.Classes, System.Net.HttpClient, System.Net.URLClient, System.Rtti;
+uses System.Classes, WebMock.ResponseBodySource;
 
-function FixturePath(const AFileName: string): string;
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
-
-var
-  WebClient: THTTPClient;
+type
+  TWebMockResponseContentString = class(TInterfacedObject,
+    IWebMockResponseBodySource)
+  private
+    FContentString: string;
+    FContentType: string;
+    procedure SetContentType(const Value: string);
+    function GetContentStream: TStream;
+  public
+    constructor Create(const AContentString: string = '';
+      const AContentType: string = 'text/plain; charset=utf-8');
+    function GetContentString: string;
+    function GetContentType: string;
+    property ContentStream: TStream read GetContentStream;
+    property ContentString: string read GetContentString write FContentString;
+    property ContentType: string read GetContentType write SetContentType;
+  end;
 
 implementation
 
-uses
-  System.SysUtils;
+{ TWebMockResponseContentString }
 
-function FixturePath(const AFileName: string): string;
+constructor TWebMockResponseContentString.Create(const AContentString
+  : string = ''; const AContentType: string = 'text/plain; charset=utf-8');
 begin
-  Result := Format('../../Fixtures/%s', [AFileName]);
+  inherited Create;
+  FContentString := AContentString;
+  FContentType := AContentType;
 end;
 
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
+function TWebMockResponseContentString.GetContentType: string;
 begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  Result := LProperty.GetValue(AObject);
+  Result := FContentType;
 end;
 
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
+procedure TWebMockResponseContentString.SetContentType(const Value: string);
 begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  LProperty.SetValue(AObject, AValue);
+  FContentType := Value;
 end;
 
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
-var
-  LHeaders: TStringList;
-  LHeader: TNetHeader;
+function TWebMockResponseContentString.GetContentStream: TStream;
 begin
-  LHeaders := TStringList.Create;
-  for LHeader in ANetHeaders do
-  begin
-    LHeaders.AddPair(LHeader.Name, LHeader.Value);
-  end;
-  Result := LHeaders;
+  Result := TStringStream.Create(ContentString);
 end;
 
-initialization
-  WebClient := THTTPClient.Create;
-finalization
-  WebClient.Free;
+function TWebMockResponseContentString.GetContentString: string;
+begin
+  Result := FContentString;
+end;
+
 end.
