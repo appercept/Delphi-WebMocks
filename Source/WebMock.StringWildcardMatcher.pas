@@ -23,70 +23,42 @@
 {                                                                              }
 {******************************************************************************}
 
-unit TestHelpers;
+unit WebMock.StringWildcardMatcher;
 
 interface
 
 uses
-  System.Classes, System.Net.HttpClient, System.Net.URLClient, System.Rtti;
+  WebMock.StringMatcher;
 
-function FixturePath(const AFileName: string): string;
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
-
-var
-  WebClient: THTTPClient;
+type
+  TWebMockStringWildcardMatcher = class(TInterfacedObject, IStringMatcher)
+  private
+    FValue: string;
+  public
+    constructor Create(const AValue: string = '*');
+    function IsMatch(AValue: string): Boolean;
+    function ToString: string; override;
+    property Value: string read FValue;
+  end;
 
 implementation
 
-uses
-  System.SysUtils;
+{ TWebMockStringWildcardMatcher }
 
-function FixturePath(const AFileName: string): string;
+constructor TWebMockStringWildcardMatcher.Create(const AValue: string = '*');
 begin
-  Result := Format('../../Fixtures/%s', [AFileName]);
+  inherited Create;
+  FValue := AValue;
 end;
 
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
+function TWebMockStringWildcardMatcher.IsMatch(AValue: string): Boolean;
 begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  Result := LProperty.GetValue(AObject);
+  Result := (Value = '*') or (Value = AValue);
 end;
 
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
+function TWebMockStringWildcardMatcher.ToString: string;
 begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  LProperty.SetValue(AObject, AValue);
+  Result := Value;
 end;
 
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
-var
-  LHeaders: TStringList;
-  LHeader: TNetHeader;
-begin
-  LHeaders := TStringList.Create;
-  for LHeader in ANetHeaders do
-  begin
-    LHeaders.AddPair(LHeader.Name, LHeader.Value);
-  end;
-  Result := LHeaders;
-end;
-
-initialization
-  WebClient := THTTPClient.Create;
-finalization
-  WebClient.Free;
 end.

@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2020 Richard Hatherall                               }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -23,70 +23,82 @@
 {                                                                              }
 {******************************************************************************}
 
-unit TestHelpers;
+unit WebMock.Dynamic.RequestStub;
 
 interface
 
 uses
-  System.Classes, System.Net.HttpClient, System.Net.URLClient, System.Rtti;
+  WebMock.HTTP.Messages, WebMock.RequestStub, WebMock.Response,
+  WebMock.ResponseStatus;
 
-function FixturePath(const AFileName: string): string;
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
+type
+  TWebMockDynamicRequestMatcher = reference to function(
+    ARequest: IWebMockHTTPRequest
+  ): Boolean;
 
-var
-  WebClient: THTTPClient;
+  TWebMockDynamicRequestStub = class(TInterfacedObject, IWebMockRequestStub)
+  private
+    FMatcher: TWebMockDynamicRequestMatcher;
+    FResponse: TWebMockResponse;
+  public
+    constructor Create(const AMatcher: TWebMockDynamicRequestMatcher);
+    function ToRespond(AResponseStatus: TWebMockResponseStatus = nil)
+      : TWebMockResponse;
+
+    // IWebMockRequestStub
+    function IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
+    function GetResponse: TWebMockResponse;
+    procedure SetResponse(const AResponse: TWebMockResponse);
+    function ToString: string; override;
+    property Response: TWebMockResponse read GetResponse write SetResponse;
+
+    property Matcher: TWebMockDynamicRequestMatcher read FMatcher;
+  end;
 
 implementation
 
 uses
   System.SysUtils;
 
-function FixturePath(const AFileName: string): string;
+{ TWebMockDynamicRequestStub }
+
+constructor TWebMockDynamicRequestStub.Create(
+  const AMatcher: TWebMockDynamicRequestMatcher);
 begin
-  Result := Format('../../Fixtures/%s', [AFileName]);
+  inherited Create;
+  FMatcher := AMatcher;
+  FResponse := TWebMockResponse.Create;
 end;
 
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
+function TWebMockDynamicRequestStub.GetResponse: TWebMockResponse;
 begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  Result := LProperty.GetValue(AObject);
+  Result := FResponse;
 end;
 
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
+function TWebMockDynamicRequestStub.IsMatch(
+  ARequest: IWebMockHTTPRequest): Boolean;
 begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  LProperty.SetValue(AObject, AValue);
+  Result := Matcher(ARequest);
 end;
 
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
-var
-  LHeaders: TStringList;
-  LHeader: TNetHeader;
+procedure TWebMockDynamicRequestStub.SetResponse(
+  const AResponse: TWebMockResponse);
 begin
-  LHeaders := TStringList.Create;
-  for LHeader in ANetHeaders do
-  begin
-    LHeaders.AddPair(LHeader.Name, LHeader.Value);
-  end;
-  Result := LHeaders;
+  FResponse := AResponse;
 end;
 
-initialization
-  WebClient := THTTPClient.Create;
-finalization
-  WebClient.Free;
+function TWebMockDynamicRequestStub.ToRespond(
+  AResponseStatus: TWebMockResponseStatus): TWebMockResponse;
+begin
+  if Assigned(AResponseStatus) then
+    Response.Status := AResponseStatus;
+
+  Result := Response;
+end;
+
+function TWebMockDynamicRequestStub.ToString: string;
+begin
+  Result := Format('(Dynamic Matcher)' + ^I + '%s', [Response.ToString]);
+end;
+
 end.

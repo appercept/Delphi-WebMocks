@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2020 Richard Hatherall                               }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -23,70 +23,24 @@
 {                                                                              }
 {******************************************************************************}
 
-unit TestHelpers;
+unit WebMock.RequestStub;
 
 interface
 
 uses
-  System.Classes, System.Net.HttpClient, System.Net.URLClient, System.Rtti;
+  System.Classes,
+  WebMock.HTTP.Messages, WebMock.Response;
 
-function FixturePath(const AFileName: string): string;
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
-
-var
-  WebClient: THTTPClient;
+type
+  IWebMockRequestStub = interface(IInterface)
+    ['{AA474C0C-CA37-44CF-A66A-3B024CC79BE6}']
+    function IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
+    function GetResponse: TWebMockResponse;
+    procedure SetResponse(const AResponse: TWebMockResponse);
+    function ToString: string;
+    property Response: TWebMockResponse read GetResponse write SetResponse;
+  end;
 
 implementation
 
-uses
-  System.SysUtils;
-
-function FixturePath(const AFileName: string): string;
-begin
-  Result := Format('../../Fixtures/%s', [AFileName]);
-end;
-
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
-begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  Result := LProperty.GetValue(AObject);
-end;
-
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
-begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  LProperty.SetValue(AObject, AValue);
-end;
-
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
-var
-  LHeaders: TStringList;
-  LHeader: TNetHeader;
-begin
-  LHeaders := TStringList.Create;
-  for LHeader in ANetHeaders do
-  begin
-    LHeaders.AddPair(LHeader.Name, LHeader.Value);
-  end;
-  Result := LHeaders;
-end;
-
-initialization
-  WebClient := THTTPClient.Create;
-finalization
-  WebClient.Free;
 end.

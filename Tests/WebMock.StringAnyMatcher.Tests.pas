@@ -23,70 +23,56 @@
 {                                                                              }
 {******************************************************************************}
 
-unit TestHelpers;
+unit WebMock.StringAnyMatcher.Tests;
 
 interface
 
 uses
-  System.Classes, System.Net.HttpClient, System.Net.URLClient, System.Rtti;
+  DUnitX.TestFramework,
+  IdCustomHTTPServer,
+  WebMock.StringAnyMatcher;
 
-function FixturePath(const AFileName: string): string;
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
+type
 
-var
-  WebClient: THTTPClient;
+  [TestFixture]
+  TWebMockStringAnyMatcherTests = class(TObject)
+  private
+    StringAnyMatcher: TWebMockStringAnyMatcher;
+  public
+    [Setup]
+    procedure Setup;
+    [TearDown]
+    procedure TearDown;
+    [Test]
+    procedure IsMatch_Always_ReturnsTrue;
+    [Test]
+    procedure ToString_Always_ReturnsWildcard;
+  end;
 
 implementation
 
-uses
-  System.SysUtils;
+{ TWebMockStringAnyMatcherTests }
 
-function FixturePath(const AFileName: string): string;
+procedure TWebMockStringAnyMatcherTests.IsMatch_Always_ReturnsTrue;
 begin
-  Result := Format('../../Fixtures/%s', [AFileName]);
+  Assert.IsTrue(StringAnyMatcher.IsMatch('Any Value'));
 end;
 
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
+procedure TWebMockStringAnyMatcherTests.Setup;
 begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  Result := LProperty.GetValue(AObject);
+  StringAnyMatcher := TWebMockStringAnyMatcher.Create;
 end;
 
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
+procedure TWebMockStringAnyMatcherTests.TearDown;
 begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  LProperty.SetValue(AObject, AValue);
+  StringAnyMatcher.Free;
 end;
 
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
-var
-  LHeaders: TStringList;
-  LHeader: TNetHeader;
+procedure TWebMockStringAnyMatcherTests.ToString_Always_ReturnsWildcard;
 begin
-  LHeaders := TStringList.Create;
-  for LHeader in ANetHeaders do
-  begin
-    LHeaders.AddPair(LHeader.Name, LHeader.Value);
-  end;
-  Result := LHeaders;
+  Assert.AreEqual('*', StringAnyMatcher.ToString);
 end;
 
 initialization
-  WebClient := THTTPClient.Create;
-finalization
-  WebClient.Free;
+  TDUnitX.RegisterTestFixture(TWebMockStringAnyMatcherTests);
 end.

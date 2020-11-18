@@ -23,70 +23,87 @@
 {                                                                              }
 {******************************************************************************}
 
-unit TestHelpers;
+unit WebMock.History.Tests;
 
 interface
 
 uses
-  System.Classes, System.Net.HttpClient, System.Net.URLClient, System.Rtti;
+  DUnitX.TestFramework,
+  System.Classes,
+  System.SysUtils,
+  WebMock;
 
-function FixturePath(const AFileName: string): string;
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
-
-var
-  WebClient: THTTPClient;
+type
+  [TestFixture]
+  TWebMockHistoryTests = class(TObject)
+  private
+    WebMock: TWebMock;
+  public
+    [Setup]
+    procedure Setup;
+    [TearDown]
+    procedure TearDown;
+    [Test]
+    procedure History_AfterStubbedRequest_IncreasesCount;
+    [Test]
+    procedure History_AfterUnStubbedRequest_IncreasesCount;
+    [Test]
+    procedure History_AfterRequest_ContainsMatchingRequest;
+  end;
 
 implementation
 
+{ TWebMockHistoryTests }
+
 uses
-  System.SysUtils;
+  System.Generics.Collections,
+  TestHelpers,
+  WebMock.HTTP.Messages;
 
-function FixturePath(const AFileName: string): string;
+procedure TWebMockHistoryTests.History_AfterRequest_ContainsMatchingRequest;
+var
+  LastRequest: IWebMockHTTPRequest;
 begin
-  Result := Format('../../Fixtures/%s', [AFileName]);
+  WebClient.Get(WebMock.URLFor('resource'));
+
+  LastRequest := WebMock.History.Last;
+  Assert.AreEqual('GET', LastRequest.Method);
+  Assert.AreEqual('/resource', LastRequest.RequestURI);
 end;
 
-function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;
+procedure TWebMockHistoryTests.History_AfterStubbedRequest_IncreasesCount;
 var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
+  ExpectedHistoryCount: Integer;
 begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  Result := LProperty.GetValue(AObject);
+  ExpectedHistoryCount := WebMock.History.Count + 1;
+  WebMock.StubRequest('GET', '/stubbed');
+
+  WebClient.Get(WebMock.URLFor('stubbed'));
+
+  Assert.AreEqual(ExpectedHistoryCount, WebMock.History.Count);
 end;
 
-procedure SetPropertyValue(AObject: TObject; APropertyName: string;
-  AValue: TValue);
+procedure TWebMockHistoryTests.History_AfterUnStubbedRequest_IncreasesCount;
 var
-  LContext: TRttiContext;
-  LType: TRttiType;
-  LProperty: TRttiProperty;
+  ExpectedHistoryCount: Integer;
 begin
-  LType := LContext.GetType(AObject.ClassType);
-  LProperty := LType.GetProperty(APropertyName);
-  LProperty.SetValue(AObject, AValue);
+  ExpectedHistoryCount := WebMock.History.Count + 1;
+
+  WebClient.Get(WebMock.URLFor('not-stubbed'));
+
+  Assert.AreEqual(ExpectedHistoryCount, WebMock.History.Count);
 end;
 
-function NetHeadersToStrings(ANetHeaders: TNetHeaders): TStringList;
-var
-  LHeaders: TStringList;
-  LHeader: TNetHeader;
+procedure TWebMockHistoryTests.Setup;
 begin
-  LHeaders := TStringList.Create;
-  for LHeader in ANetHeaders do
-  begin
-    LHeaders.AddPair(LHeader.Name, LHeader.Value);
-  end;
-  Result := LHeaders;
+  WebMock := TWebMock.Create;
+end;
+
+procedure TWebMockHistoryTests.TearDown;
+begin
+  WebMock.Free;
 end;
 
 initialization
-  WebClient := THTTPClient.Create;
-finalization
-  WebClient.Free;
+  TDUnitX.RegisterTestFixture(TWebMockHistoryTests);
 end.
