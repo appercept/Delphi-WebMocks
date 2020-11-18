@@ -81,11 +81,11 @@ begin
 
   // First request
   LResponse := WebClient.Get(WebMock.URLFor('json'));
-  Assert.AreEqual(LExpected, LResponse.ContentAsString);
+  Assert.AreEqual(LExpected, LResponse.ContentAsString, 'on first request');
 
   // Second request
   LResponse := WebClient.Get(WebMock.URLFor('json'));
-  Assert.AreEqual(LExpected, LResponse.ContentAsString);
+  Assert.AreEqual(LExpected, LResponse.ContentAsString, 'on second request');
 end;
 
 procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyFileWithContentType_SetsContentType;
