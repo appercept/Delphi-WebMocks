@@ -1,4 +1,4 @@
-# Delphi-WebMocks
+# WebMocks
 Library for stubbing and setting expectations on HTTP requests in Delphi with
 [DUnitX](https://github.com/VSoftTechnologies/DUnitX).
 
@@ -31,6 +31,11 @@ not be found in your test projects.
    [1.3.0](https://github.com/appercept/Delphi-WebMocks/archive/1.3.0.zip).
 2. In "Tools > Options" under the "Language / Delphi / Library" add the
    extracted `Source` directory to the "Library path" and "Browsing path".
+
+## Unreleased Breaking Changes
+Version 2 will include a change to the unit naming within the project. All units
+have the `Delphi.` prefix dropped. Existing projects will need to have their
+`uses` clauses updated to remove any `Delphi.` prefixes from WebMocks units.
 
 ## Setup
 In your test unit file a couple of simple steps are required.
@@ -337,6 +342,9 @@ WebMock.Assert
 Anything that can be asserted positively (`WasRequested`) can also be asserted
 negatively with `WasNotRequested`. This is useful to check your code is not
 performing extra unwanted requests.
+
+## Semantic Versioning
+This project follows [Semantic Versioning](https://semver.org).
 
 ## License
 Copyright ©2019 Richard Hatherall <richard@appercept.com>
