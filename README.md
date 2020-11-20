@@ -1,3 +1,9 @@
+![Delphi compatibility](https://img.shields.io/badge/Delphi-XE8%20or%20newer-brightgreen)
+![Platform compatibility](https://img.shields.io/badge/platform-Linux64%20%7C%20macOS64%20%7C%20Win32%20%7C%20Win64-lightgrey)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/appercept/Delphi-WebMocks)
+![License](https://img.shields.io/github/license/appercept/Delphi-WebMocks)
+![Lines of Code](https://tokei.rs/b1/github/appercept/Delphi-WebMocks)
+
 # WebMocks
 Library for stubbing and setting expectations on HTTP requests in Delphi with
 [DUnitX](https://github.com/VSoftTechnologies/DUnitX).
