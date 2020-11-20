@@ -7,17 +7,10 @@ Library for stubbing and setting expectations on HTTP requests in Delphi with
 * [DUnitX](https://github.com/VSoftTechnologies/DUnitX)
 * [Indy](https://www.indyproject.org)
 
-\* Delphi-WebMocks was developed in Delphi 10.3 (Rio) and 10.4 (Sydney).
-WebMocks has been reported working on 10.1 (Berlin). I'd be interested to hear
-from anyone working on other versions. As Delphi-WebMocks makes use of the
-`System.Net library introduced with XE8 it will not be compatible with earlier
-versions.
-
-## Optional Dependencies
-* [TestInsight](https://bitbucket.org/sglienke/testinsight/wiki/Home) is
-  required to run the Delphi-WebMocks test suite, so, if you're considering
-  contributing and need to run the test suite, install it. If you do TDD in
-  Delphi I would recommend installing and using it in your own projects.
+\* WebMocks was developed in Delphi 10.3 (Rio) and 10.4 (Sydney). WebMocks has
+been reported working on 10.1 (Berlin). I'd be interested to hear from anyone
+working on other versions. As WebMocks makes use of the `System.Net`
+library introduced with XE8 it will not be compatible with earlier versions.
 
 ## Installation: Delphinus-Support
 WebMocks should now be listed in
@@ -103,13 +96,13 @@ end.
 ```
 
 By default `TWebMock` will bind to a port dynamically assigned start at `8080`.
-This behaviour can be overriden by sepcifying a port at creation.
+This behaviour can be overriden by specifying a port at creation.
 ```Delphi
 WebMock := TWebMock.Create(8088);
 ```
 
 The use of `WebMock.URLFor` function within your tests is to simplify
-constructing a valid URL. The `Port` property containes the current bound port
+constructing a valid URL. The `Port` property contains the current bound port
 and `BaseURL` property contains a valid URL for the server root.
 
 ## Examples
@@ -342,6 +335,12 @@ WebMock.Assert
 Anything that can be asserted positively (`WasRequested`) can also be asserted
 negatively with `WasNotRequested`. This is useful to check your code is not
 performing extra unwanted requests.
+
+## Development Dependencies (Optional)
+* [TestInsight](https://bitbucket.org/sglienke/testinsight/wiki/Home) is
+  required to run the Delphi-WebMocks test suite, so, if you're considering
+  contributing and need to run the test suite, install it. If you do TDD in
+  Delphi I would recommend installing and using it in your own projects.
 
 ## Semantic Versioning
 This project follows [Semantic Versioning](https://semver.org).
