@@ -44,14 +44,14 @@ interface
 
 uses
   DUnitX.TestFramework,
-  MyTestObjectUnit,
+  MyObjectUnit,
   WebMock;
 
 type
-  TMyTestObjectTests = class(TObject)
+  TMyObjectTests = class(TObject)
   private
     WebMock: TWebMock;
-    Subject: TMyTestObject;
+    Subject: TMyObject;
   public
     [Setup]
     procedure Setup;
@@ -63,24 +63,25 @@ type
 
 implementation
 
-procedure TMyTestObjectTests.Setup;
+procedure TMyObjectTests.Setup;
 begin
   WebMock := TWebMock.Create;
 end;
 
-procedure TMyTestObjectTests.TearDown;
+procedure TMyObjectTests.TearDown;
 begin
   WebMock.Free;
 end;
 
-procedure TMyTestObjectTests.TestGet;
+procedure TMyObjectTests.TestGet;
 begin
   // Arrange
   // Stub the request
   WebMock.StubRequest('GET', '/endpoint');
 
-  // Point your subject at the endpoint
-  Subject := TMyTestObject.Create(WebMock.URLFor('endpoint'));
+  // Create your subject and point it at the endpoint
+  Subject := TMyObject.Create;
+  Subject.EndpointURL := WebMock.URLFor('endpoint');
 
   // Act
   Subject.Get;
@@ -90,8 +91,7 @@ begin
 end;
 
 initialization
-  TDUnitX.RegisterTestFixture(TMyTestObjectTests);
-
+  TDUnitX.RegisterTestFixture(TMyObjectTests);
 end.
 ```
 
