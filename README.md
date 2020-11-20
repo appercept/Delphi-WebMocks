@@ -355,6 +355,8 @@ performing extra unwanted requests.
 This project follows [Semantic Versioning](https://semver.org).
 
 ## License
-Copyright ©2019 Richard Hatherall <richard@appercept.com>
+Copyright ©2019-2020 Richard Hatherall <richard@appercept.com>
+
+WebMocks is distributed under the terms of the Apache License (Version 2.0).
 
 See [LICENSE](LICENSE) for details.
