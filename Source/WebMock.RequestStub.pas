@@ -29,16 +29,19 @@ interface
 
 uses
   System.Classes,
-  WebMock.HTTP.Messages, WebMock.Response;
+  System.Net.HttpClient,
+  WebMock.HTTP.Messages,
+  WebMock.Responder,
+  WebMock.Response;
 
 type
   IWebMockRequestStub = interface(IInterface)
     ['{AA474C0C-CA37-44CF-A66A-3B024CC79BE6}']
     function IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
-    function GetResponse: TWebMockResponse;
-    procedure SetResponse(const AResponse: TWebMockResponse);
+    function GetResponder: IWebMockResponder;
+    procedure SetResponder(const AResponder: IWebMockResponder);
     function ToString: string;
-    property Response: TWebMockResponse read GetResponse write SetResponse;
+    property Responder: IWebMockResponder read GetResponder write SetResponder;
   end;
 
 implementation

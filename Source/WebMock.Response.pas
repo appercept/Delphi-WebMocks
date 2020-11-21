@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2019-2020 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -29,11 +29,44 @@ interface
 
 uses
   System.Classes,
-  WebMock.ResponseBodySource, WebMock.ResponseStatus;
+  WebMock.HTTP.Messages,
+  WebMock.ResponseBodySource,
+  WebMock.ResponseStatus;
 
 type
-  TWebMockResponse = class(TObject)
+  IWebMockResponseBuilder = interface(IInterface)
+    ['{7F071795-E710-44B6-B799-4BE03ADC954F}']
+    function WithBody(const AContent: string;
+      const AContentType: string = 'text/plain; charset=utf-8'): IWebMockResponseBuilder;
+    function WithBodyFile(const AFileName: string;
+      const AContentType: string = ''): IWebMockResponseBuilder;
+    function WithHeader(const AHeaderName, AHeaderValue: string): IWebMockResponseBuilder;
+    function WithHeaders(const AHeaders: TStrings): IWebMockResponseBuilder;
+    function WithStatus(const AStatus: TWebMockResponseStatus): IWebMockResponseBuilder; overload;
+    function WithStatus(const AStatusCode: Integer; const AStatusText: string = ''): IWebMockResponseBuilder; overload;
+  end;
+
+  TWebMockResponse = class(TInterfacedObject, IWebMockResponseBuilder)
+  private type
+
+    TBuilder = class(TInterfacedObject, IWebMockResponseBuilder)
+    private
+      FResponse: TWebMockResponse;
+    public
+      constructor Create(const AResponse: TWebMockResponse);
+      function WithBody(const AContent: string;
+        const AContentType: string = 'text/plain; charset=utf-8'): IWebMockResponseBuilder;
+      function WithBodyFile(const AFileName: string;
+        const AContentType: string = ''): IWebMockResponseBuilder;
+      function WithHeader(const AHeaderName, AHeaderValue: string): IWebMockResponseBuilder;
+      function WithHeaders(const AHeaders: TStrings): IWebMockResponseBuilder;
+      function WithStatus(const AStatus: TWebMockResponseStatus): IWebMockResponseBuilder; overload;
+      function WithStatus(const AStatusCode: Integer; const AStatusText: string = ''): IWebMockResponseBuilder; overload;
+      property Response: TWebMockResponse read FResponse;
+    end;
+
   private
+    FBuilder: IWebMockResponseBuilder;
     FBodySource: IWebMockResponseBodySource;
     FHeaders: TStringList;
     FStatus: TWebMockResponseStatus;
@@ -41,12 +74,7 @@ type
     constructor Create(const AStatus: TWebMockResponseStatus = nil);
     destructor Destroy; override;
     function ToString: string; override;
-    function WithBody(const AContent: string;
-      const AContentType: string = 'text/plain; charset=utf-8'): TWebMockResponse;
-    function WithBodyFile(const AFileName: string;
-      const AContentType: string = ''): TWebMockResponse;
-    function WithHeader(AHeaderName, AHeaderValue: string): TWebMockResponse;
-    function WithHeaders(AHeaders: TStrings): TWebMockResponse;
+    property Builder: IWebMockResponseBuilder read FBuilder implements IWebMockResponseBuilder;
     property BodySource: IWebMockResponseBodySource read FBodySource write FBodySource;
     property Headers: TStringList read FHeaders write FHeaders;
     property Status: TWebMockResponseStatus read FStatus write FStatus;
@@ -58,12 +86,14 @@ implementation
 
 uses
   System.SysUtils,
-  WebMock.ResponseContentFile, WebMock.ResponseContentString;
+  WebMock.ResponseContentFile,
+  WebMock.ResponseContentString;
 
 constructor TWebMockResponse.Create(const AStatus
   : TWebMockResponseStatus = nil);
 begin
   inherited Create;
+  FBuilder := TBuilder.Create(Self);
   FBodySource := TWebMockResponseContentString.Create;
   FHeaders := TStringList.Create;
   if Assigned(AStatus) then
@@ -84,33 +114,61 @@ begin
   Result := Format('%s', [Status.ToString]);
 end;
 
-function TWebMockResponse.WithBody(const AContent: string;
-  const AContentType: string = 'text/plain; charset=utf-8'): TWebMockResponse;
+{ TWebMockResponse.TBuilder }
+
+constructor TWebMockResponse.TBuilder.Create(const AResponse: TWebMockResponse);
 begin
-  BodySource := TWebMockResponseContentString.Create(AContent, AContentType);
+  inherited Create;
+  FResponse := AResponse;
+end;
+
+function TWebMockResponse.TBuilder.WithBody(const AContent,
+  AContentType: string): IWebMockResponseBuilder;
+begin
+  Response.BodySource := TWebMockResponseContentString.Create(AContent, AContentType);
 
   Result := Self;
 end;
 
-function TWebMockResponse.WithBodyFile(const AFileName: string;
-  const AContentType: string = ''): TWebMockResponse;
+
+function TWebMockResponse.TBuilder.WithBodyFile(const AFileName,
+  AContentType: string): IWebMockResponseBuilder;
 begin
-  BodySource := TWebMockResponseContentFile.Create(AFileName, AContentType);
+  Response.BodySource := TWebMockResponseContentFile.Create(AFileName, AContentType);
 
   Result := Self;
 end;
 
-function TWebMockResponse.WithHeader(AHeaderName,
-  AHeaderValue: string): TWebMockResponse;
+
+function TWebMockResponse.TBuilder.WithHeader(const AHeaderName,
+  AHeaderValue: string): IWebMockResponseBuilder;
 begin
-  Headers.Values[AHeaderName] := AHeaderValue;
+  Response.Headers.Values[AHeaderName] := AHeaderValue;
 
   Result := Self;
 end;
 
-function TWebMockResponse.WithHeaders(AHeaders: TStrings): TWebMockResponse;
+
+function TWebMockResponse.TBuilder.WithHeaders(
+  const AHeaders: TStrings): IWebMockResponseBuilder;
 begin
-  Headers.AddStrings(AHeaders);
+  Response.Headers.AddStrings(AHeaders);
+
+  Result := Self;
+end;
+
+function TWebMockResponse.TBuilder.WithStatus(const AStatusCode: Integer;
+  const AStatusText: string = ''): IWebMockResponseBuilder;
+begin
+  Response.Status := TWebMockResponseStatus.Create(AStatusCode, AStatusText);
+
+  Result := Self;
+end;
+
+function TWebMockResponse.TBuilder.WithStatus(
+  const AStatus: TWebMockResponseStatus): IWebMockResponseBuilder;
+begin
+  Response.Status := AStatus;
 
   Result := Self;
 end;

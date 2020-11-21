@@ -28,12 +28,22 @@ unit WebMock;
 interface
 
 uses
-  IdContext, IdCustomHTTPServer, IdGlobal, IdHTTPServer,
-  System.Classes, System.Generics.Collections, System.RegularExpressions,
+  IdContext,
+  IdCustomHTTPServer,
+  IdGlobal,
+  IdHTTPServer,
+  System.Classes,
+  System.Generics.Collections,
+  System.RegularExpressions,
   System.SysUtils,
-  WebMock.Assertion, WebMock.HTTP.Messages, WebMock.RequestStub,
-  WebMock.Static.RequestStub, WebMock.Dynamic.RequestStub, WebMock.Response,
-  WebMock.ResponseBodySource, WebMock.ResponseStatus;
+  WebMock.Assertion,
+  WebMock.HTTP.Messages,
+  WebMock.RequestStub,
+  WebMock.Static.RequestStub,
+  WebMock.Dynamic.RequestStub,
+  WebMock.Response,
+  WebMock.ResponseBodySource,
+  WebMock.ResponseStatus;
 
 type
   EWebMockError = class(Exception);
@@ -181,7 +191,10 @@ begin
   History.Add(LRequest);
   LRequestStub := GetRequestStub(LRequest);
   if Assigned(LRequestStub) then
-    RespondWith(LRequestStub.Response, AResponseInfo)
+    RespondWith(
+      LRequestStub.Responder.GetResponseTo(LRequest),
+      AResponseInfo
+    )
   else
     SetResponseStatus(AResponseInfo, TWebMockResponseStatus.NotImplemented);
 end;

@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2019-2020 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -81,9 +81,14 @@ implementation
 uses
   IdCustomHTTPServer,
   Mock.Indy.HTTPRequestInfo,
-  System.Classes, System.RegularExpressions,
-  WebMock.HTTP.RequestMatcher, WebMock.RequestStub, WebMock.Response,
-  WebMock.ResponseStatus, WebMock.StringMatcher, WebMock.StringWildcardMatcher,
+  System.Classes,
+  System.RegularExpressions,
+  WebMock.HTTP.RequestMatcher,
+  WebMock.RequestStub,
+  WebMock.Response,
+  WebMock.ResponseStatus,
+  WebMock.StringMatcher,
+  WebMock.StringWildcardMatcher,
   WebMock.StringRegExMatcher;
 
 { TWebMockRequestStubTests }
@@ -112,7 +117,7 @@ end;
 
 procedure TWebMockStaticRequestStubTests.ToRespond_Always_ReturnsAResponseStub;
 begin
-  Assert.IsTrue(StubbedRequest.ToRespond is TWebMockResponse);
+  Assert.IsNotNull(StubbedRequest.ToRespond as IWebMockResponseBuilder);
 end;
 
 procedure TWebMockStaticRequestStubTests.ToRespond_WithNoArguments_DoesNotRaiseException;
@@ -128,11 +133,12 @@ procedure TWebMockStaticRequestStubTests.ToRespond_WithNoArguments_DoesNotChange
 var
   LExpectedStatus: TWebMockResponseStatus;
 begin
-  LExpectedStatus := StubbedRequest.Response.Status;
+  LExpectedStatus := StubbedRequest.Responder.GetResponseTo(nil).Status;
 
   StubbedRequest.ToRespond;
 
-  Assert.AreSame(LExpectedStatus, StubbedRequest.Response.Status);
+  Assert.AreSame(LExpectedStatus,
+                 StubbedRequest.Responder.GetResponseTo(nil).Status);
 end;
 
 procedure TWebMockStaticRequestStubTests.ToRespond_WithResponse_SetsResponseStatus;
@@ -143,7 +149,7 @@ begin
 
   StubbedRequest.ToRespond(LResponse);
 
-  Assert.AreSame(LResponse, StubbedRequest.Response.Status);
+  Assert.AreSame(LResponse, StubbedRequest.Responder.GetResponseTo(nil).Status);
 end;
 
 procedure TWebMockStaticRequestStubTests.WithBody_GivenRegEx_ReturnsSelf;

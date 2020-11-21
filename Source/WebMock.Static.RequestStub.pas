@@ -29,20 +29,31 @@ interface
 
 uses
   IdCustomHTTPServer,
-  System.Classes, System.Generics.Collections, System.RegularExpressions,
-  WebMock.HTTP.Messages, WebMock.HTTP.RequestMatcher, WebMock.RequestStub,
-  WebMock.Response, WebMock.ResponseStatus;
+  System.Classes,
+  System.Generics.Collections,
+  System.RegularExpressions,
+  WebMock.Dynamic.Responder,
+  WebMock.HTTP.Messages,
+  WebMock.HTTP.RequestMatcher,
+  WebMock.RequestStub,
+  WebMock.Responder,
+  WebMock.Response,
+  WebMock.ResponseStatus;
 
 type
   TWebMockStaticRequestStub = class(TInterfacedObject, IWebMockRequestStub)
   private
     FMatcher: TWebMockHTTPRequestMatcher;
+    FResponder: IWebMockResponder;
     FResponse: TWebMockResponse;
+    property Response: TWebMockResponse read FResponse;
   public
     constructor Create(AMatcher: TWebMockHTTPRequestMatcher);
     destructor Destroy; override;
     function ToRespond(AResponseStatus: TWebMockResponseStatus = nil)
-      : TWebMockResponse;
+      : IWebMockResponseBuilder;
+    procedure ToRespondWith(const AProc: TWebMockDynamicResponse);
+
     function WithBody(const AContent: string): TWebMockStaticRequestStub; overload;
     function WithBody(const APattern: TRegEx): TWebMockStaticRequestStub; overload;
     function WithHeader(AName, AValue: string): TWebMockStaticRequestStub; overload;
@@ -52,10 +63,10 @@ type
 
     // IWebMockRequestStub
     function IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
-    function GetResponse: TWebMockResponse;
-    procedure SetResponse(const AResponse: TWebMockResponse);
+    function GetResponder: IWebMockResponder;
+    procedure SetResponder(const AResponder: IWebMockResponder);
     function ToString: string; override;
-    property Response: TWebMockResponse read GetResponse write SetResponse;
+    property Responder: IWebMockResponder read GetResponder write SetResponder;
 
     property Matcher: TWebMockHTTPRequestMatcher read FMatcher;
   end;
@@ -64,7 +75,9 @@ implementation
 
 uses
   System.SysUtils,
-  WebMock.StringWildcardMatcher, WebMock.StringRegExMatcher;
+  WebMock.Static.Responder,
+  WebMock.StringWildcardMatcher,
+  WebMock.StringRegExMatcher;
 
 { TWebMockRequestStub }
 
@@ -73,6 +86,7 @@ begin
   inherited Create;
   FMatcher := AMatcher;
   FResponse := TWebMockResponse.Create;
+  FResponder := TWebMockStaticResponder.Create(Response);
 end;
 
 destructor TWebMockStaticRequestStub.Destroy;
@@ -83,9 +97,9 @@ begin
   inherited;
 end;
 
-function TWebMockStaticRequestStub.GetResponse: TWebMockResponse;
+function TWebMockStaticRequestStub.GetResponder: IWebMockResponder;
 begin
-  Result := FResponse;
+  Result := FResponder;
 end;
 
 function TWebMockStaticRequestStub.IsMatch(
@@ -94,19 +108,25 @@ begin
   Result := Matcher.IsMatch(ARequest);
 end;
 
-procedure TWebMockStaticRequestStub.SetResponse(
-  const AResponse: TWebMockResponse);
+procedure TWebMockStaticRequestStub.SetResponder(
+  const AResponder: IWebMockResponder);
 begin
-
+  FResponder := AResponder;
 end;
 
 function TWebMockStaticRequestStub.ToRespond(
-  AResponseStatus: TWebMockResponseStatus = nil): TWebMockResponse;
+  AResponseStatus: TWebMockResponseStatus = nil): IWebMockResponseBuilder;
 begin
   if Assigned(AResponseStatus) then
     Response.Status := AResponseStatus;
 
-  Result := Response;
+  Result := Response as IWebMockResponseBuilder;
+end;
+
+procedure TWebMockStaticRequestStub.ToRespondWith(
+  const AProc: TWebMockDynamicResponse);
+begin
+  Responder := TWebMockDynamicResponder.Create(AProc);
 end;
 
 function TWebMockStaticRequestStub.ToString: string;
