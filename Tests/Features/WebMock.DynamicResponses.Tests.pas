@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019-2020 Richard Hatherall                          }
+{           Copyright (c) 2020 Richard Hatherall                               }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -23,71 +23,92 @@
 {                                                                              }
 {******************************************************************************}
 
-unit WebMock.Response.Tests;
+unit WebMock.DynamicResponses.Tests;
 
 interface
 
 uses
   DUnitX.TestFramework,
-  WebMock.Response;
+  WebMock;
 
 type
   [TestFixture]
-  TWebMockResponseTests = class(TObject)
+  TWebMockDynamicResponsesTests = class(TObject)
   private
-    WebMockResponse: TWebMockResponse;
+    WebMock: TWebMock;
   public
     [Setup]
     procedure Setup;
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure Create_WithoutArguments_SetsStatusToOK;
+    procedure DynamicResponse_WithStaticMatcher_ReceivesRequest;
     [Test]
-    procedure Create_WithStatus_SetsStatus;
-    [Test]
-    procedure BodySource_WhenNotSet_ReturnsEmptyContentSource;
+    procedure DynamicResponse_WithDynamicMatcher_ReceivesRequest;
   end;
 
 implementation
 
-{ TWebMockResponseTests }
-
 uses
+  System.Net.HttpClient,
   TestHelpers,
-  WebMock.ResponseStatus;
+  WebMock.HTTP.Messages,
+  WebMock.Response;
 
-procedure TWebMockResponseTests.Setup;
-begin
-  WebMockResponse := TWebMockResponse.Create;
-end;
+{ TWebMockDynamicResponsesTests }
 
-procedure TWebMockResponseTests.TearDown;
-begin
-  WebMockResponse.Free;
-end;
-
-procedure TWebMockResponseTests.BodySource_WhenNotSet_ReturnsEmptyContentSource;
-begin
-  Assert.AreEqual(Int64(0), WebMockResponse.BodySource.ContentStream.Size);
-end;
-
-procedure TWebMockResponseTests.Create_WithoutArguments_SetsStatusToOK;
-begin
-  Assert.AreEqual(200, WebMockResponse.Status.Code);
-end;
-
-procedure TWebMockResponseTests.Create_WithStatus_SetsStatus;
+procedure TWebMockDynamicResponsesTests.DynamicResponse_WithDynamicMatcher_ReceivesRequest;
 var
-  LExpectedStatus: TWebMockResponseStatus;
+  LResponse: IHTTPResponse;
 begin
-  LExpectedStatus := TWebMockResponseStatus.Accepted;
+  WebMock.StubRequest(
+    function(ARequest: IWebMockHTTPRequest): Boolean
+    begin
+      Result := True;
+    end
+  ).ToRespondWith(
+    procedure(const ARequest: IWebMockHTTPRequest; const AResponse: IWebMockResponseBuilder)
+    begin
+      AResponse
+        .WithStatus(555)
+        .WithBody('Dynamic response.');
+    end
+  );
 
-  WebMockResponse := TWebMockResponse.Create(LExpectedStatus);
+  LResponse := WebClient.Get(WebMock.URLFor('/'));
 
-  Assert.AreSame(LExpectedStatus, WebMockResponse.Status);
+  Assert.AreEqual(555, LResponse.StatusCode);
+end;
+
+procedure TWebMockDynamicResponsesTests.DynamicResponse_WithStaticMatcher_ReceivesRequest;
+var
+  LResponse: IHTTPResponse;
+begin
+  WebMock.StubRequest('*', '*')
+    .ToRespondWith(
+      procedure(const ARequest: IWebMockHTTPRequest; const AResponse: IWebMockResponseBuilder)
+      begin
+        AResponse
+          .WithStatus(555)
+          .WithBody('Dynamic response.');
+      end
+    );
+
+  LResponse := WebClient.Get(WebMock.URLFor('/'));
+
+  Assert.AreEqual(555, LResponse.StatusCode);
+end;
+
+procedure TWebMockDynamicResponsesTests.Setup;
+begin
+  WebMock := TWebMock.Create;
+end;
+
+procedure TWebMockDynamicResponsesTests.TearDown;
+begin
+  WebMock.Free;
 end;
 
 initialization
-  TDUnitX.RegisterTestFixture(TWebMockResponseTests);
+  TDUnitX.RegisterTestFixture(TWebMockDynamicResponsesTests);
 end.

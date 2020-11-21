@@ -75,9 +75,13 @@ implementation
 uses
   Mock.Indy.HTTPRequestInfo,
   TestHelpers,
-  System.Classes, System.Generics.Collections,
-  WebMock.HTTP.Messages, WebMock.HTTP.Request, WebMock.StringMatcher,
-  WebMock.StringAnyMatcher, WebMock.StringWildcardMatcher;
+  System.Classes,
+  System.Generics.Collections,
+  WebMock.HTTP.Messages,
+  WebMock.HTTP.Request,
+  WebMock.StringMatcher,
+  WebMock.StringAnyMatcher,
+  WebMock.StringWildcardMatcher;
 
 { TWebMockHTTPRequestMatcherTests }
 

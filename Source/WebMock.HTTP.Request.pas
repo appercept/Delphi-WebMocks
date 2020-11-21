@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2019-2020 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -28,7 +28,8 @@ unit WebMock.HTTP.Request;
 interface
 
 uses
-  IdCustomHTTPServer, IdHeaderList,
+  IdCustomHTTPServer,
+  IdHeaderList,
   System.Classes,
   WebMock.HTTP.Messages;
 

@@ -28,7 +28,11 @@ unit WebMock.Dynamic.RequestStub;
 interface
 
 uses
-  WebMock.HTTP.Messages, WebMock.RequestStub, WebMock.Response,
+  WebMock.Dynamic.Responder,
+  WebMock.HTTP.Messages,
+  WebMock.RequestStub,
+  WebMock.Responder,
+  WebMock.Response,
   WebMock.ResponseStatus;
 
 type
@@ -39,18 +43,21 @@ type
   TWebMockDynamicRequestStub = class(TInterfacedObject, IWebMockRequestStub)
   private
     FMatcher: TWebMockDynamicRequestMatcher;
+    FResponder: IWebMockResponder;
     FResponse: TWebMockResponse;
+    property Response: TWebMockResponse read FResponse;
   public
     constructor Create(const AMatcher: TWebMockDynamicRequestMatcher);
     function ToRespond(AResponseStatus: TWebMockResponseStatus = nil)
-      : TWebMockResponse;
+      : IWebMockResponseBuilder;
+    procedure ToRespondWith(const AProc: TWebMockDynamicResponse);
 
-    // IWebMockRequestStub
+    { IWebMockRequestStub }
     function IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
-    function GetResponse: TWebMockResponse;
-    procedure SetResponse(const AResponse: TWebMockResponse);
+    function GetResponder: IWebMockResponder;
+    procedure SetResponder(const AResponder: IWebMockResponder);
     function ToString: string; override;
-    property Response: TWebMockResponse read GetResponse write SetResponse;
+    property Responder: IWebMockResponder read GetResponder write SetResponder;
 
     property Matcher: TWebMockDynamicRequestMatcher read FMatcher;
   end;
@@ -58,7 +65,8 @@ type
 implementation
 
 uses
-  System.SysUtils;
+  System.SysUtils,
+  WebMock.Static.Responder;
 
 { TWebMockDynamicRequestStub }
 
@@ -68,11 +76,12 @@ begin
   inherited Create;
   FMatcher := AMatcher;
   FResponse := TWebMockResponse.Create;
+  FResponder := TWebMockStaticResponder.Create(FResponse)
 end;
 
-function TWebMockDynamicRequestStub.GetResponse: TWebMockResponse;
+function TWebMockDynamicRequestStub.GetResponder: IWebMockResponder;
 begin
-  Result := FResponse;
+  Result := FResponder;
 end;
 
 function TWebMockDynamicRequestStub.IsMatch(
@@ -81,19 +90,25 @@ begin
   Result := Matcher(ARequest);
 end;
 
-procedure TWebMockDynamicRequestStub.SetResponse(
-  const AResponse: TWebMockResponse);
+procedure TWebMockDynamicRequestStub.SetResponder(
+  const AResponder: IWebMockResponder);
 begin
-  FResponse := AResponse;
+  FResponder := AResponder;
 end;
 
 function TWebMockDynamicRequestStub.ToRespond(
-  AResponseStatus: TWebMockResponseStatus): TWebMockResponse;
+  AResponseStatus: TWebMockResponseStatus): IWebMockResponseBuilder;
 begin
   if Assigned(AResponseStatus) then
     Response.Status := AResponseStatus;
 
   Result := Response;
+end;
+
+procedure TWebMockDynamicRequestStub.ToRespondWith(
+  const AProc: TWebMockDynamicResponse);
+begin
+  Responder := TWebMockDynamicResponder.Create(AProc);
 end;
 
 function TWebMockDynamicRequestStub.ToString: string;

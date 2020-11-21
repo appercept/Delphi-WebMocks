@@ -53,7 +53,14 @@ uses
   WebMock.DynamicMatching.Tests in 'Features\WebMock.DynamicMatching.Tests.pas',
   WebMock.Dynamic.RequestStub.Tests in 'WebMock.Dynamic.RequestStub.Tests.pas',
   WebMock.Dynamic.RequestStub in '..\Source\WebMock.Dynamic.RequestStub.pas',
-  WebMock.RequestStub in '..\Source\WebMock.RequestStub.pas';
+  WebMock.RequestStub in '..\Source\WebMock.RequestStub.pas',
+  WebMock.Static.Responder.Tests in 'WebMock.Static.Responder.Tests.pas',
+  WebMock.Static.Responder in '..\Source\WebMock.Static.Responder.pas',
+  WebMock.Responder in '..\Source\WebMock.Responder.pas',
+  WebMock.ResponseBuilder.Tests in 'WebMock.ResponseBuilder.Tests.pas',
+  WebMock.DynamicResponses.Tests in 'Features\WebMock.DynamicResponses.Tests.pas',
+  WebMock.Dynamic.Responder.Tests in 'WebMock.Dynamic.Responder.Tests.pas',
+  WebMock.Dynamic.Responder in '..\Source\WebMock.Dynamic.Responder.pas';
 
 var
   Runner: ITestRunner;

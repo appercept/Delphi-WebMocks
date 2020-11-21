@@ -44,10 +44,6 @@ type
     [Test]
     procedure IsMatch_WhenInitializedWithFunctionReturningFalse_ReturnsFalse;
     [Test]
-    procedure GetResponse_Always_GetsResponse;
-    [Test]
-    procedure SetResponse_Always_SetsResponse;
-    [Test]
     procedure ToRespond_Always_ReturnsAResponseStub;
     [Test]
     procedure ToRespond_WithNoArguments_DoesNotRaiseException;
@@ -60,10 +56,13 @@ type
 implementation
 
 uses
-  Mock.Indy.HTTPRequestInfo,
   IdCustomHTTPServer,
-  WebMock.HTTP.Messages, WebMock.HTTP.Request, WebMock.RequestStub,
-  WebMock.Response, WebMock.ResponseStatus;
+  Mock.Indy.HTTPRequestInfo,
+  WebMock.HTTP.Messages,
+  WebMock.HTTP.Request,
+  WebMock.RequestStub,
+  WebMock.Response,
+  WebMock.ResponseStatus;
 
 { TWebMockDynamicRequestStubTests }
 
@@ -79,11 +78,6 @@ begin
   );
 
   Assert.Implements<IWebMockRequestStub>(LSubject);
-end;
-
-procedure TWebMockDynamicRequestStubTests.GetResponse_Always_GetsResponse;
-begin
-  Assert.IsTrue(StubbedRequest.GetResponse <> nil, 'GetResponse should return a response');
 end;
 
 procedure TWebMockDynamicRequestStubTests.IsMatch_WhenInitializedWithFunctionReturningFalse_ReturnsFalse;
@@ -122,31 +116,21 @@ begin
   Assert.IsTrue(StubbedRequest.IsMatch(LRequest));
 end;
 
-procedure TWebMockDynamicRequestStubTests.SetResponse_Always_SetsResponse;
-var
-  LResponse: TWebMockResponse;
-begin
-  LResponse := TWebMockResponse.Create;
-
-  StubbedRequest.SetResponse(LResponse);
-
-  Assert.AreSame(LResponse, StubbedRequest.Response, 'SetResponse should set Response');
-end;
-
 procedure TWebMockDynamicRequestStubTests.ToRespond_Always_ReturnsAResponseStub;
 begin
-  Assert.IsTrue(StubbedRequest.ToRespond is TWebMockResponse);
+  Assert.IsNotNull(StubbedRequest.ToRespond as IWebMockResponseBuilder);
 end;
 
 procedure TWebMockDynamicRequestStubTests.ToRespond_WithNoArguments_DoesNotChangeStatus;
 var
   LExpectedStatus: TWebMockResponseStatus;
 begin
-  LExpectedStatus := StubbedRequest.Response.Status;
+  LExpectedStatus := StubbedRequest.Responder.GetResponseTo(nil).Status;
 
   StubbedRequest.ToRespond;
 
-  Assert.AreSame(LExpectedStatus, StubbedRequest.Response.Status);
+  Assert.AreSame(LExpectedStatus,
+                 StubbedRequest.Responder.GetResponseTo(nil).Status);
 end;
 
 procedure TWebMockDynamicRequestStubTests.ToRespond_WithNoArguments_DoesNotRaiseException;

@@ -284,6 +284,53 @@ compiler will be output to the `Win32\Debug` folder. To correctly reference a
 file named `Content.txt` in the project folder, the path will be
 `..\..\Content.txt`.
 
+#### Dynamic Responses
+Sometimes it is useful to dynamically respond to a request. For example:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .ToRespondWith(
+    procedure (const ARequest: IWebMockHTTPRequest;
+               const AResponse: IWebMockResponseBuilder)
+    begin
+      AReponse
+        .WithStatus(202)
+        .WithHeader('header-1', 'a-value')
+        .WithBody('Some content...');
+    end
+  );
+```
+
+This enables testing of features that require deeper inspection of the request
+or to reflect values from the request back in the response. For example:
+```Delphi
+WebMock.StubRequest('GET', '/echo_header')
+  .ToRespondWith(
+    procedure (const ARequest: IWebMockHTTPRequest;
+               const AResponse: IWebMockHTTPResponseBuilder)
+    begin
+      AResponse.WithHeader('my-header', ARequest.Headers.Values['my-header']);
+    end
+  );
+```
+
+It can also be useful for simulating failures for a number of attempts before
+returning a success. For example:
+```Delphi
+var LRequestCount := 0;
+WebMock.StubRequest('GET', '/busy_endpoint')
+  .ToRespondWith(
+    procedure (const ARequest: IWebMockHTTPRequest;
+               const AResponse: IWebMockHTTPResponseBuilder)
+    begin
+      Inc(LRequestCount);
+      if LRequestCount < 3 then
+        AResponse.WithStatus(408, 'Request Timeout')
+      else
+        AResponse.WithStatus(200, 'OK');
+    end
+  );
+```
+
 ### Resetting Registered Stubs
 If you need to clear the current registered stubs you can call
 `ResetStubRegistry` or `Reset` on the instance of TWebMock. The general `Reset`

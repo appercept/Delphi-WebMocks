@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019-2020 Richard Hatherall                          }
+{           Copyright (c) 2020 Richard Hatherall                               }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -23,71 +23,43 @@
 {                                                                              }
 {******************************************************************************}
 
-unit WebMock.Response.Tests;
+unit WebMock.Static.Responder.Tests;
 
 interface
 
 uses
   DUnitX.TestFramework,
-  WebMock.Response;
+  WebMock.Static.Responder;
 
 type
   [TestFixture]
-  TWebMockResponseTests = class(TObject)
+  TWebMockStaticResponderTests = class(TObject)
   private
-    WebMockResponse: TWebMockResponse;
+    Responder: TWebMockStaticResponder;
   public
-    [Setup]
-    procedure Setup;
-    [TearDown]
-    procedure TearDown;
     [Test]
-    procedure Create_WithoutArguments_SetsStatusToOK;
-    [Test]
-    procedure Create_WithStatus_SetsStatus;
-    [Test]
-    procedure BodySource_WhenNotSet_ReturnsEmptyContentSource;
+    procedure GetResponseTo_Always_ReturnsResponse;
   end;
 
 implementation
 
-{ TWebMockResponseTests }
-
 uses
-  TestHelpers,
-  WebMock.ResponseStatus;
+  WebMock.Response;
 
-procedure TWebMockResponseTests.Setup;
-begin
-  WebMockResponse := TWebMockResponse.Create;
-end;
+{ TWebMockStaticResponderTests }
 
-procedure TWebMockResponseTests.TearDown;
-begin
-  WebMockResponse.Free;
-end;
-
-procedure TWebMockResponseTests.BodySource_WhenNotSet_ReturnsEmptyContentSource;
-begin
-  Assert.AreEqual(Int64(0), WebMockResponse.BodySource.ContentStream.Size);
-end;
-
-procedure TWebMockResponseTests.Create_WithoutArguments_SetsStatusToOK;
-begin
-  Assert.AreEqual(200, WebMockResponse.Status.Code);
-end;
-
-procedure TWebMockResponseTests.Create_WithStatus_SetsStatus;
+procedure TWebMockStaticResponderTests.GetResponseTo_Always_ReturnsResponse;
 var
-  LExpectedStatus: TWebMockResponseStatus;
+  LResponse: TWebMockResponse;
 begin
-  LExpectedStatus := TWebMockResponseStatus.Accepted;
+  LResponse := TWebMockResponse.Create;
+  Responder := TWebMockStaticResponder.Create(LResponse);
 
-  WebMockResponse := TWebMockResponse.Create(LExpectedStatus);
+  Assert.AreSame(LResponse, Responder.GetResponseTo(nil) as TWebMockResponse);
 
-  Assert.AreSame(LExpectedStatus, WebMockResponse.Status);
+  Responder.Free;
 end;
 
 initialization
-  TDUnitX.RegisterTestFixture(TWebMockResponseTests);
+  TDUnitX.RegisterTestFixture(TWebMockStaticResponderTests);
 end.
