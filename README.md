@@ -26,14 +26,14 @@ not be found in your test projects.
 
 ## Installation: Manual
 1. Download and extract the latest version
-   [1.3.0](https://github.com/appercept/Delphi-WebMocks/archive/1.3.0.zip).
+   [2.0.0](https://github.com/appercept/Delphi-WebMocks/archive/2.0.0.zip).
 2. In "Tools > Options" under the "Language / Delphi / Library" add the
    extracted `Source` directory to the "Library path" and "Browsing path".
 
-## Unreleased Breaking Changes
-Version 2 will include a change to the unit naming within the project. All units
-have the `Delphi.` prefix dropped. Existing projects will need to have their
-`uses` clauses updated to remove any `Delphi.` prefixes from WebMocks units.
+## Upgrading to versions prior to 2.0.0
+Version 2 has dropped the `Delphi.` namespace from all units. Any projects
+upgrade to version 2 or later will need to drop the `Delphi.` prefix from any
+included WebMocks units.
 
 ## Setup
 In your test unit file a couple of simple steps are required.
