@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2020 Richard Hatherall                               }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -23,37 +23,42 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Mock.Indy.HTTPRequestInfo;
+unit WebMock.Static.Responder;
 
 interface
 
 uses
-  IdCustomHTTPServer;
+  WebMock.HTTP.Messages,
+  WebMock.Responder,
+  WebMock.Response;
 
 type
-  TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
+  TWebMockStaticResponder = class(TInterfacedObject, IWebMockResponder)
+  private
+    FResponse: TWebMockResponse;
   public
-    constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
-    property RawHeaders;
-    property RawHTTPCommand: string read FRawHTTPCommand write FRawHTTPCommand;
+    constructor Create(const AResponse: TWebMockResponse);
+
+    { IWebMockResponder }
+    function GetResponseTo(const ARequest: IWebMockHTTPRequest): TWebMockResponse;
+
+    property Response: TWebMockResponse read FResponse;
   end;
 
 implementation
 
-{ TMockIdHTTPRequestInfo }
+{ TWebMockStaticResponder }
 
-uses
-  System.SysUtils;
-
-constructor TMockIdHTTPRequestInfo.Mock(ACommand: string = 'GET';
-  AURI: string = '*');
+constructor TWebMockStaticResponder.Create(const AResponse: TWebMockResponse);
 begin
-  inherited Create(nil);
-  FCommand := ACommand;
-  FDocument := AURI;
-  FVersion := 'HTTP/1.1';
-  FRawHTTPCommand := Format('%s %s HTTP/1.1', [Command, Document]);
-  FURI := AURI;
+  inherited Create;
+  FResponse := AResponse;
+end;
+
+function TWebMockStaticResponder.GetResponseTo(
+  const ARequest: IWebMockHTTPRequest): TWebMockResponse;
+begin
+  Result := FResponse;
 end;
 
 end.

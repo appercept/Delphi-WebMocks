@@ -23,37 +23,17 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Mock.Indy.HTTPRequestInfo;
+unit WebMock.StringMatcher;
 
 interface
 
-uses
-  IdCustomHTTPServer;
-
 type
-  TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
-  public
-    constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
-    property RawHeaders;
-    property RawHTTPCommand: string read FRawHTTPCommand write FRawHTTPCommand;
+  IStringMatcher = interface
+    ['{1D54F796-75BD-4ED1-B0A3-EC567084711A}']
+    function IsMatch(AValue: string): Boolean;
+    function ToString: string;
   end;
 
 implementation
-
-{ TMockIdHTTPRequestInfo }
-
-uses
-  System.SysUtils;
-
-constructor TMockIdHTTPRequestInfo.Mock(ACommand: string = 'GET';
-  AURI: string = '*');
-begin
-  inherited Create(nil);
-  FCommand := ACommand;
-  FDocument := AURI;
-  FVersion := 'HTTP/1.1';
-  FRawHTTPCommand := Format('%s %s HTTP/1.1', [Command, Document]);
-  FURI := AURI;
-end;
 
 end.

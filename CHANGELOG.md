@@ -1,5 +1,31 @@
 # Changelog
 
+## [2.0.0](https://github.com/appercept/Delphi-WebMocks/tree/2.0.0) (2020-11-25)
+
+[Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/1.3.0...2.0.0)
+
+**Implemented enhancements:**
+
+- Dynamic response stubs [\#16](https://github.com/appercept/Delphi-WebMocks/issues/16)
+- Add support for dynamic responses [\#40](https://github.com/appercept/Delphi-WebMocks/pull/40) ([rhatherall](https://github.com/rhatherall))
+- Remove packages for Delphinus installation [\#39](https://github.com/appercept/Delphi-WebMocks/pull/39) ([rhatherall](https://github.com/rhatherall))
+- Remove `Delphi.` unit prefix [\#38](https://github.com/appercept/Delphi-WebMocks/pull/38) ([rhatherall](https://github.com/rhatherall))
+
+**Fixed bugs:**
+
+- Unsupported Authorisation Scheme error when setting Authorization header [\#34](https://github.com/appercept/Delphi-WebMocks/issues/34)
+- Repeated calls to stubs with content causes exception [\#32](https://github.com/appercept/Delphi-WebMocks/issues/32)
+
+**Closed issues:**
+
+- Packages are not required for Delphinus installation [\#37](https://github.com/appercept/Delphi-WebMocks/issues/37)
+- Remove `Delphi.` namespace prefix [\#36](https://github.com/appercept/Delphi-WebMocks/issues/36)
+
+**Merged pull requests:**
+
+- Allow any authorization header values for stubs [\#35](https://github.com/appercept/Delphi-WebMocks/pull/35) ([rhatherall](https://github.com/rhatherall))
+- Use fresh content streams for successive requests [\#33](https://github.com/appercept/Delphi-WebMocks/pull/33) ([rhatherall](https://github.com/rhatherall))
+
 ## [1.3.0](https://github.com/appercept/Delphi-WebMocks/tree/1.3.0) (2020-10-07)
 
 [Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/1.2.2...1.3.0)

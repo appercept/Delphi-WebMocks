@@ -23,37 +23,93 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Mock.Indy.HTTPRequestInfo;
+unit WebMock.StringRegExMatcher.Tests;
 
 interface
 
 uses
-  IdCustomHTTPServer;
+  DUnitX.TestFramework,
+  IdCustomHTTPServer,
+  WebMock.StringRegExMatcher;
 
 type
-  TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
+
+  [TestFixture]
+  TWebMockStringRegExMatcherTests = class(TObject)
+  private
+    StringRegExMatcher: TWebMockStringRegExMatcher;
   public
-    constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
-    property RawHeaders;
-    property RawHTTPCommand: string read FRawHTTPCommand write FRawHTTPCommand;
+    [Setup]
+    procedure Setup;
+    [TearDown]
+    procedure TearDown;
+    [Test]
+    procedure Class_Always_ImplementsStringMatcher;
+    [Test]
+    procedure IsMatch_WhenGivenValueMatchesRegEx_ReturnsTrue;
+    [Test]
+    procedure IsMatch_WhenGivenValueDoesNotMatchRegEx_ReturnsFalse;
+    [Test]
+    procedure ToString_Always_ReturnsRegularExpression;
   end;
 
 implementation
 
-{ TMockIdHTTPRequestInfo }
+{ TWebMockStringRegExMatcherTests }
 
 uses
-  System.SysUtils;
+  System.RegularExpressions,
+  WebMock.StringMatcher;
 
-constructor TMockIdHTTPRequestInfo.Mock(ACommand: string = 'GET';
-  AURI: string = '*');
+procedure TWebMockStringRegExMatcherTests.Class_Always_ImplementsStringMatcher;
+var
+  Subject: IInterface;
 begin
-  inherited Create(nil);
-  FCommand := ACommand;
-  FDocument := AURI;
-  FVersion := 'HTTP/1.1';
-  FRawHTTPCommand := Format('%s %s HTTP/1.1', [Command, Document]);
-  FURI := AURI;
+  Subject := TWebMockStringRegExMatcher.Create(TRegEx.Create(''));
+
+  Assert.Implements<IStringMatcher>(Subject);
 end;
 
+procedure TWebMockStringRegExMatcherTests.IsMatch_WhenGivenValueDoesNotMatchRegEx_ReturnsFalse;
+var
+  LRegEx: TRegEx;
+begin
+  LRegEx := TRegEx.Create('A\ Value');
+  StringRegExMatcher := TWebMockStringRegExMatcher.Create(LRegEx);
+
+  Assert.IsFalse(StringRegExMatcher.IsMatch('Other Value'));
+end;
+
+procedure TWebMockStringRegExMatcherTests.IsMatch_WhenGivenValueMatchesRegEx_ReturnsTrue;
+var
+  LRegEx: TRegEx;
+begin
+  LRegEx := TRegEx.Create('A\ Value');
+  StringRegExMatcher := TWebMockStringRegExMatcher.Create(LRegEx);
+
+  Assert.IsTrue(StringRegExMatcher.IsMatch('A Value'));
+end;
+
+procedure TWebMockStringRegExMatcherTests.Setup;
+begin
+
+end;
+
+procedure TWebMockStringRegExMatcherTests.TearDown;
+begin
+  StringRegExMatcher.Free;
+end;
+
+procedure TWebMockStringRegExMatcherTests.ToString_Always_ReturnsRegularExpression;
+var
+  LRegEx: TRegEx;
+begin
+  LRegEx := TRegEx.Create('');
+  StringRegExMatcher := TWebMockStringRegExMatcher.Create(LRegEx);
+
+  Assert.AreEqual('Regular Expression', StringRegExMatcher.ToString);
+end;
+
+initialization
+  TDUnitX.RegisterTestFixture(TWebMockStringRegExMatcherTests);
 end.

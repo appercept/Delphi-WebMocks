@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2019-2020 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -23,37 +23,71 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Mock.Indy.HTTPRequestInfo;
+unit WebMock.Response.Tests;
 
 interface
 
 uses
-  IdCustomHTTPServer;
+  DUnitX.TestFramework,
+  WebMock.Response;
 
 type
-  TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
+  [TestFixture]
+  TWebMockResponseTests = class(TObject)
+  private
+    WebMockResponse: TWebMockResponse;
   public
-    constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
-    property RawHeaders;
-    property RawHTTPCommand: string read FRawHTTPCommand write FRawHTTPCommand;
+    [Setup]
+    procedure Setup;
+    [TearDown]
+    procedure TearDown;
+    [Test]
+    procedure Create_WithoutArguments_SetsStatusToOK;
+    [Test]
+    procedure Create_WithStatus_SetsStatus;
+    [Test]
+    procedure BodySource_WhenNotSet_ReturnsEmptyContentSource;
   end;
 
 implementation
 
-{ TMockIdHTTPRequestInfo }
+{ TWebMockResponseTests }
 
 uses
-  System.SysUtils;
+  TestHelpers,
+  WebMock.ResponseStatus;
 
-constructor TMockIdHTTPRequestInfo.Mock(ACommand: string = 'GET';
-  AURI: string = '*');
+procedure TWebMockResponseTests.Setup;
 begin
-  inherited Create(nil);
-  FCommand := ACommand;
-  FDocument := AURI;
-  FVersion := 'HTTP/1.1';
-  FRawHTTPCommand := Format('%s %s HTTP/1.1', [Command, Document]);
-  FURI := AURI;
+  WebMockResponse := TWebMockResponse.Create;
 end;
 
+procedure TWebMockResponseTests.TearDown;
+begin
+  WebMockResponse.Free;
+end;
+
+procedure TWebMockResponseTests.BodySource_WhenNotSet_ReturnsEmptyContentSource;
+begin
+  Assert.AreEqual(Int64(0), WebMockResponse.BodySource.ContentStream.Size);
+end;
+
+procedure TWebMockResponseTests.Create_WithoutArguments_SetsStatusToOK;
+begin
+  Assert.AreEqual(200, WebMockResponse.Status.Code);
+end;
+
+procedure TWebMockResponseTests.Create_WithStatus_SetsStatus;
+var
+  LExpectedStatus: TWebMockResponseStatus;
+begin
+  LExpectedStatus := TWebMockResponseStatus.Accepted;
+
+  WebMockResponse := TWebMockResponse.Create(LExpectedStatus);
+
+  Assert.AreSame(LExpectedStatus, WebMockResponse.Status);
+end;
+
+initialization
+  TDUnitX.RegisterTestFixture(TWebMockResponseTests);
 end.

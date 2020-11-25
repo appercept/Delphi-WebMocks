@@ -23,37 +23,60 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Mock.Indy.HTTPRequestInfo;
+unit WebMock.ResponseContentString;
 
 interface
 
-uses
-  IdCustomHTTPServer;
+uses System.Classes, WebMock.ResponseBodySource;
 
 type
-  TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
+  TWebMockResponseContentString = class(TInterfacedObject,
+    IWebMockResponseBodySource)
+  private
+    FContentString: string;
+    FContentType: string;
+    procedure SetContentType(const Value: string);
+    function GetContentStream: TStream;
   public
-    constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
-    property RawHeaders;
-    property RawHTTPCommand: string read FRawHTTPCommand write FRawHTTPCommand;
+    constructor Create(const AContentString: string = '';
+      const AContentType: string = 'text/plain; charset=utf-8');
+    function GetContentString: string;
+    function GetContentType: string;
+    property ContentStream: TStream read GetContentStream;
+    property ContentString: string read GetContentString write FContentString;
+    property ContentType: string read GetContentType write SetContentType;
   end;
 
 implementation
 
-{ TMockIdHTTPRequestInfo }
+{ TWebMockResponseContentString }
 
-uses
-  System.SysUtils;
-
-constructor TMockIdHTTPRequestInfo.Mock(ACommand: string = 'GET';
-  AURI: string = '*');
+constructor TWebMockResponseContentString.Create(const AContentString
+  : string = ''; const AContentType: string = 'text/plain; charset=utf-8');
 begin
-  inherited Create(nil);
-  FCommand := ACommand;
-  FDocument := AURI;
-  FVersion := 'HTTP/1.1';
-  FRawHTTPCommand := Format('%s %s HTTP/1.1', [Command, Document]);
-  FURI := AURI;
+  inherited Create;
+  FContentString := AContentString;
+  FContentType := AContentType;
+end;
+
+function TWebMockResponseContentString.GetContentType: string;
+begin
+  Result := FContentType;
+end;
+
+procedure TWebMockResponseContentString.SetContentType(const Value: string);
+begin
+  FContentType := Value;
+end;
+
+function TWebMockResponseContentString.GetContentStream: TStream;
+begin
+  Result := TStringStream.Create(ContentString);
+end;
+
+function TWebMockResponseContentString.GetContentString: string;
+begin
+  Result := FContentString;
 end;
 
 end.

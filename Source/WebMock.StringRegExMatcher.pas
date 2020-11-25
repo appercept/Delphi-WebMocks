@@ -23,37 +23,43 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Mock.Indy.HTTPRequestInfo;
+unit WebMock.StringRegExMatcher;
 
 interface
 
 uses
-  IdCustomHTTPServer;
+  System.RegularExpressions,
+  WebMock.StringMatcher;
 
 type
-  TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
+  TWebMockStringRegExMatcher = class(TInterfacedObject, IStringMatcher)
+  private
+    FRegEx: TRegEx;
   public
-    constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
-    property RawHeaders;
-    property RawHTTPCommand: string read FRawHTTPCommand write FRawHTTPCommand;
+    constructor Create(ARegEx: TRegEx);
+    function IsMatch(AValue: string): Boolean;
+    function ToString: string; reintroduce;
+    property RegEx: TRegEx read FRegEx;
   end;
 
 implementation
 
-{ TMockIdHTTPRequestInfo }
+{ TWebMockStringRegExMatcher }
 
-uses
-  System.SysUtils;
-
-constructor TMockIdHTTPRequestInfo.Mock(ACommand: string = 'GET';
-  AURI: string = '*');
+constructor TWebMockStringRegExMatcher.Create(ARegEx: TRegEx);
 begin
-  inherited Create(nil);
-  FCommand := ACommand;
-  FDocument := AURI;
-  FVersion := 'HTTP/1.1';
-  FRawHTTPCommand := Format('%s %s HTTP/1.1', [Command, Document]);
-  FURI := AURI;
+  inherited Create;
+  FRegEx := ARegEx;
+end;
+
+function TWebMockStringRegExMatcher.IsMatch(AValue: string): Boolean;
+begin
+  Result := RegEx.IsMatch(AValue);
+end;
+
+function TWebMockStringRegExMatcher.ToString: string;
+begin
+  Result := 'Regular Expression';
 end;
 
 end.

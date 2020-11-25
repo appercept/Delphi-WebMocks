@@ -2,10 +2,10 @@
   "id": "{DFCA358E-5EF2-44CF-BE16-72B3634DC147}",
   "name": "WebMocks",
   "licenses": [{ "type": "Apache 2.0", "file": "LICENSE" }],
-  "platforms": "Win32;Win64",
-  "package_compiler_min": 33,
+  "platforms": "Linux64;OSX32;OSX64;Win32;Win64",
+  "package_compiler_min": 29,
   "package_compiler_max": 34,
-  "compiler_min": 33,
+  "compiler_min": 29,
   "compiler_max": 34,
   "dependencies": []
 }

@@ -23,37 +23,56 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Mock.Indy.HTTPRequestInfo;
+unit WebMock.StringAnyMatcher.Tests;
 
 interface
 
 uses
-  IdCustomHTTPServer;
+  DUnitX.TestFramework,
+  IdCustomHTTPServer,
+  WebMock.StringAnyMatcher;
 
 type
-  TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
+
+  [TestFixture]
+  TWebMockStringAnyMatcherTests = class(TObject)
+  private
+    StringAnyMatcher: TWebMockStringAnyMatcher;
   public
-    constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
-    property RawHeaders;
-    property RawHTTPCommand: string read FRawHTTPCommand write FRawHTTPCommand;
+    [Setup]
+    procedure Setup;
+    [TearDown]
+    procedure TearDown;
+    [Test]
+    procedure IsMatch_Always_ReturnsTrue;
+    [Test]
+    procedure ToString_Always_ReturnsWildcard;
   end;
 
 implementation
 
-{ TMockIdHTTPRequestInfo }
+{ TWebMockStringAnyMatcherTests }
 
-uses
-  System.SysUtils;
-
-constructor TMockIdHTTPRequestInfo.Mock(ACommand: string = 'GET';
-  AURI: string = '*');
+procedure TWebMockStringAnyMatcherTests.IsMatch_Always_ReturnsTrue;
 begin
-  inherited Create(nil);
-  FCommand := ACommand;
-  FDocument := AURI;
-  FVersion := 'HTTP/1.1';
-  FRawHTTPCommand := Format('%s %s HTTP/1.1', [Command, Document]);
-  FURI := AURI;
+  Assert.IsTrue(StringAnyMatcher.IsMatch('Any Value'));
 end;
 
+procedure TWebMockStringAnyMatcherTests.Setup;
+begin
+  StringAnyMatcher := TWebMockStringAnyMatcher.Create;
+end;
+
+procedure TWebMockStringAnyMatcherTests.TearDown;
+begin
+  StringAnyMatcher.Free;
+end;
+
+procedure TWebMockStringAnyMatcherTests.ToString_Always_ReturnsWildcard;
+begin
+  Assert.AreEqual('*', StringAnyMatcher.ToString);
+end;
+
+initialization
+  TDUnitX.RegisterTestFixture(TWebMockStringAnyMatcherTests);
 end.

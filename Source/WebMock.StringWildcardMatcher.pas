@@ -23,37 +23,42 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Mock.Indy.HTTPRequestInfo;
+unit WebMock.StringWildcardMatcher;
 
 interface
 
 uses
-  IdCustomHTTPServer;
+  WebMock.StringMatcher;
 
 type
-  TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
+  TWebMockStringWildcardMatcher = class(TInterfacedObject, IStringMatcher)
+  private
+    FValue: string;
   public
-    constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
-    property RawHeaders;
-    property RawHTTPCommand: string read FRawHTTPCommand write FRawHTTPCommand;
+    constructor Create(const AValue: string = '*');
+    function IsMatch(AValue: string): Boolean;
+    function ToString: string; override;
+    property Value: string read FValue;
   end;
 
 implementation
 
-{ TMockIdHTTPRequestInfo }
+{ TWebMockStringWildcardMatcher }
 
-uses
-  System.SysUtils;
-
-constructor TMockIdHTTPRequestInfo.Mock(ACommand: string = 'GET';
-  AURI: string = '*');
+constructor TWebMockStringWildcardMatcher.Create(const AValue: string = '*');
 begin
-  inherited Create(nil);
-  FCommand := ACommand;
-  FDocument := AURI;
-  FVersion := 'HTTP/1.1';
-  FRawHTTPCommand := Format('%s %s HTTP/1.1', [Command, Document]);
-  FURI := AURI;
+  inherited Create;
+  FValue := AValue;
+end;
+
+function TWebMockStringWildcardMatcher.IsMatch(AValue: string): Boolean;
+begin
+  Result := (Value = '*') or (Value = AValue);
+end;
+
+function TWebMockStringWildcardMatcher.ToString: string;
+begin
+  Result := Value;
 end;
 
 end.

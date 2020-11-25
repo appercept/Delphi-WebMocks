@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2020 Richard Hatherall                               }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -23,37 +23,20 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Mock.Indy.HTTPRequestInfo;
+unit WebMock.Responder;
 
 interface
 
 uses
-  IdCustomHTTPServer;
+  WebMock.HTTP.Messages,
+  WebMock.Response;
 
 type
-  TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
-  public
-    constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
-    property RawHeaders;
-    property RawHTTPCommand: string read FRawHTTPCommand write FRawHTTPCommand;
+  IWebMockResponder = interface(IInterface)
+    ['{DC0BF955-CBFB-4EBB-987B-0A5FCE2C6575}']
+    function GetResponseTo(const ARequest: IWebMockHTTPRequest): TWebMockResponse;
   end;
 
 implementation
-
-{ TMockIdHTTPRequestInfo }
-
-uses
-  System.SysUtils;
-
-constructor TMockIdHTTPRequestInfo.Mock(ACommand: string = 'GET';
-  AURI: string = '*');
-begin
-  inherited Create(nil);
-  FCommand := ACommand;
-  FDocument := AURI;
-  FVersion := 'HTTP/1.1';
-  FRawHTTPCommand := Format('%s %s HTTP/1.1', [Command, Document]);
-  FURI := AURI;
-end;
 
 end.

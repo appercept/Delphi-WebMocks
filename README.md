@@ -1,4 +1,9 @@
-# Delphi-WebMocks
+![Delphi compatibility](https://img.shields.io/badge/Delphi-XE8%20or%20newer-brightgreen)
+![Platform compatibility](https://img.shields.io/badge/platform-Linux64%20%7C%20macOS64%20%7C%20Win32%20%7C%20Win64-lightgrey)
+![License](https://img.shields.io/github/license/appercept/Delphi-WebMocks)
+![Lines of Code](https://tokei.rs/b1/github/appercept/Delphi-WebMocks)
+
+# WebMocks ![GitHub release (latest by date)](https://img.shields.io/github/v/release/appercept/Delphi-WebMocks) ![GitHub commits since latest release (by SemVer)](https://img.shields.io/github/commits-since/appercept/Delphi-WebMocks/latest?sort=semver) ![GitHub Release Date](https://img.shields.io/github/release-date/appercept/Delphi-WebMocks)
 Library for stubbing and setting expectations on HTTP requests in Delphi with
 [DUnitX](https://github.com/VSoftTechnologies/DUnitX).
 
@@ -7,34 +12,32 @@ Library for stubbing and setting expectations on HTTP requests in Delphi with
 * [DUnitX](https://github.com/VSoftTechnologies/DUnitX)
 * [Indy](https://www.indyproject.org)
 
-\* Delphi-WebMocks was developed in Delphi 10.3 (Rio) and 10.4 (Sydney) and
-runtime packages are provided for these versions. WebMocks has been reported
-working on 10.1 (Berlin). I'd be interested to hear from anyone working on other
-versions. As Delphi-WebMocks makes use of the `System.Net library introduced
-with XE8 it will not be compatible with earlier versions. Should anyone wish to
-provide a runtime package for a version earlier than 10.3 Rio then please open a
-pull-request.
-
-## Optional Dependencies
-* [TestInsight](https://bitbucket.org/sglienke/testinsight/wiki/Home) is
-  required to run the Delphi-WebMocks test suite, so, if you're considering
-  contributing and need to run the test suite, install it. If you do TDD in
-  Delphi I would recommend installing and using it in your own projects.
+\* WebMocks was developed in Delphi 10.3 (Rio) and 10.4 (Sydney). WebMocks has
+been reported working on 10.1 (Berlin). I'd be interested to hear from anyone
+working on other versions. As WebMocks makes use of the `System.Net`
+library introduced with XE8 it will not be compatible with earlier versions.
 
 ## Installation: Delphinus-Support
 WebMocks should now be listed in
 [Delphinus](https://github.com/Memnarch/Delphinus) package manager.
 
+Be sure to restart Delphi after installing via Delphinus otherwise the units may
+not be found in your test projects.
+
 ## Installation: Manual
 1. Download and extract the latest version
-   [1.3.0](https://github.com/appercept/Delphi-WebMocks/archive/1.3.0.zip).
-2. Open the package appropriate for your Delphi version in the `Packages`
-   folder.
-3. Build and install the package.
+   [2.0.0](https://github.com/appercept/Delphi-WebMocks/archive/2.0.0.zip).
+2. In "Tools > Options" under the "Language / Delphi / Library" add the
+   extracted `Source` directory to the "Library path" and "Browsing path".
+
+## Upgrading to versions prior to 2.0.0
+Version 2 has dropped the `Delphi.` namespace from all units. Any projects
+upgrade to version 2 or later will need to drop the `Delphi.` prefix from any
+included WebMocks units.
 
 ## Setup
 In your test unit file a couple of simple steps are required.
-1. Add `Delphi.WebMock` to your interface `uses`.
+1. Add `WebMock` to your interface `uses`.
 2. In your `TestFixture` class use `Setup` and `TearDown` to create/destroy an
   instance of `TWebMock`.
 
@@ -46,14 +49,14 @@ interface
 
 uses
   DUnitX.TestFramework,
-  Delphi.WebMock,
-  MyTestObjectUnit;
+  MyObjectUnit,
+  WebMock;
 
 type
-  TMyTestObjectTests = class(TObject)
+  TMyObjectTests = class(TObject)
   private
     WebMock: TWebMock;
-    Subject: TMyTestObject;
+    Subject: TMyObject;
   public
     [Setup]
     procedure Setup;
@@ -65,24 +68,25 @@ type
 
 implementation
 
-procedure TMyTestObjectTests.Setup;
+procedure TMyObjectTests.Setup;
 begin
   WebMock := TWebMock.Create;
 end;
 
-procedure TMyTestObjectTests.TearDown;
+procedure TMyObjectTests.TearDown;
 begin
   WebMock.Free;
 end;
 
-procedure TMyTestObjectTests.TestGet;
+procedure TMyObjectTests.TestGet;
 begin
   // Arrange
   // Stub the request
   WebMock.StubRequest('GET', '/endpoint');
 
-  // Point your subject at the endpoint
-  Subject := TMyTestObject.Create(WebMock.URLFor('endpoint'));
+  // Create your subject and point it at the endpoint
+  Subject := TMyObject.Create;
+  Subject.EndpointURL := WebMock.URLFor('endpoint');
 
   // Act
   Subject.Get;
@@ -92,19 +96,18 @@ begin
 end;
 
 initialization
-  TDUnitX.RegisterTestFixture(TMyTestObjectTests);
-
+  TDUnitX.RegisterTestFixture(TMyObjectTests);
 end.
 ```
 
 By default `TWebMock` will bind to a port dynamically assigned start at `8080`.
-This behaviour can be overriden by sepcifying a port at creation.
+This behaviour can be overriden by specifying a port at creation.
 ```Delphi
 WebMock := TWebMock.Create(8088);
 ```
 
 The use of `WebMock.URLFor` function within your tests is to simplify
-constructing a valid URL. The `Port` property containes the current bound port
+constructing a valid URL. The `Port` property contains the current bound port
 and `BaseURL` property contains a valid URL for the server root.
 
 ## Examples
@@ -281,6 +284,53 @@ compiler will be output to the `Win32\Debug` folder. To correctly reference a
 file named `Content.txt` in the project folder, the path will be
 `..\..\Content.txt`.
 
+#### Dynamic Responses
+Sometimes it is useful to dynamically respond to a request. For example:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .ToRespondWith(
+    procedure (const ARequest: IWebMockHTTPRequest;
+               const AResponse: IWebMockResponseBuilder)
+    begin
+      AReponse
+        .WithStatus(202)
+        .WithHeader('header-1', 'a-value')
+        .WithBody('Some content...');
+    end
+  );
+```
+
+This enables testing of features that require deeper inspection of the request
+or to reflect values from the request back in the response. For example:
+```Delphi
+WebMock.StubRequest('GET', '/echo_header')
+  .ToRespondWith(
+    procedure (const ARequest: IWebMockHTTPRequest;
+               const AResponse: IWebMockHTTPResponseBuilder)
+    begin
+      AResponse.WithHeader('my-header', ARequest.Headers.Values['my-header']);
+    end
+  );
+```
+
+It can also be useful for simulating failures for a number of attempts before
+returning a success. For example:
+```Delphi
+var LRequestCount := 0;
+WebMock.StubRequest('GET', '/busy_endpoint')
+  .ToRespondWith(
+    procedure (const ARequest: IWebMockHTTPRequest;
+               const AResponse: IWebMockHTTPResponseBuilder)
+    begin
+      Inc(LRequestCount);
+      if LRequestCount < 3 then
+        AResponse.WithStatus(408, 'Request Timeout')
+      else
+        AResponse.WithStatus(200, 'OK');
+    end
+  );
+```
+
 ### Resetting Registered Stubs
 If you need to clear the current registered stubs you can call
 `ResetStubRegistry` or `Reset` on the instance of TWebMock. The general `Reset`
@@ -338,7 +388,18 @@ Anything that can be asserted positively (`WasRequested`) can also be asserted
 negatively with `WasNotRequested`. This is useful to check your code is not
 performing extra unwanted requests.
 
+## Development Dependencies (Optional)
+* [TestInsight](https://bitbucket.org/sglienke/testinsight/wiki/Home) is
+  required to run the Delphi-WebMocks test suite, so, if you're considering
+  contributing and need to run the test suite, install it. If you do TDD in
+  Delphi I would recommend installing and using it in your own projects.
+
+## Semantic Versioning
+This project follows [Semantic Versioning](https://semver.org).
+
 ## License
-Copyright ©2019 Richard Hatherall <richard@appercept.com>
+Copyright ©2019-2020 Richard Hatherall <richard@appercept.com>
+
+WebMocks is distributed under the terms of the Apache License (Version 2.0).
 
 See [LICENSE](LICENSE) for details.

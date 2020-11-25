@@ -23,37 +23,87 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Mock.Indy.HTTPRequestInfo;
+unit WebMock.History.Tests;
 
 interface
 
 uses
-  IdCustomHTTPServer;
+  DUnitX.TestFramework,
+  System.Classes,
+  System.SysUtils,
+  WebMock;
 
 type
-  TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
+  [TestFixture]
+  TWebMockHistoryTests = class(TObject)
+  private
+    WebMock: TWebMock;
   public
-    constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
-    property RawHeaders;
-    property RawHTTPCommand: string read FRawHTTPCommand write FRawHTTPCommand;
+    [Setup]
+    procedure Setup;
+    [TearDown]
+    procedure TearDown;
+    [Test]
+    procedure History_AfterStubbedRequest_IncreasesCount;
+    [Test]
+    procedure History_AfterUnStubbedRequest_IncreasesCount;
+    [Test]
+    procedure History_AfterRequest_ContainsMatchingRequest;
   end;
 
 implementation
 
-{ TMockIdHTTPRequestInfo }
+{ TWebMockHistoryTests }
 
 uses
-  System.SysUtils;
+  System.Generics.Collections,
+  TestHelpers,
+  WebMock.HTTP.Messages;
 
-constructor TMockIdHTTPRequestInfo.Mock(ACommand: string = 'GET';
-  AURI: string = '*');
+procedure TWebMockHistoryTests.History_AfterRequest_ContainsMatchingRequest;
+var
+  LastRequest: IWebMockHTTPRequest;
 begin
-  inherited Create(nil);
-  FCommand := ACommand;
-  FDocument := AURI;
-  FVersion := 'HTTP/1.1';
-  FRawHTTPCommand := Format('%s %s HTTP/1.1', [Command, Document]);
-  FURI := AURI;
+  WebClient.Get(WebMock.URLFor('resource'));
+
+  LastRequest := WebMock.History.Last;
+  Assert.AreEqual('GET', LastRequest.Method);
+  Assert.AreEqual('/resource', LastRequest.RequestURI);
 end;
 
+procedure TWebMockHistoryTests.History_AfterStubbedRequest_IncreasesCount;
+var
+  ExpectedHistoryCount: Integer;
+begin
+  ExpectedHistoryCount := WebMock.History.Count + 1;
+  WebMock.StubRequest('GET', '/stubbed');
+
+  WebClient.Get(WebMock.URLFor('stubbed'));
+
+  Assert.AreEqual(ExpectedHistoryCount, WebMock.History.Count);
+end;
+
+procedure TWebMockHistoryTests.History_AfterUnStubbedRequest_IncreasesCount;
+var
+  ExpectedHistoryCount: Integer;
+begin
+  ExpectedHistoryCount := WebMock.History.Count + 1;
+
+  WebClient.Get(WebMock.URLFor('not-stubbed'));
+
+  Assert.AreEqual(ExpectedHistoryCount, WebMock.History.Count);
+end;
+
+procedure TWebMockHistoryTests.Setup;
+begin
+  WebMock := TWebMock.Create;
+end;
+
+procedure TWebMockHistoryTests.TearDown;
+begin
+  WebMock.Free;
+end;
+
+initialization
+  TDUnitX.RegisterTestFixture(TWebMockHistoryTests);
 end.

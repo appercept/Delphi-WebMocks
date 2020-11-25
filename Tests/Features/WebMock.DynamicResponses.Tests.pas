@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2020 Richard Hatherall                               }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -23,37 +23,92 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Mock.Indy.HTTPRequestInfo;
+unit WebMock.DynamicResponses.Tests;
 
 interface
 
 uses
-  IdCustomHTTPServer;
+  DUnitX.TestFramework,
+  WebMock;
 
 type
-  TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
+  [TestFixture]
+  TWebMockDynamicResponsesTests = class(TObject)
+  private
+    WebMock: TWebMock;
   public
-    constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
-    property RawHeaders;
-    property RawHTTPCommand: string read FRawHTTPCommand write FRawHTTPCommand;
+    [Setup]
+    procedure Setup;
+    [TearDown]
+    procedure TearDown;
+    [Test]
+    procedure DynamicResponse_WithStaticMatcher_ReceivesRequest;
+    [Test]
+    procedure DynamicResponse_WithDynamicMatcher_ReceivesRequest;
   end;
 
 implementation
 
-{ TMockIdHTTPRequestInfo }
-
 uses
-  System.SysUtils;
+  System.Net.HttpClient,
+  TestHelpers,
+  WebMock.HTTP.Messages,
+  WebMock.Response;
 
-constructor TMockIdHTTPRequestInfo.Mock(ACommand: string = 'GET';
-  AURI: string = '*');
+{ TWebMockDynamicResponsesTests }
+
+procedure TWebMockDynamicResponsesTests.DynamicResponse_WithDynamicMatcher_ReceivesRequest;
+var
+  LResponse: IHTTPResponse;
 begin
-  inherited Create(nil);
-  FCommand := ACommand;
-  FDocument := AURI;
-  FVersion := 'HTTP/1.1';
-  FRawHTTPCommand := Format('%s %s HTTP/1.1', [Command, Document]);
-  FURI := AURI;
+  WebMock.StubRequest(
+    function(ARequest: IWebMockHTTPRequest): Boolean
+    begin
+      Result := True;
+    end
+  ).ToRespondWith(
+    procedure(const ARequest: IWebMockHTTPRequest; const AResponse: IWebMockResponseBuilder)
+    begin
+      AResponse
+        .WithStatus(555)
+        .WithBody('Dynamic response.');
+    end
+  );
+
+  LResponse := WebClient.Get(WebMock.URLFor('/'));
+
+  Assert.AreEqual(555, LResponse.StatusCode);
 end;
 
+procedure TWebMockDynamicResponsesTests.DynamicResponse_WithStaticMatcher_ReceivesRequest;
+var
+  LResponse: IHTTPResponse;
+begin
+  WebMock.StubRequest('*', '*')
+    .ToRespondWith(
+      procedure(const ARequest: IWebMockHTTPRequest; const AResponse: IWebMockResponseBuilder)
+      begin
+        AResponse
+          .WithStatus(555)
+          .WithBody('Dynamic response.');
+      end
+    );
+
+  LResponse := WebClient.Get(WebMock.URLFor('/'));
+
+  Assert.AreEqual(555, LResponse.StatusCode);
+end;
+
+procedure TWebMockDynamicResponsesTests.Setup;
+begin
+  WebMock := TWebMock.Create;
+end;
+
+procedure TWebMockDynamicResponsesTests.TearDown;
+begin
+  WebMock.Free;
+end;
+
+initialization
+  TDUnitX.RegisterTestFixture(TWebMockDynamicResponsesTests);
 end.

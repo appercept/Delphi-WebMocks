@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2020 Richard Hatherall                               }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -23,37 +23,43 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Mock.Indy.HTTPRequestInfo;
+unit WebMock.Static.Responder.Tests;
 
 interface
 
 uses
-  IdCustomHTTPServer;
+  DUnitX.TestFramework,
+  WebMock.Static.Responder;
 
 type
-  TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
+  [TestFixture]
+  TWebMockStaticResponderTests = class(TObject)
+  private
+    Responder: TWebMockStaticResponder;
   public
-    constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
-    property RawHeaders;
-    property RawHTTPCommand: string read FRawHTTPCommand write FRawHTTPCommand;
+    [Test]
+    procedure GetResponseTo_Always_ReturnsResponse;
   end;
 
 implementation
 
-{ TMockIdHTTPRequestInfo }
-
 uses
-  System.SysUtils;
+  WebMock.Response;
 
-constructor TMockIdHTTPRequestInfo.Mock(ACommand: string = 'GET';
-  AURI: string = '*');
+{ TWebMockStaticResponderTests }
+
+procedure TWebMockStaticResponderTests.GetResponseTo_Always_ReturnsResponse;
+var
+  LResponse: TWebMockResponse;
 begin
-  inherited Create(nil);
-  FCommand := ACommand;
-  FDocument := AURI;
-  FVersion := 'HTTP/1.1';
-  FRawHTTPCommand := Format('%s %s HTTP/1.1', [Command, Document]);
-  FURI := AURI;
+  LResponse := TWebMockResponse.Create;
+  Responder := TWebMockStaticResponder.Create(LResponse);
+
+  Assert.AreSame(LResponse, Responder.GetResponseTo(nil) as TWebMockResponse);
+
+  Responder.Free;
 end;
 
+initialization
+  TDUnitX.RegisterTestFixture(TWebMockStaticResponderTests);
 end.

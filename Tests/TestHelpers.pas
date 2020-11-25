@@ -1,4 +1,4 @@
-{******************************************************************************}
+﻿{******************************************************************************}
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
@@ -42,11 +42,15 @@ var
 implementation
 
 uses
+  System.IOUtils,
   System.SysUtils;
 
 function FixturePath(const AFileName: string): string;
+var
+  LFixtureDir: string;
 begin
-  Result := Format('../../Fixtures/%s', [AFileName]);
+  LFixtureDir := TPath.Combine(TDirectory.GetCurrentDirectory, 'Fixtures');
+  Result := TPath.Combine(LFixtureDir, AFileName);
 end;
 
 function GetPropertyValue(AObject: TObject; APropertyName: string): TValue;

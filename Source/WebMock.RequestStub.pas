@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2020 Richard Hatherall                               }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -23,37 +23,27 @@
 {                                                                              }
 {******************************************************************************}
 
-unit Mock.Indy.HTTPRequestInfo;
+unit WebMock.RequestStub;
 
 interface
 
 uses
-  IdCustomHTTPServer;
+  System.Classes,
+  System.Net.HttpClient,
+  WebMock.HTTP.Messages,
+  WebMock.Responder,
+  WebMock.Response;
 
 type
-  TMockIdHTTPRequestInfo = class(TIdHTTPRequestInfo)
-  public
-    constructor Mock(ACommand: string = 'GET'; AURI: string = '*');
-    property RawHeaders;
-    property RawHTTPCommand: string read FRawHTTPCommand write FRawHTTPCommand;
+  IWebMockRequestStub = interface(IInterface)
+    ['{AA474C0C-CA37-44CF-A66A-3B024CC79BE6}']
+    function IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
+    function GetResponder: IWebMockResponder;
+    procedure SetResponder(const AResponder: IWebMockResponder);
+    function ToString: string;
+    property Responder: IWebMockResponder read GetResponder write SetResponder;
   end;
 
 implementation
-
-{ TMockIdHTTPRequestInfo }
-
-uses
-  System.SysUtils;
-
-constructor TMockIdHTTPRequestInfo.Mock(ACommand: string = 'GET';
-  AURI: string = '*');
-begin
-  inherited Create(nil);
-  FCommand := ACommand;
-  FDocument := AURI;
-  FVersion := 'HTTP/1.1';
-  FRawHTTPCommand := Format('%s %s HTTP/1.1', [Command, Document]);
-  FURI := AURI;
-end;
 
 end.

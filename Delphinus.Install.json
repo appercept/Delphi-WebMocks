@@ -1,22 +1,11 @@
 {
   "browsing_pathes": [
-    { "pathes": "Source", "platforms": "Win32;Win64" }
+    { "pathes": "Source", "platforms": "Linux64;OSX32;OSX64;Win32;Win64" }
   ],
   "search_pathes": [
-    { "pathes": "Source", "platforms": "Win32;Win64" }
+    { "pathes": "Source", "platforms": "Linux64;OSX32;OSX64;Win32;Win64" }
   ],
   "source_folders": [
-    { "folder": "Source", "recursive": false, "filter": "*.pas" },
-    { "folder": "Packages", "recursive": true }
-  ],
-  "projects": [
-    {
-      "project": "Packages\\Delphi10Rio\\WebMocks.dproj",
-      "compiler": 33
-    },
-    {
-      "project": "Packages\\Delphi10Sydney\\WebMocks.dproj",
-      "compiler": 34
-    }
+    { "folder": "Source", "recursive": false, "filter": "*.pas" }
   ]
 }
