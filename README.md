@@ -30,7 +30,7 @@ not be found in your test projects.
 2. In "Tools > Options" under the "Language / Delphi / Library" add the
    extracted `Source` directory to the "Library path" and "Browsing path".
 
-## Upgrading to versions prior to 2.0.0
+## Upgrading from versions prior to 2.0.0
 Version 2 has dropped the `Delphi.` namespace from all units. Any projects
 upgrade to version 2 or later will need to drop the `Delphi.` prefix from any
 included WebMocks units.
