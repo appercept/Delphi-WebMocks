@@ -101,6 +101,12 @@ type
     procedure WithHeaders_Always_ReturnsSelf;
     [Test]
     procedure WithHeaders_Always_SetsAllValues;
+    [Test]
+    procedure WithQueryParam_GivenNameAndValue_ReturnsSelf;
+    [Test]
+    procedure WithQueryParam_GivenNameAndValue_SetsValueForQueryParam;
+    [Test]
+    procedure WithQueryParam_GivenNameAndRegEx_SetsPatternForQueryParam;
   end;
 
 implementation
@@ -419,6 +425,42 @@ begin
     LHeaderValue,
     (Assertion.Matcher.Headers[LHeaderName] as TWebMockStringWildcardMatcher).Value
   );
+end;
+
+procedure TWebMockAssertionTests.WithQueryParam_GivenNameAndValue_SetsValueForQueryParam;
+var
+  LParamName, LParamValue: string;
+begin
+  LParamName := 'Param1';
+  LParamValue := 'Value1';
+
+  Assertion.Get('/').WithQueryParam(LParamName, LParamValue);
+
+  Assert.AreEqual(
+    LParamValue,
+    (Assertion.Matcher.QueryParams[LParamName] as TWebMockStringWildcardMatcher).Value
+  );
+end;
+
+procedure TWebMockAssertionTests.WithQueryParam_GivenNameAndRegEx_SetsPatternForQueryParam;
+var
+  LParamName: string;
+  LParamPattern: TRegEx;
+begin
+  LParamName := 'Header1';
+  LParamPattern := TRegEx.Create('');
+
+  Assertion.Get('/').WithQueryParam(LParamName, LParamPattern);
+
+  Assert.AreEqual(
+    LParamPattern,
+    (Assertion.Matcher.QueryParams[LParamName] as TWebMockStringRegExMatcher).RegEx
+  );
+end;
+
+procedure TWebMockAssertionTests.WithQueryParam_GivenNameAndValue_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Get('/').WithQueryParam('ParamName', 'Value'));
 end;
 
 procedure TWebMockAssertionTests.WasNotRequested_MatchingHistory_RaisesFailingException;

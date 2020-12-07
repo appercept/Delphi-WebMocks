@@ -373,11 +373,12 @@ WebClient.Get(WebMock.URLFor('/'));
 WebMock.Assert.Get('/').WasRequested; // Passes
 ```
 
-As with request stubbing you can match requests by HTTP Method, URI, Headers,
-and Body content.
+As with request stubbing you can match requests by HTTP Method, URI, Query
+Parameters, Headers, and Body content.
 ```Delphi
 WebMock.Assert
   .Patch('/resource`)
+  .WithQueryParam('ParamName', 'Value')
   .WithHeader('Content-Type', 'application/json')
   .WithBody('{ "resource": { "propertyA": "Value" } }')
   .WasRequested;

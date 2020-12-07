@@ -52,6 +52,8 @@ type
     function WithHeader(const AName, AValue: string): TWebMockAssertion; overload;
     function WithHeader(const AName: string; const APattern: TRegEx): TWebMockAssertion; overload;
     function WithHeaders(const AHeaders: TStringList): TWebMockAssertion;
+    function WithQueryParam(const AName, AValue: string): TWebMockAssertion; overload;
+    function WithQueryParam(const AName: string; const APattern: TRegEx): TWebMockAssertion; overload;
     procedure WasRequested;
     procedure WasNotRequested;
     property History: TList<IWebMockHTTPRequest> read FHistory;
@@ -186,6 +188,28 @@ var
 begin
   for I := 0 to AHeaders.Count - 1 do
     WithHeader(AHeaders.Names[I], AHeaders.ValueFromIndex[I]);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithQueryParam(const AName: string;
+  const APattern: TRegEx): TWebMockAssertion;
+begin
+  Matcher.QueryParams.AddOrSetValue(
+    AName,
+    TWebMockStringRegExMatcher.Create(APattern)
+  );
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithQueryParam(const AName,
+  AValue: string): TWebMockAssertion;
+begin
+  Matcher.QueryParams.AddOrSetValue(
+    AName,
+    TWebMockStringWildcardMatcher.Create(AValue)
+  );
 
   Result := Self;
 end;
