@@ -72,6 +72,10 @@ type
     [Test]
     procedure WasRequestedWithHeadersStrings_NotMatchingRequest_Fails;
     [Test]
+    procedure WasRequestedWithQueryParam_MatchingRequest_Passes;
+    [Test]
+    procedure WasRequestedWithQueryParam_NotMatchingRequest_Fails;
+    [Test]
     procedure DeleteWasRequested_MatchingRequest_Passes;
     [Test]
     procedure DeleteWasRequested_NotMatchingRequest_Fails;
@@ -460,6 +464,40 @@ begin
     procedure
     begin
       WebMock.Assert.Get('/').WithHeader(LHeaderName, 'Value-2').WasRequested;
+    end,
+    ETestFailure
+  );
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithQueryParam_MatchingRequest_Passes;
+var
+  LParamName, LParamValue: string;
+begin
+  LParamName := 'Param1';
+  LParamValue := 'Value1';
+  WebClient.Get(WebMock.URLFor('/') + Format('?%s=%s', [LParamName, LParamValue]));
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert.Get('/').WithQueryParam(LParamName, LParamValue).WasRequested;
+    end,
+    ETestPass
+  );
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithQueryParam_NotMatchingRequest_Fails;
+var
+  LParamName, LParamValue: string;
+begin
+  LParamName := 'Param1';
+  LParamValue := 'Value1';
+  WebClient.Get(WebMock.URLFor('/'));
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert.Get('/').WithQueryParam(LParamName, LParamValue).WasRequested;
     end,
     ETestFailure
   );

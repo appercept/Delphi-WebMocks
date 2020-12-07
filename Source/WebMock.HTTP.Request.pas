@@ -63,6 +63,9 @@ type
 
 implementation
 
+uses
+  System.SysUtils;
+
 { TWebMockHTTPRequest }
 
 function TWebMockHTTPRequest.CloneHeaders(AHeaders: TIdHeaderList): TStringList;
@@ -82,7 +85,10 @@ begin
   FHeaders := CloneHeaders(ARequestInfo.RawHeaders);
   FHTTPVersion := ARequestInfo.Version;
   FMethod := ARequestInfo.Command;
-  FRequestURI := ARequestInfo.URI;
+  if ARequestInfo.QueryParams.IsEmpty then
+    FRequestURI := ARequestInfo.URI
+  else
+    FRequestURI := Format('%s?%s', [ARequestInfo.URI, ARequestInfo.QueryParams]);
   FStartLine := ARequestInfo.RawHTTPCommand;
 end;
 

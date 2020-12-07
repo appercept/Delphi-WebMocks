@@ -213,6 +213,9 @@ var
   LParam: TPair<string, IStringMatcher>;
   LExtractedParams: TDictionary<string, string>;
 begin
+  if QueryParams.Count = 0 then
+    Exit(True);
+
   LExtractedParams := ExtractURIQueryParams(AURI);
   for LParam in QueryParams do
   begin
