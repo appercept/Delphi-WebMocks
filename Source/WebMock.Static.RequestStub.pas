@@ -56,6 +56,8 @@ type
 
     function WithBody(const AContent: string): TWebMockStaticRequestStub; overload;
     function WithBody(const APattern: TRegEx): TWebMockStaticRequestStub; overload;
+    function WithFormData(const AName, AValue: string): TWebMockStaticRequestStub; overload;
+    function WithFormData(const AName: string; const APattern: TRegEx): TWebMockStaticRequestStub; overload;
     function WithHeader(AName, AValue: string): TWebMockStaticRequestStub; overload;
     function WithHeader(AName: string; APattern: TRegEx)
       : TWebMockStaticRequestStub; overload;
@@ -75,6 +77,7 @@ implementation
 
 uses
   System.SysUtils,
+  WebMock.FormDataMatcher,
   WebMock.Static.Responder,
   WebMock.StringWildcardMatcher,
   WebMock.StringRegExMatcher;
@@ -156,6 +159,28 @@ function TWebMockStaticRequestStub.WithBody(
   const APattern: TRegEx): TWebMockStaticRequestStub;
 begin
   Matcher.Body := TWebMockStringRegExMatcher.Create(APattern);
+
+  Result := Self;
+end;
+
+function TWebMockStaticRequestStub.WithFormData(const AName: string;
+  const APattern: TRegEx): TWebMockStaticRequestStub;
+begin
+  if not (Matcher.Body is TWebMockFormDataMatcher) then
+    Matcher.Body := TWebMockFormDataMatcher.Create;
+
+  (Matcher.Body as TWebMockFormDataMatcher).Add(AName, APattern);
+
+  Result := Self;
+end;
+
+function TWebMockStaticRequestStub.WithFormData(const AName,
+  AValue: string): TWebMockStaticRequestStub;
+begin
+  if not (Matcher.Body is TWebMockFormDataMatcher) then
+    Matcher.Body := TWebMockFormDataMatcher.Create;
+
+  (Matcher.Body as TWebMockFormDataMatcher).Add(AName, AValue);
 
   Result := Self;
 end;

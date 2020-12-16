@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2019-2020 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -75,6 +75,10 @@ type
     procedure WasRequestedWithQueryParam_MatchingRequest_Passes;
     [Test]
     procedure WasRequestedWithQueryParam_NotMatchingRequest_Fails;
+    [Test]
+    procedure WasRequestedWithFormData_MatchingRequest_Passes;
+    [Test]
+    procedure WasRequestedWithFormData_NotMatchingRequest_Fails;
     [Test]
     procedure DeleteWasRequested_MatchingRequest_Passes;
     [Test]
@@ -317,6 +321,46 @@ begin
     procedure
     begin
       WebMock.Assert.Post('/').WithBody('GOODBYE').WasRequested;
+    end,
+    ETestFailure
+  );
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithFormData_MatchingRequest_Passes;
+var
+  LFormData: TStringList;
+begin
+  LFormData := TStringList.Create;
+  LFormData.AddPair('AField', 'AValue');
+  WebClient.Post(WebMock.URLFor('/form'), LFormData);
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert
+        .Post('/form')
+        .WithFormData('AField', 'AValue')
+        .WasRequested;
+    end,
+    ETestPass
+  );
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithFormData_NotMatchingRequest_Fails;
+var
+  LFormData: TStringList;
+begin
+  LFormData := TStringList.Create;
+  LFormData.AddPair('AField', 'AValue');
+  WebClient.Post(WebMock.URLFor('/form'), LFormData);
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert
+        .Post('/form')
+        .WithFormData('AField', 'OtherValue')
+        .WasRequested;
     end,
     ETestFailure
   );

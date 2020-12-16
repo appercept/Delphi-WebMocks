@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2019-2020 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -29,8 +29,11 @@ interface
 
 uses
   DUnitX.TestFramework,
-  System.Classes, System.Generics.Collections, System.RegularExpressions,
-  WebMock.HTTP.Messages, WebMock.HTTP.RequestMatcher;
+  System.Classes,
+  System.Generics.Collections,
+  System.RegularExpressions,
+  WebMock.HTTP.Messages,
+  WebMock.HTTP.RequestMatcher;
 
 type
   TWebMockAssertion = class(TObject)
@@ -54,6 +57,8 @@ type
     function WithHeaders(const AHeaders: TStringList): TWebMockAssertion;
     function WithQueryParam(const AName, AValue: string): TWebMockAssertion; overload;
     function WithQueryParam(const AName: string; const APattern: TRegEx): TWebMockAssertion; overload;
+    function WithFormData(const AName, AValue: string): TWebMockAssertion; overload;
+    function WithFormData(const AName: string; const APattern: TRegEx): TWebMockAssertion; overload;
     procedure WasRequested;
     procedure WasNotRequested;
     property History: TList<IWebMockHTTPRequest> read FHistory;
@@ -66,7 +71,9 @@ implementation
 
 uses
   System.SysUtils,
-  WebMock.StringRegExMatcher, WebMock.StringWildcardMatcher;
+  WebMock.FormDataMatcher,
+  WebMock.StringRegExMatcher,
+  WebMock.StringWildcardMatcher;
 
 constructor TWebMockAssertion.Create(AHistory: TList<IWebMockHTTPRequest>);
 begin
@@ -149,6 +156,28 @@ end;
 function TWebMockAssertion.WithBody(const APattern: TRegEx): TWebMockAssertion;
 begin
   Matcher.Body := TWebMockStringRegExMatcher.Create(APattern);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithFormData(const AName: string;
+  const APattern: TRegEx): TWebMockAssertion;
+begin
+  if not (Matcher.Body is TWebMockFormDataMatcher) then
+    Matcher.Body := TWebMockFormDataMatcher.Create;
+
+  (Matcher.Body as TWebMockFormDataMatcher).Add(AName, APattern);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithFormData(const AName,
+  AValue: string): TWebMockAssertion;
+begin
+  if not (Matcher.Body is TWebMockFormDataMatcher) then
+    Matcher.Body := TWebMockFormDataMatcher.Create;
+
+  (Matcher.Body as TWebMockFormDataMatcher).Add(AName, AValue);
 
   Result := Self;
 end;

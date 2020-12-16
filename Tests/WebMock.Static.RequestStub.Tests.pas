@@ -61,6 +61,14 @@ type
     [Test]
     procedure WithBody_GivenRegEx_SetsValueForContent;
     [Test]
+    procedure WithFormData_GivenString_ReturnsSelf;
+    [Test]
+    procedure WithFormData_GivenStringValue_SetsValueForFormData;
+    [Test]
+    procedure WithFormData_GivenRegExValue_ReturnsSelf;
+    [Test]
+    procedure WithFormData_GivenRegExValue_SetsValueForFormData;
+    [Test]
     procedure WithHeader_GivenString_ReturnsSelf;
     [Test]
     procedure WithHeader_GivenString_SetsValueForHeader;
@@ -83,6 +91,8 @@ uses
   Mock.Indy.HTTPRequestInfo,
   System.Classes,
   System.RegularExpressions,
+  WebMock.FormDataMatcher,
+  WebMock.FormFieldMatcher,
   WebMock.HTTP.RequestMatcher,
   WebMock.RequestStub,
   WebMock.Response,
@@ -190,6 +200,61 @@ begin
   Assert.AreEqual(
     LContent,
     (StubbedRequest.Matcher.Body as TWebMockStringWildcardMatcher).Value
+  );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithFormData_GivenRegExValue_ReturnsSelf;
+begin
+  Assert.AreSame(
+    StubbedRequest,
+    StubbedRequest.WithFormData('AField', TRegEx.Create(''))
+  );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithFormData_GivenRegExValue_SetsValueForFormData;
+var
+  LName: string;
+  LValuePattern: TRegEx;
+  LFormDataMatcher: TWebMockFormDataMatcher;
+  LFormFieldMatcher: TWebMockFormFieldMatcher;
+begin
+  LName := 'AName';
+  LValuePattern := TRegEx.Create('');
+
+  StubbedRequest.WithFormData(LName, LValuePattern);
+
+  LFormDataMatcher := (StubbedRequest.Matcher.Body as TWebMockFormDataMatcher);
+  LFormFieldMatcher := (LFormDataMatcher.FieldMatchers[0] as TWebMockFormFieldMatcher);
+  Assert.AreEqual(
+    LValuePattern,
+    (LFormFieldMatcher.ValueMatcher as TWebMockStringRegExMatcher).RegEx
+  );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithFormData_GivenStringValue_SetsValueForFormData;
+var
+  LName, LValue: string;
+  LFormDataMatcher: TWebMockFormDataMatcher;
+  LFormFieldMatcher: TWebMockFormFieldMatcher;
+begin
+  LName := 'AName';
+  LValue := 'AValue';
+
+  StubbedRequest.WithFormData(LName, LValue);
+
+  LFormDataMatcher := (StubbedRequest.Matcher.Body as TWebMockFormDataMatcher);
+  LFormFieldMatcher := (LFormDataMatcher.FieldMatchers[0] as TWebMockFormFieldMatcher);
+  Assert.AreEqual(
+    LValue,
+    (LFormFieldMatcher.ValueMatcher as TWebMockStringWildcardMatcher).Value
+  );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithFormData_GivenString_ReturnsSelf;
+begin
+  Assert.AreSame(
+    StubbedRequest,
+    StubbedRequest.WithFormData('AField', 'AValue')
   );
 end;
 

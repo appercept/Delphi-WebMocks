@@ -42,9 +42,10 @@ type
     FMethod: string;
     FStartLine: string;
     FRequestURI: string;
-    function CloneHeaders(AHeaders: TIdHeaderList): TStringList;
+    procedure CloneContent(const ARequestInfo: TIdHTTPRequestInfo);
+    function CloneHeaders(const AHeaders: TIdHeaderList): TStringList;
   public
-    constructor Create(ARequestInfo: TIdHTTPRequestInfo);
+    constructor Create(const ARequestInfo: TIdHTTPRequestInfo);
     destructor Destroy; override;
     function GetStartLine: string;
     function GetMethod: string;
@@ -68,20 +69,29 @@ uses
 
 { TWebMockHTTPRequest }
 
-function TWebMockHTTPRequest.CloneHeaders(AHeaders: TIdHeaderList): TStringList;
+procedure TWebMockHTTPRequest.CloneContent(const ARequestInfo: TIdHTTPRequestInfo);
+begin
+  if Assigned(ARequestInfo.PostStream) then
+  begin
+    FBody := TMemoryStream.Create;
+    FBody.CopyFrom(ARequestInfo.PostStream, 0);
+    Exit;
+  end;
+
+  if not ARequestInfo.FormParams.IsEmpty then
+    FBody := TStringStream.Create(ARequestInfo.FormParams);
+end;
+
+function TWebMockHTTPRequest.CloneHeaders(const AHeaders: TIdHeaderList): TStringList;
 begin
   Result := TStringList.Create;
   AHeaders.ConvertToStdValues(Result);
 end;
 
-constructor TWebMockHTTPRequest.Create(ARequestInfo: TIdHTTPRequestInfo);
+constructor TWebMockHTTPRequest.Create(const ARequestInfo: TIdHTTPRequestInfo);
 begin
   inherited Create;
-  if Assigned(ARequestInfo.PostStream) then
-  begin
-    FBody := TMemoryStream.Create;
-    Body.CopyFrom(ARequestInfo.PostStream, 0);
-  end;
+  CloneContent(ARequestInfo);
   FHeaders := CloneHeaders(ARequestInfo.RawHeaders);
   FHTTPVersion := ARequestInfo.Version;
   FMethod := ARequestInfo.Command;

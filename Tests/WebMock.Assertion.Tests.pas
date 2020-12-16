@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2019-2020 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -107,6 +107,12 @@ type
     procedure WithQueryParam_GivenNameAndValue_SetsValueForQueryParam;
     [Test]
     procedure WithQueryParam_GivenNameAndRegEx_SetsPatternForQueryParam;
+    [Test]
+    procedure WithFormData_GivenNameAndValue_ReturnsSelf;
+    [Test]
+    procedure WithFormData_GivenNameAndValue_SetsValueForBodyMatcher;
+    [Test]
+    procedure WithFormData_GivenNameAndRegEx_SetsPatternForBodyMatcher;
   end;
 
 implementation
@@ -117,7 +123,11 @@ uses
   DUnitX.Exceptions,
   Mock.Indy.HTTPRequestInfo,
   System.RegularExpressions,
-  WebMock.HTTP.Request, WebMock.StringRegExMatcher, WebMock.StringMatcher,
+  WebMock.FormDataMatcher,
+  WebMock.FormFieldMatcher,
+  WebMock.HTTP.Request,
+  WebMock.StringRegExMatcher,
+  WebMock.StringMatcher,
   WebMock.StringWildcardMatcher;
 
 procedure TWebMockAssertionTests.Delete_Always_ReturnsSelf;
@@ -328,6 +338,50 @@ begin
   Assert.AreEqual(
     LBody,
     (Assertion.Matcher.Body as TWebMockStringWildcardMatcher).Value
+  );
+end;
+
+procedure TWebMockAssertionTests.WithFormData_GivenNameAndRegEx_SetsPatternForBodyMatcher;
+var
+  LName: string;
+  LPattern: TRegEx;
+  LFormDataMatcher: TWebMockFormDataMatcher;
+  LFormFieldMatcher: TWebMockFormFieldMatcher;
+begin
+  LName := 'Param1';
+  LPattern := TRegEx.Create('');
+
+  Assertion.Put('/').WithFormData(LName, LPattern);
+
+  LFormDataMatcher := Assertion.Matcher.Body as TWebMockFormDataMatcher;
+  LFormFieldMatcher := LFormDataMatcher.FieldMatchers[0] as TWebMockFormFieldMatcher;
+  Assert.AreEqual(
+    LPattern,
+    (LFormFieldMatcher.ValueMatcher as TWebMockStringRegExMatcher).RegEx
+  );
+end;
+
+procedure TWebMockAssertionTests.WithFormData_GivenNameAndValue_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Put('/').WithFormData('AName', 'AValue'));
+end;
+
+procedure TWebMockAssertionTests.WithFormData_GivenNameAndValue_SetsValueForBodyMatcher;
+var
+  LName, LValue: string;
+  LFormDataMatcher: TWebMockFormDataMatcher;
+  LFormFieldMatcher: TWebMockFormFieldMatcher;
+begin
+  LName := 'Param1';
+  LValue := 'Value1';
+
+  Assertion.Get('/').WithFormData(LName, LValue);
+
+  LFormDataMatcher := Assertion.Matcher.Body as TWebMockFormDataMatcher;
+  LFormFieldMatcher := LFormDataMatcher.FieldMatchers[0] as TWebMockFormFieldMatcher;
+  Assert.AreEqual(
+    LValue,
+    (LFormFieldMatcher.ValueMatcher as TWebMockStringWildcardMatcher).Value
   );
 end;
 

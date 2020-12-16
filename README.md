@@ -169,6 +169,23 @@ HTTP request can be matched by content like:
 WebMock.StubRequest('*', '*').WithBody('String content.');
 ```
 
+#### Request matching by form-data
+HTTP requests can be matched by form-data as submitted with `content-type` of
+`application/x-www-form-urlencoded`. Multiple matching field values can be
+combined. For example:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithFormData('AField', 'A value.')
+  .WithFormData('AOtherField', 'Another value.');
+```
+
+To simply match the presence of a field, a wildcard `*` can be passed for the
+value.
+
+NOTE: You cannot match form-data (`WithFormData`) and body content (`WithBody`)
+at the same time. Specifying both will result in the latest call overwriting the
+previous matcher.
+
 #### Matching request document path, headers, or content by regular-expression
 Matching a request by regular-expression can be useful for stubbing dynamic
 routes for a ReSTful resource involving a resource name and an unknown resource
@@ -187,6 +204,12 @@ Matching content can be performed like:
 ```Delphi
 WebMock.StubRequest('*', '*')
   .WithBody(TRegEx.Create('Hello'));
+```
+
+Matching form-data content can be performed like:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithFormData('AField', TRegEx.Create('.*'));
 ```
 
 NOTE: Be sure to add `System.RegularExpressions` to your uses clause.

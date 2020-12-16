@@ -60,7 +60,11 @@ uses
   WebMock.ResponseBuilder.Tests in 'WebMock.ResponseBuilder.Tests.pas',
   WebMock.DynamicResponses.Tests in 'Features\WebMock.DynamicResponses.Tests.pas',
   WebMock.Dynamic.Responder.Tests in 'WebMock.Dynamic.Responder.Tests.pas',
-  WebMock.Dynamic.Responder in '..\Source\WebMock.Dynamic.Responder.pas';
+  WebMock.Dynamic.Responder in '..\Source\WebMock.Dynamic.Responder.pas',
+  WebMock.FormDataMatcher.Tests in 'WebMock.FormDataMatcher.Tests.pas',
+  WebMock.FormDataMatcher in '..\Source\WebMock.FormDataMatcher.pas',
+  WebMock.FormFieldMatcher.Tests in 'WebMock.FormFieldMatcher.Tests.pas',
+  WebMock.FormFieldMatcher in '..\Source\WebMock.FormFieldMatcher.pas';
 
 var
   Runner: ITestRunner;
