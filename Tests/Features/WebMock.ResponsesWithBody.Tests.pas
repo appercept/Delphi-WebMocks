@@ -76,16 +76,16 @@ var
   LExpected: string;
   LResponse: IHTTPResponse;
 begin
-  LExpected := '{ "key": "value" }'#10;
+  LExpected := '{ "key": "value" }';
   WebMock.StubRequest('GET', '/json').ToRespond.WithBodyFile(FixturePath('Response.json'));
 
   // First request
   LResponse := WebClient.Get(WebMock.URLFor('json'));
-  Assert.AreEqual(LExpected, LResponse.ContentAsString, 'on first request');
+  Assert.AreEqual(LExpected, LResponse.ContentAsString.Trim, 'on first request');
 
   // Second request
   LResponse := WebClient.Get(WebMock.URLFor('json'));
-  Assert.AreEqual(LExpected, LResponse.ContentAsString, 'on second request');
+  Assert.AreEqual(LExpected, LResponse.ContentAsString.Trim, 'on second request');
 end;
 
 procedure TWebMockResponsesWithBodyTests.Response_WhenWithBodyFileWithContentType_SetsContentType;
