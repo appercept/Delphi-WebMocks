@@ -220,8 +220,11 @@ begin
 end;
 
 procedure TWebMockAssertionsTests.PostWasRequested_MatchingRequest_Passes;
+var
+  LContentStream: TStringStream;
 begin
-  WebClient.Post(WebMock.URLFor('/'), TStringStream.Create(''));
+  LContentStream := TStringStream.Create('');
+  WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
   Assert.WillRaise(
     procedure
@@ -230,11 +233,16 @@ begin
     end,
     ETestPass
   );
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockAssertionsTests.PostWasRequested_NotMatchingRequest_Fails;
+var
+  LContentStream: TStringStream;
 begin
-  WebClient.Post(WebMock.URLFor('/'), TStringStream.Create(''));
+  LContentStream := TStringStream.Create('');
+  WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
   Assert.WillRaise(
     procedure
@@ -243,6 +251,8 @@ begin
     end,
     ETestFailure
   );
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockAssertionsTests.PutWasRequested_MatchingRequest_Passes;
@@ -272,8 +282,11 @@ begin
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithBodyRegEx_MatchingRequestBody_Passes;
+var
+  LContentStream: TStringStream;
 begin
-  WebClient.Post(WebMock.URLFor('/'), TStringStream.Create('HELLO'));
+  LContentStream := TStringStream.Create('HELLO');
+  WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
   Assert.WillRaise(
     procedure
@@ -282,11 +295,16 @@ begin
     end,
     ETestPass
   );
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithBodyRegEx_NotMatchingRequestBody_Fails;
+var
+  LContentStream: TStringStream;
 begin
-  WebClient.Post(WebMock.URLFor('/'), TStringStream.Create('HELLO'));
+  LContentStream := TStringStream.Create('HELLO');
+  WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
   Assert.WillRaise(
     procedure
@@ -295,14 +313,18 @@ begin
     end,
     ETestFailure
   );
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithBodyString_MatchingRequestBody_Passes;
 var
   LContent: string;
+  LContentStream: TStringStream;
 begin
   LContent := 'OK';
-  WebClient.Post(WebMock.URLFor('/'), TStringStream.Create(LContent));
+  LContentStream := TStringStream.Create('OK');
+  WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
   Assert.WillRaise(
     procedure
@@ -311,11 +333,16 @@ begin
     end,
     ETestPass
   );
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithBodyString_NotMatchingRequestBody_Fails;
+var
+  LContentStream: TStringStream;
 begin
-  WebClient.Post(WebMock.URLFor('/'), TStringStream.Create('HELLO'));
+  LContentStream := TStringStream.Create('HELLO');
+  WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
   Assert.WillRaise(
     procedure
@@ -324,6 +351,8 @@ begin
     end,
     ETestFailure
   );
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithFormData_MatchingRequest_Passes;
@@ -344,6 +373,8 @@ begin
     end,
     ETestPass
   );
+
+  LFormData.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithFormData_NotMatchingRequest_Fails;
@@ -364,6 +395,8 @@ begin
     end,
     ETestFailure
   );
+
+  LFormData.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithHeaderRegEx_MatchingRequest_Passes;
@@ -440,6 +473,8 @@ begin
     end,
     ETestPass
   );
+
+  LHeaders.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithHeadersStrings_NotMatchingRequest_Fails;
@@ -466,6 +501,8 @@ begin
     end,
     ETestFailure
   );
+
+  LHeaders.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithHeaderString_MatchingRequest_Passes;

@@ -43,7 +43,7 @@ type
     FProc: TWebMockDynamicResponse;
   public
     constructor Create(const AProc: TWebMockDynamicResponse);
-    function GetResponseTo(const ARequest: IWebMockHTTPRequest): TWebMockResponse;
+    function GetResponseTo(const ARequest: IWebMockHTTPRequest): IWebMockResponse;
   end;
 
 implementation
@@ -58,12 +58,12 @@ begin
 end;
 
 function TWebMockDynamicResponder.GetResponseTo(
-  const ARequest: IWebMockHTTPRequest): TWebMockResponse;
+  const ARequest: IWebMockHTTPRequest): IWebMockResponse;
 var
   LResponse: TWebMockResponse;
 begin
   LResponse := TWebMockResponse.Create;
-  FProc(ARequest, LResponse);
+  FProc(ARequest, LResponse.Builder);
   Result := LResponse;
 end;
 

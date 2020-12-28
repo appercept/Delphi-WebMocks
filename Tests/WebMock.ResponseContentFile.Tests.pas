@@ -97,14 +97,17 @@ end;
 
 procedure TWebMockResponseContentFileTests.Create_WithValidFileName_LoadsContentStreamFromFile;
 var
-  LActualContent: TStringStream;
+  LActualContent: TStream;
+  LActualStringContent: TStringStream;
 begin
   WebMockResponseContentFile := TWebMockResponseContentFile.Create(FixturePath('Sample.txt'));
 
-  LActualContent := TStringStream.Create('');
-  LActualContent.CopyFrom(WebMockResponseContentFile.ContentStream, 0);
-  Assert.AreEqual('Sample Text', LActualContent.DataString);
+  LActualContent := WebMockResponseContentFile.ContentStream;
+  LActualStringContent := TStringStream.Create('');
+  LActualStringContent.CopyFrom(LActualContent, 0);
+  Assert.AreEqual('Sample Text', LActualStringContent.DataString);
 
+  LActualStringContent.Free;
   LActualContent.Free;
 end;
 

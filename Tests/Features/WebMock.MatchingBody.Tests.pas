@@ -81,6 +81,8 @@ begin
   LResponse := WebClient.Post(WebMock.BaseURL, LFormData);
 
   Assert.AreEqual(200, LResponse.StatusCode);
+
+  LFormData.Free;
 end;
 
 procedure TWebMockMatchingBodyTests.Request_WithFormDataMatchingBodyWithMultipleFields_RespondsOK;
@@ -98,6 +100,8 @@ begin
   LResponse := WebClient.Post(WebMock.BaseURL, LFormData);
 
   Assert.AreEqual(200, LResponse.StatusCode);
+
+  LFormData.Free;
 end;
 
 procedure TWebMockMatchingBodyTests.Request_WithFormDataMatchingBody_RespondsOK;
@@ -112,55 +116,73 @@ begin
   LResponse := WebClient.Post(WebMock.BaseURL, LFormData);
 
   Assert.AreEqual(200, LResponse.StatusCode);
+
+  LFormData.Free;
 end;
 
 procedure TWebMockMatchingBodyTests.Request_WithPatternMatchingBody_RespondsOK;
 var
   LContent: string;
+  LContentStream: TStringStream;
   LResponse: IHTTPResponse;
 begin
   LContent := 'Hello world!';
+  LContentStream := TStringStream.Create(LContent);
 
   WebMock.StubRequest('*', '*').WithBody(TRegEx.Create('Hello'));
-  LResponse := WebClient.Post(WebMock.BaseURL, TStringStream.Create(LContent));
+  LResponse := WebClient.Post(WebMock.BaseURL, LContentStream);
 
   Assert.AreEqual(200, LResponse.StatusCode);
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockMatchingBodyTests.Request_WithPatternNotMatchingBody_RespondsNotImplemented;
 var
   LContent: string;
+  LContentStream: TStringStream;
   LResponse: IHTTPResponse;
 begin
   LContent := 'Hello world!';
+  LContentStream := TStringStream.Create(LContent);
 
   WebMock.StubRequest('*', '*').WithBody(TRegEx.Create('Goodbye'));
-  LResponse := WebClient.Post(WebMock.BaseURL, TStringStream.Create(LContent));
+  LResponse := WebClient.Post(WebMock.BaseURL, LContentStream);
 
   Assert.AreEqual(501, LResponse.StatusCode);
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockMatchingBodyTests.Request_WithStringMatchingBodyExactly_RespondsOK;
 var
   LContent: string;
+  LContentStream: TStringStream;
   LResponse: IHTTPResponse;
 begin
   LContent := 'Hello world!';
+  LContentStream := TStringStream.Create(LContent);
 
   WebMock.StubRequest('*', '*').WithBody(LContent);
-  LResponse := WebClient.Post(WebMock.BaseURL, TStringStream.Create(LContent));
+  LResponse := WebClient.Post(WebMock.BaseURL, LContentStream);
 
   Assert.AreEqual(200, LResponse.StatusCode);
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockMatchingBodyTests.Request_WithStringNotMatchingBody_RespondsNotImplemented;
 var
+  LContentStream: TStringStream;
   LResponse: IHTTPResponse;
 begin
   WebMock.StubRequest('*', '*').WithBody('Hello!');
-  LResponse := WebClient.Post(WebMock.BaseURL, TStringStream.Create('Goodbye!'));
+  LContentStream := TStringStream.Create('Goodbye!');
+  LResponse := WebClient.Post(WebMock.BaseURL, LContentStream);
 
   Assert.AreEqual(501, LResponse.StatusCode);
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockMatchingBodyTests.Setup;

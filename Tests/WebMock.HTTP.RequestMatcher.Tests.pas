@@ -39,8 +39,6 @@ type
   private
     RequestMatcher: TWebMockHTTPRequestMatcher;
   public
-    [Setup]
-    procedure Setup;
     [TearDown]
     procedure TearDown;
     [Test]
@@ -100,23 +98,22 @@ uses
 
 { TWebMockHTTPRequestMatcherTests }
 
-procedure TWebMockHTTPRequestMatcherTests.Setup;
-begin
-  RequestMatcher := TWebMockHTTPRequestMatcher.Create('');
-end;
-
 procedure TWebMockHTTPRequestMatcherTests.TearDown;
 begin
-  RequestMatcher := nil;
+  RequestMatcher.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.Body_ByDefault_MatchesAnyString;
 begin
+  RequestMatcher := TWebMockHTTPRequestMatcher.Create('');
+
   Assert.IsTrue(RequestMatcher.Body.IsMatch('Any Value'));
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.Headers_Always_IsADictionary;
 begin
+  RequestMatcher := TWebMockHTTPRequestMatcher.Create('');
+
   Assert.IsTrue(RequestMatcher.Headers is TDictionary<string, IStringMatcher>);
 end;
 
@@ -127,6 +124,7 @@ var
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/match');
   LRequest := TWebMockHTTPRequest.Create(LRequestInfo);
+  LRequestInfo.Free;
 
   RequestMatcher := TWebMockHTTPRequestMatcher.Create('/match', 'GET');
 
@@ -144,6 +142,8 @@ begin
   RequestMatcher := TWebMockHTTPRequestMatcher.Create('GET');
 
   Assert.IsFalse(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_GivenDifferingURI_ReturnsFalse;
@@ -157,6 +157,8 @@ begin
   RequestMatcher := TWebMockHTTPRequestMatcher.Create('/match', 'GET');
 
   Assert.IsFalse(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenContentMatcherDoesNotMatchRequestInfo_ReturnsFalse;
@@ -173,6 +175,8 @@ begin
   RequestMatcher.Body := TWebMockStringWildcardMatcher.Create('Other Value');
 
   Assert.IsFalse(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenContentMatcherMatchesRequestInfo_ReturnsTrue;
@@ -189,6 +193,8 @@ begin
   RequestMatcher.Body := TWebMockStringWildcardMatcher.Create('Match');
 
   Assert.IsTrue(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenHeadersAreSetGivenMatchingRequestInfo_ReturnsTrue;
@@ -209,6 +215,8 @@ begin
   );
 
   Assert.IsTrue(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenHeadersAreSetGivenNonMatchingRequestInfo_ReturnsFalse;
@@ -225,6 +233,8 @@ begin
   );
 
   Assert.IsFalse(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenMethodIsWildcardGivenAnyRequestInfoMethod_ReturnsTrue;
@@ -238,6 +248,8 @@ begin
   RequestMatcher := TWebMockHTTPRequestMatcher.Create('*', '*');
 
   Assert.IsTrue(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenQueryParamsAreSetGivenMatchingRequestInfo_ReturnsTrue(const AParamValue, AMatchValue: string);
@@ -259,6 +271,8 @@ begin
   );
 
   Assert.IsTrue(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenQueryParamsAreSetGivenNonMatchingRequestInfo_ReturnsFalse;
@@ -278,6 +292,8 @@ begin
   );
 
   Assert.IsFalse(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenQueryParamsAreSetToMatchWildcardAndURLHasNoParam_ReturnsFalse;
@@ -296,6 +312,8 @@ begin
   );
 
   Assert.IsFalse(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenQueryParamsAreSetWithRegExGivenMatchingRequestInfo_ReturnsTrue;
@@ -317,6 +335,8 @@ begin
   );
 
   Assert.IsTrue(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenQueryParamsAreSetWithRegExGivenNonMatchingRequestInfo_ReturnsFalse;
@@ -338,6 +358,8 @@ begin
   );
 
   Assert.IsFalse(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenURIIsWildcardGivenAnyRequestInfoURI_ReturnsTrue;
@@ -351,6 +373,8 @@ begin
   RequestMatcher := TWebMockHTTPRequestMatcher.Create('*', 'GET');
 
   Assert.IsTrue(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
 end;
 
 procedure TWebMockHTTPRequestMatcherTests.StringProperty_Defaults_ToValue(
@@ -358,6 +382,8 @@ procedure TWebMockHTTPRequestMatcherTests.StringProperty_Defaults_ToValue(
 var
   Actual: string;
 begin
+  RequestMatcher := TWebMockHTTPRequestMatcher.Create('');
+
   Actual := GetPropertyValue(RequestMatcher, APropertyName).ToString;
 
   Assert.AreEqual(Expected, Actual);

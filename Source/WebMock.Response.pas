@@ -29,6 +29,7 @@ interface
 
 uses
   System.Classes,
+  System.Generics.Collections,
   WebMock.HTTP.Messages,
   WebMock.ResponseBodySource,
   WebMock.ResponseStatus;
@@ -46,7 +47,49 @@ type
     function WithStatus(const AStatusCode: Integer; const AStatusText: string = ''): IWebMockResponseBuilder; overload;
   end;
 
-  TWebMockResponse = class(TInterfacedObject, IWebMockResponseBuilder)
+  IWebMockHeaders = interface(IInterface)
+    ['{C48A79A4-D42A-4BE0-9531-2BD8D6B93B39}']
+    function GetEnumerator: TDictionary<string, string>.TPairEnumerator;
+    function GetCount: Integer;
+    property Count: Integer read GetCount;
+    function GetHeader(const AName: string): string;
+    procedure SetHeader(const AName, AValue: string);
+    property Values[const Name: string]: string read GetHeader write SetHeader; default;
+  end;
+
+  TWebMockHeaders = class(TInterfacedObject, IWebMockHeaders)
+  private
+    FValues: TDictionary<string, string>;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    { IEnumerable }
+    function GetEnumerator: TDictionary<string, string>.TPairEnumerator;
+
+    { IWebMockHeaders }
+    function GetCount: Integer;
+    property Count: Integer read GetCount;
+    function GetHeader(const AName: string): string;
+    procedure SetHeader(const AName, AValue: string);
+    property Headers[const Name: string]: string read GetHeader write SetHeader; default;
+  end;
+
+  IWebMockResponse = interface(IInterface)
+    ['{5139FE36-3737-466E-8120-8E4FA0460EAE}']
+    function ToString: string;
+    function GetBuilder: IWebMockResponseBuilder;
+    property Builder: IWebMockResponseBuilder read GetBuilder;
+    function GetBodySource: IWebMockResponseBodySource;
+    property BodySource: IWebMockResponseBodySource read GetBodySource;
+    function GetHeaders: IWebMockHeaders;
+    property Headers: IWebMockHeaders read GetHeaders;
+    function GetStatus: TWebMockResponseStatus;
+    property Status: TWebMockResponseStatus read GetStatus;
+  end;
+
+  TWebMockResponse = class(TInterfacedObject, IWebMockResponse,
+    IWebMockResponseBuilder)
   private type
 
     TBuilder = class(TInterfacedObject, IWebMockResponseBuilder)
@@ -68,16 +111,22 @@ type
   private
     FBuilder: IWebMockResponseBuilder;
     FBodySource: IWebMockResponseBodySource;
-    FHeaders: TStringList;
+    FHeaders: IWebMockHeaders;
     FStatus: TWebMockResponseStatus;
   public
-    constructor Create(const AStatus: TWebMockResponseStatus = nil);
-    destructor Destroy; override;
+    constructor Create; overload;
+    constructor Create(const AStatus: TWebMockResponseStatus); overload;
     function ToString: string; override;
-    property Builder: IWebMockResponseBuilder read FBuilder implements IWebMockResponseBuilder;
-    property BodySource: IWebMockResponseBodySource read FBodySource write FBodySource;
-    property Headers: TStringList read FHeaders write FHeaders;
-    property Status: TWebMockResponseStatus read FStatus write FStatus;
+
+    { IWebMockResponse }
+    function GetBuilder: IWebMockResponseBuilder;
+    property Builder: IWebMockResponseBuilder read GetBuilder implements IWebMockResponseBuilder;
+    function GetBodySource: IWebMockResponseBodySource;
+    property BodySource: IWebMockResponseBodySource read GetBodySource write FBodySource;
+    function GetHeaders: IWebMockHeaders;
+    property Headers: IWebMockHeaders read GetHeaders write FHeaders;
+    function GetStatus: TWebMockResponseStatus;
+    property Status: TWebMockResponseStatus read GetStatus write FStatus;
   end;
 
 implementation
@@ -90,23 +139,38 @@ uses
   WebMock.ResponseContentString;
 
 constructor TWebMockResponse.Create(const AStatus
-  : TWebMockResponseStatus = nil);
+  : TWebMockResponseStatus);
 begin
   inherited Create;
   FBuilder := TBuilder.Create(Self);
   FBodySource := TWebMockResponseContentString.Create;
-  FHeaders := TStringList.Create;
-  if Assigned(AStatus) then
-    FStatus := AStatus
-  else
-    FStatus := TWebMockResponseStatus.OK;
+  FHeaders := TWebMockHeaders.Create;
+  FStatus := AStatus
 end;
 
-destructor TWebMockResponse.Destroy;
+constructor TWebMockResponse.Create;
 begin
-  FHeaders.Free;
-  FStatus.Free;
-  inherited;
+  Create(TWebMockResponseStatus.OK);
+end;
+
+function TWebMockResponse.GetBodySource: IWebMockResponseBodySource;
+begin
+  Result := FBodySource;
+end;
+
+function TWebMockResponse.GetBuilder: IWebMockResponseBuilder;
+begin
+  Result := FBuilder;
+end;
+
+function TWebMockResponse.GetHeaders: IWebMockHeaders;
+begin
+  Result := FHeaders;
+end;
+
+function TWebMockResponse.GetStatus: TWebMockResponseStatus;
+begin
+  Result := FStatus;
 end;
 
 function TWebMockResponse.ToString: string;
@@ -143,7 +207,7 @@ end;
 function TWebMockResponse.TBuilder.WithHeader(const AHeaderName,
   AHeaderValue: string): IWebMockResponseBuilder;
 begin
-  Response.Headers.Values[AHeaderName] := AHeaderValue;
+  Response.Headers[AHeaderName] := AHeaderValue;
 
   Result := Self;
 end;
@@ -151,8 +215,11 @@ end;
 
 function TWebMockResponse.TBuilder.WithHeaders(
   const AHeaders: TStrings): IWebMockResponseBuilder;
+var
+  I: Integer;
 begin
-  Response.Headers.AddStrings(AHeaders);
+  for I := 0 to AHeaders.Count - 1 do
+    Response.Headers[AHeaders.Names[I]] := AHeaders.ValueFromIndex[I];
 
   Result := Self;
 end;
@@ -171,6 +238,40 @@ begin
   Response.Status := AStatus;
 
   Result := Self;
+end;
+
+{ TWebMockHeaders }
+
+constructor TWebMockHeaders.Create;
+begin
+  inherited;
+  FValues := TDictionary<string, string>.Create;
+end;
+
+destructor TWebMockHeaders.Destroy;
+begin
+  FValues.Free;
+  inherited;
+end;
+
+function TWebMockHeaders.GetCount: Integer;
+begin
+  Result := FValues.Count;
+end;
+
+function TWebMockHeaders.GetEnumerator: TDictionary<string, string>.TPairEnumerator;
+begin
+  Result := FValues.GetEnumerator;
+end;
+
+function TWebMockHeaders.GetHeader(const AName: string): string;
+begin
+  Result := FValues[AName];
+end;
+
+procedure TWebMockHeaders.SetHeader(const AName, AValue: string);
+begin
+  FValues.AddOrSetValue(AName, AValue);
 end;
 
 end.

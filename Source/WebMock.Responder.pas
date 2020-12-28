@@ -34,7 +34,7 @@ uses
 type
   IWebMockResponder = interface(IInterface)
     ['{DC0BF955-CBFB-4EBB-987B-0A5FCE2C6575}']
-    function GetResponseTo(const ARequest: IWebMockHTTPRequest): TWebMockResponse;
+    function GetResponseTo(const ARequest: IWebMockHTTPRequest): IWebMockResponse;
   end;
 
 implementation

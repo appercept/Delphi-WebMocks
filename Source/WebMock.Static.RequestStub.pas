@@ -45,13 +45,14 @@ type
   private
     FMatcher: TWebMockHTTPRequestMatcher;
     FResponder: IWebMockResponder;
-    FResponse: TWebMockResponse;
-    property Response: TWebMockResponse read FResponse;
+    FResponse: IWebMockResponse;
+    property Response: IWebMockResponse read FResponse;
   public
     constructor Create(AMatcher: TWebMockHTTPRequestMatcher);
     destructor Destroy; override;
-    function ToRespond(AResponseStatus: TWebMockResponseStatus = nil)
-      : IWebMockResponseBuilder;
+    function ToRespond: IWebMockResponseBuilder; overload;
+    function ToRespond(AResponseStatus: TWebMockResponseStatus)
+      : IWebMockResponseBuilder; overload;
     procedure ToRespondWith(const AProc: TWebMockDynamicResponse);
 
     function WithBody(const AContent: string): TWebMockStaticRequestStub; overload;
@@ -95,8 +96,7 @@ end;
 destructor TWebMockStaticRequestStub.Destroy;
 
 begin
-  FResponse.Free;
-  FMatcher.Free;
+  Matcher.Free;
   inherited;
 end;
 
@@ -118,18 +118,20 @@ begin
 end;
 
 function TWebMockStaticRequestStub.ToRespond(
-  AResponseStatus: TWebMockResponseStatus = nil): IWebMockResponseBuilder;
+  AResponseStatus: TWebMockResponseStatus): IWebMockResponseBuilder;
 begin
-  if Assigned(AResponseStatus) then
-    Response.Status := AResponseStatus;
-
-  Result := Response as IWebMockResponseBuilder;
+  Result := Response.Builder.WithStatus(AResponseStatus);
 end;
 
 procedure TWebMockStaticRequestStub.ToRespondWith(
   const AProc: TWebMockDynamicResponse);
 begin
   Responder := TWebMockDynamicResponder.Create(AProc);
+end;
+
+function TWebMockStaticRequestStub.ToRespond: IWebMockResponseBuilder;
+begin
+  Result := Response as IWebMockResponseBuilder;
 end;
 
 function TWebMockStaticRequestStub.ToString: string;

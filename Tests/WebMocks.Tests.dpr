@@ -4,8 +4,6 @@ program WebMocks.Tests;
 {$APPTYPE CONSOLE}
 {$ENDIF}{$STRONGLINKTYPES ON}
 
-{$WARN DUPLICATE_CTOR_DTOR OFF}
-
 uses
   System.SysUtils,
   {$IFDEF TESTINSIGHT}
@@ -74,6 +72,7 @@ var
 
 begin
 {$IFDEF TESTINSIGHT}
+  ReportMemoryLeaksOnShutdown := True;
   TestInsight.DUnitX.RunRegisteredTests;
   exit;
 {$ENDIF}

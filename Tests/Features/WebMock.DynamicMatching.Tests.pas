@@ -65,16 +65,20 @@ uses
 procedure TWebMockDynamicMatchingTests.DynamicMatcher_Always_CanBeChainedToProvideCustomResponses;
 var
   LResponse: IHTTPResponse;
+  LContentStream: TStringStream;
 begin
   WebMock.StubRequest(
     function(ARequest: IWebMockHTTPRequest): Boolean
     begin
       Result := True;
     end
-  ).ToRespond(TWebMockResponseStatus.Created);
-  LResponse := WebClient.Post(WebMock.URLFor('/resource'), TStringStream.Create(''));
+  ).ToRespond(Created);
+  LContentStream := TStringStream.Create('');
+  LResponse := WebClient.Post(WebMock.URLFor('/resource'), LContentStream);
 
   Assert.AreEqual(201, LResponse.StatusCode);
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockDynamicMatchingTests.DynamicMatcher_OnEachRequest_CanChooseToRespond;

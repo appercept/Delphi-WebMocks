@@ -29,6 +29,7 @@ interface
 
 uses
   DUnitX.TestFramework,
+  WebMock.HTTP.RequestMatcher,
   WebMock.Static.RequestStub;
 
 type
@@ -37,13 +38,12 @@ type
   TWebMockStaticRequestStubTests = class(TObject)
   private
     StubbedRequest: TWebMockStaticRequestStub;
+    Matcher: TWebMockHTTPRequestMatcher;
   public
     [Setup]
     procedure Setup;
     [TearDown]
     procedure TearDown;
-    [Test]
-    procedure Class_Always_ImplementsIWebMockRequestStub;
     [Test]
     procedure ToRespond_Always_ReturnsAResponseStub;
     [Test]
@@ -93,7 +93,6 @@ uses
   System.RegularExpressions,
   WebMock.FormDataMatcher,
   WebMock.FormFieldMatcher,
-  WebMock.HTTP.RequestMatcher,
   WebMock.RequestStub,
   WebMock.Response,
   WebMock.ResponseStatus,
@@ -103,31 +102,21 @@ uses
 
 { TWebMockRequestStubTests }
 
-procedure TWebMockStaticRequestStubTests.Class_Always_ImplementsIWebMockRequestStub;
-var
-  LSubject: IInterface;
-begin
-  LSubject := StubbedRequest;
-
-  Assert.Implements<IWebMockRequestStub>(LSubject);
-end;
-
 procedure TWebMockStaticRequestStubTests.Setup;
-var
-  LMatcher: TWebMockHTTPRequestMatcher;
 begin
-  LMatcher := TWebMockHTTPRequestMatcher.Create('');
-  StubbedRequest := TWebMockStaticRequestStub.Create(LMatcher);
+  Matcher := TWebMockHTTPRequestMatcher.Create('');
+  StubbedRequest := TWebMockStaticRequestStub.Create(Matcher);
 end;
 
 procedure TWebMockStaticRequestStubTests.TearDown;
 begin
-  StubbedRequest := nil;
+  StubbedRequest.Free;
+  Matcher := nil;
 end;
 
 procedure TWebMockStaticRequestStubTests.ToRespond_Always_ReturnsAResponseStub;
 begin
-  Assert.IsNotNull(StubbedRequest.ToRespond as IWebMockResponseBuilder);
+  Assert.IsNotNull(StubbedRequest.ToRespond);
 end;
 
 procedure TWebMockStaticRequestStubTests.ToRespond_WithNoArguments_DoesNotRaiseException;
@@ -141,14 +130,14 @@ end;
 
 procedure TWebMockStaticRequestStubTests.ToRespond_WithNoArguments_DoesNotChangeStatus;
 var
-  LExpectedStatus: TWebMockResponseStatus;
+  LExpected, LActual: IWebMockResponse;
 begin
-  LExpectedStatus := StubbedRequest.Responder.GetResponseTo(nil).Status;
+  LExpected := StubbedRequest.Responder.GetResponseTo(nil);
 
   StubbedRequest.ToRespond;
 
-  Assert.AreSame(LExpectedStatus,
-                 StubbedRequest.Responder.GetResponseTo(nil).Status);
+  LActual := StubbedRequest.Responder.GetResponseTo(nil);
+  Assert.AreEqual(LExpected.Status, LActual.Status);
 end;
 
 procedure TWebMockStaticRequestStubTests.ToRespond_WithResponse_SetsResponseStatus;
@@ -159,7 +148,7 @@ begin
 
   StubbedRequest.ToRespond(LResponse);
 
-  Assert.AreSame(LResponse, StubbedRequest.Responder.GetResponseTo(nil).Status);
+  Assert.AreEqual(LResponse, StubbedRequest.Responder.GetResponseTo(nil).Status);
 end;
 
 procedure TWebMockStaticRequestStubTests.WithBody_GivenRegEx_ReturnsSelf;

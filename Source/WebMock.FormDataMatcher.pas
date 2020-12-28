@@ -36,16 +36,17 @@ uses
 type
   TWebMockFormDataMatcher = class(TInterfacedObject, IStringMatcher)
   private
-    FFieldMatchers: TList<IStringMatcher>;
+    FFieldMatchers: TInterfaceList; // IStringMatcher
     function HasMatch(const AFormFields: TArray<string>;
       const AMatcher: IStringMatcher): Boolean;
   public
     constructor Create;
+    destructor Destroy; override;
     procedure Add(const AName: string; const AValue: string = '*'); overload;
     procedure Add(const AName: string; const APattern: TRegEx); overload;
     function IsMatch(AValue: string): Boolean;
     function ToString: string; override;
-    property FieldMatchers: TList<IStringMatcher> read FFieldMatchers;
+    property FieldMatchers: TInterfaceList read FFieldMatchers;
   end;
 
 implementation
@@ -70,8 +71,14 @@ end;
 
 constructor TWebMockFormDataMatcher.Create;
 begin
-  inherited Create;
-  FFieldMatchers := TList<IStringMatcher>.Create;
+  inherited;
+  FFieldMatchers := TInterfaceList.Create;
+end;
+
+destructor TWebMockFormDataMatcher.Destroy;
+begin
+  FFieldMatchers.Free;
+  inherited;
 end;
 
 function TWebMockFormDataMatcher.HasMatch(const AFormFields: TArray<string>;
@@ -89,23 +96,29 @@ end;
 function TWebMockFormDataMatcher.IsMatch(AValue: string): Boolean;
 var
   LFormFields: TArray<string>;
+  I: Integer;
   LMatcher: IStringMatcher;
 begin
   LFormFields := AValue.Split(['&']);
-  for LMatcher in FieldMatchers do
+  for I := 0 to FieldMatchers.Count - 1 do
+  begin
+    LMatcher := FieldMatchers[I] as IStringMatcher;
     if not HasMatch(LFormFields, LMatcher) then
       Exit(False);
+  end;
 
   Result := True;
 end;
 
 function TWebMockFormDataMatcher.ToString: string;
 var
+  I: Integer;
   LMatcher: IStringMatcher;
 begin
   Result := '';
-  for LMatcher in FieldMatchers do
+  for I := 0 to FieldMatchers.Count - 1 do
   begin
+    LMatcher := FieldMatchers[I] as IStringMatcher;
     if Result.Length = 0 then
       Result := LMatcher.ToString
     else

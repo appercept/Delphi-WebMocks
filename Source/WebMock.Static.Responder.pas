@@ -35,28 +35,28 @@ uses
 type
   TWebMockStaticResponder = class(TInterfacedObject, IWebMockResponder)
   private
-    FResponse: TWebMockResponse;
+    FResponse: IWebMockResponse;
   public
-    constructor Create(const AResponse: TWebMockResponse);
+    constructor Create(const AResponse: IWebMockResponse);
 
     { IWebMockResponder }
-    function GetResponseTo(const ARequest: IWebMockHTTPRequest): TWebMockResponse;
+    function GetResponseTo(const ARequest: IWebMockHTTPRequest): IWebMockResponse;
 
-    property Response: TWebMockResponse read FResponse;
+    property Response: IWebMockResponse read FResponse;
   end;
 
 implementation
 
 { TWebMockStaticResponder }
 
-constructor TWebMockStaticResponder.Create(const AResponse: TWebMockResponse);
+constructor TWebMockStaticResponder.Create(const AResponse: IWebMockResponse);
 begin
   inherited Create;
   FResponse := AResponse;
 end;
 
 function TWebMockStaticResponder.GetResponseTo(
-  const ARequest: IWebMockHTTPRequest): TWebMockResponse;
+  const ARequest: IWebMockHTTPRequest): IWebMockResponse;
 begin
   Result := FResponse;
 end;

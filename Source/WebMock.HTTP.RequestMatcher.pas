@@ -37,6 +37,16 @@ uses
   WebMock.StringMatcher;
 
 type
+  IWebMockHTTPRequestMatcherBuilder = interface;
+
+  IWebMockHTTPRequestMatcher = interface(IInterface)
+    ['{B001A943-982A-4E7C-A111-C61E1FD7EF29}']
+    function GetBuilder: IWebMockHTTPRequestMatcherBuilder;
+    property Builder: IWebMockHTTPRequestMatcherBuilder read GetBuilder;
+    function IsMatch(const ARequest: IWebMockHTTPRequest): Boolean;
+    function ToString: string;
+  end;
+
   IWebMockHTTPRequestMatcherBuilder = interface(IInterface)
     ['{47AE1CA8-9395-4B80-AD6F-5F0A7017ED7D}']
     function WithBody(const AContent: string): IWebMockHTTPRequestMatcherBuilder; overload;
@@ -44,10 +54,14 @@ type
     function WithHeader(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithHeader(const AName: string; APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithHeaders(const AHeaders: TStrings): IWebMockHTTPRequestMatcherBuilder;
-    function WithQueryParam(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder;
+    function WithFormData(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
+    function WithFormData(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
+    function WithQueryParam(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
+    function WithQueryParam(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
   end;
 
-  TWebMockHTTPRequestMatcher = class(TInterfacedObject, IWebMockHTTPRequestMatcherBuilder)
+  TWebMockHTTPRequestMatcher = class(TInterfacedObject,
+    IWebMockHTTPRequestMatcher, IWebMockHTTPRequestMatcherBuilder)
   public type
 
     TBuilder = class(TInterfacedObject, IWebMockHTTPRequestMatcherBuilder)
@@ -63,7 +77,10 @@ type
       function WithHeader(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithHeader(const AName: string; APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithHeaders(const AHeaders: TStrings): IWebMockHTTPRequestMatcherBuilder;
-      function WithQueryParam(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder;
+      function WithFormData(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
+      function WithFormData(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
+      function WithQueryParam(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
+      function WithQueryParam(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
     end;
 
   private
@@ -72,7 +89,7 @@ type
     FQueryParams: TDictionary<string, IStringMatcher>;
     FHTTPMethod: string;
     FURIMatcher: IStringMatcher;
-    FBuilder: TBuilder;
+    FBuilder: IWebMockHTTPRequestMatcherBuilder;
     function ExtractDocumentPath(const AURI: string): string;
     function ExtractURIQueryParams(const AURI: string): TDictionary<string, string>;
     function DocumentMatches(const AURI: string): Boolean;
@@ -84,10 +101,11 @@ type
     constructor Create(AURI: string; AHTTPMethod: string = 'GET'); overload;
     constructor Create(AURIPattern: TRegEx; AHTTPMethod: string = 'GET'); overload;
     destructor Destroy; override;
-    function IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
+    function IsMatch(const ARequest: IWebMockHTTPRequest): Boolean;
     function ToString: string; override;
+    function GetBuilder: IWebMockHTTPRequestMatcherBuilder;
     property Body: IStringMatcher read FContent write FContent;
-    property Builder: TBuilder read FBuilder implements IWebMockHTTPRequestMatcherBuilder;
+    property Builder: IWebMockHTTPRequestMatcherBuilder read GetBuilder implements IWebMockHTTPRequestMatcherBuilder;
     property Headers: TDictionary<string, IStringMatcher> read FHeaders;
     property QueryParams: TDictionary<string, IStringMatcher> read FQueryParams;
     property HTTPMethod: string read FHTTPMethod write FHTTPMethod;
@@ -96,14 +114,15 @@ type
 
 implementation
 
-{ TWebMockHTTPRequestMatcher }
-
 uses
   System.NetEncoding,
   System.SysUtils,
+  WebMock.FormDataMatcher,
   WebMock.StringWildcardMatcher,
   WebMock.StringAnyMatcher,
   WebMock.StringRegExMatcher;
+
+{ TWebMockHTTPRequestMatcher }
 
 constructor TWebMockHTTPRequestMatcher.Create(AURI: string;
   AHTTPMethod: string = 'GET');
@@ -175,6 +194,11 @@ begin
   end
 end;
 
+function TWebMockHTTPRequestMatcher.GetBuilder: IWebMockHTTPRequestMatcherBuilder;
+begin
+  Result := FBuilder;
+end;
+
 function TWebMockHTTPRequestMatcher.HeadersMatches(
   AHeaders: TStrings): Boolean;
 var
@@ -198,7 +222,7 @@ begin
   Result := (HTTPMethod = '*') or (AHTTPMethod = HTTPMethod);
 end;
 
-function TWebMockHTTPRequestMatcher.IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
+function TWebMockHTTPRequestMatcher.IsMatch(const ARequest: IWebMockHTTPRequest): Boolean;
 begin
   Result := HTTPMethodMatches(ARequest.Method) and
     DocumentMatches(ARequest.RequestURI) and
@@ -217,13 +241,17 @@ begin
     Exit(True);
 
   LExtractedParams := ExtractURIQueryParams(AURI);
-  for LParam in QueryParams do
-  begin
-    if not LExtractedParams.ContainsKey(LParam.Key) then
-      Exit(False);
+  try
+    for LParam in QueryParams do
+    begin
+      if not LExtractedParams.ContainsKey(LParam.Key) then
+        Exit(False);
 
-    if not LParam.Value.IsMatch(LExtractedParams[LParam.Key]) then
-      Exit(False);
+      if not LParam.Value.IsMatch(LExtractedParams[LParam.Key]) then
+        Exit(False);
+    end;
+  finally
+    LExtractedParams.Free;
   end;
 
   Result := True;
@@ -278,6 +306,28 @@ begin
   Result := Self;
 end;
 
+function TWebMockHTTPRequestMatcher.TBuilder.WithFormData(const AName: string;
+  const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder;
+begin
+  if not (Matcher.Body is TWebMockFormDataMatcher) then
+    Matcher.Body := TWebMockFormDataMatcher.Create;
+
+  (Matcher.Body as TWebMockFormDataMatcher).Add(AName, APattern);
+
+  Result := Self;
+end;
+
+function TWebMockHTTPRequestMatcher.TBuilder.WithFormData(const AName,
+  AValue: string): IWebMockHTTPRequestMatcherBuilder;
+begin
+  if not (Matcher.Body is TWebMockFormDataMatcher) then
+    Matcher.Body := TWebMockFormDataMatcher.Create;
+
+  (Matcher.Body as TWebMockFormDataMatcher).Add(AName, AValue);
+
+  Result := Self;
+end;
+
 function TWebMockHTTPRequestMatcher.TBuilder.WithHeader(const AName,
   AValue: string): IWebMockHTTPRequestMatcherBuilder;
 begin
@@ -308,6 +358,17 @@ var
 begin
   for I := 0 to AHeaders.Count - 1 do
     WithHeader(AHeaders.Names[I], AHeaders.ValueFromIndex[I]);
+
+  Result := Self;
+end;
+
+function TWebMockHTTPRequestMatcher.TBuilder.WithQueryParam(const AName: string;
+  const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder;
+begin
+  Matcher.QueryParams.AddOrSetValue(
+    AName,
+    TWebMockStringRegExMatcher.Create(APattern)
+  );
 
   Result := Self;
 end;

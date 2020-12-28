@@ -77,9 +77,12 @@ type
 implementation
 
 uses
-  System.Net.HttpClient, System.RegularExpressions, System.StrUtils,
+  System.Net.HttpClient,
+  System.RegularExpressions,
+  System.StrUtils,
   TestHelpers,
-  WebMock.RequestStub, WebMock.Static.RequestStub;
+  WebMock.RequestStub,
+  WebMock.Static.RequestStub;
 
 procedure TWebMockTests.Setup;
 begin
@@ -119,6 +122,9 @@ begin
   LWebMock2 := TWebMock.Create;
 
   Assert.IsTrue(LWebMock2.Port > LWebMock1.Port);
+
+  LWebMock2.Free;
+  LWebMock1.Free;
 end;
 
 procedure TWebMockTests.Create_WithNoArguments_StartsListeningOnPortGreaterThan8080;

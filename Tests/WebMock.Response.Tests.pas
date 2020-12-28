@@ -37,8 +37,6 @@ type
   private
     WebMockResponse: TWebMockResponse;
   public
-    [Setup]
-    procedure Setup;
     [TearDown]
     procedure TearDown;
     [Test]
@@ -54,13 +52,9 @@ implementation
 { TWebMockResponseTests }
 
 uses
+  System.Classes,
   TestHelpers,
   WebMock.ResponseStatus;
-
-procedure TWebMockResponseTests.Setup;
-begin
-  WebMockResponse := TWebMockResponse.Create;
-end;
 
 procedure TWebMockResponseTests.TearDown;
 begin
@@ -68,12 +62,22 @@ begin
 end;
 
 procedure TWebMockResponseTests.BodySource_WhenNotSet_ReturnsEmptyContentSource;
+var
+  LStream: TStream;
 begin
-  Assert.AreEqual(Int64(0), WebMockResponse.BodySource.ContentStream.Size);
+  WebMockResponse := TWebMockResponse.Create;
+
+  LStream := WebMockResponse.BodySource.ContentStream;
+
+  Assert.AreEqual(Int64(0), LStream.Size);
+
+  LStream.Free;
 end;
 
 procedure TWebMockResponseTests.Create_WithoutArguments_SetsStatusToOK;
 begin
+  WebMockResponse := TWebMockResponse.Create;
+
   Assert.AreEqual(200, WebMockResponse.Status.Code);
 end;
 
@@ -85,7 +89,7 @@ begin
 
   WebMockResponse := TWebMockResponse.Create(LExpectedStatus);
 
-  Assert.AreSame(LExpectedStatus, WebMockResponse.Status);
+  Assert.AreEqual(LExpectedStatus, WebMockResponse.Status);
 end;
 
 initialization

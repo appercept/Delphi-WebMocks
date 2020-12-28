@@ -29,7 +29,8 @@ interface
 
 uses
   DUnitX.TestFramework,
-  System.Classes, System.SysUtils,
+  System.Classes,
+  System.SysUtils,
   WebMock;
 
 type
@@ -79,7 +80,9 @@ type
 implementation
 
 uses
-  System.Net.HttpClient, System.Net.URLClient, System.RegularExpressions,
+  System.Net.HttpClient,
+  System.Net.URLClient,
+  System.RegularExpressions,
   System.StrUtils,
   TestHelpers,
   WebMock.RequestStub,
@@ -103,6 +106,8 @@ begin
   LResponse := WebClient.Get(WebMock.BaseURL, nil, LHeaders);
 
   Assert.AreEqual(200, LResponse.StatusCode);
+
+  LMatcherHeaders.Free;
 end;
 
 procedure TWebMockMatchingTests.Request_MatchingMultipleHeaders_RespondsOK;
@@ -270,4 +275,3 @@ end;
 initialization
   TDUnitX.RegisterTestFixture(TWebMockMatchingTests);
 end.
-

@@ -50,7 +50,7 @@ uses
 
 procedure TWebMockStaticResponderTests.GetResponseTo_Always_ReturnsResponse;
 var
-  LResponse: TWebMockResponse;
+  LResponse: IWebMockResponse;
 begin
   LResponse := TWebMockResponse.Create;
   Responder := TWebMockStaticResponder.Create(LResponse);

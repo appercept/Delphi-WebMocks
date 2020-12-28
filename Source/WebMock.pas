@@ -56,8 +56,8 @@ type
   private
     FServer: TIdHTTPServer;
     FBaseURL: string;
-    FStubRegistry: TList<IWebMockRequestStub>;
-    FHistory: TList<IWebMockHTTPRequest>;
+    FStubRegistry: TInterfaceList; // IWebMockRequestStub
+    FHistory: IInterfaceList;
     procedure InitializeServer(const APort: TWebWockPort);
     procedure StartServer(const APort: TWebWockPort);
     procedure OnServerRequest(AContext: TIdContext;
@@ -66,12 +66,12 @@ type
       const AAuthType, AAuthData: String; var VUsername, VPassword: String;
       var VHandled: Boolean);
     function GetRequestStub(ARequestInfo: IWebMockHTTPRequest) : IWebMockRequestStub;
-    procedure RespondWith(AResponse: TWebMockResponse;
+    procedure RespondWith(AResponse: IWebMockResponse;
       AResponseInfo: TIdHTTPResponseInfo);
     procedure SetResponseContent(AResponseInfo: TIdHTTPResponseInfo;
       const AResponseContent: IWebMockResponseBodySource);
     procedure SetResponseHeaders(AResponseInfo: TIdHTTPResponseInfo;
-      const AResponseHeaders: TStrings);
+      const AResponseHeaders: IWebMockHeaders);
     procedure SetResponseStatus(AResponseInfo: TIdHTTPResponseInfo;
       const AResponseStatus: TWebMockResponseStatus);
     function GetNextPort: Integer;
@@ -93,8 +93,8 @@ type
       : TWebMockDynamicRequestStub; overload;
     function URLFor(AURI: string): string;
     property BaseURL: string read FBaseURL;
-    property History: TList<IWebMockHTTPRequest> read FHistory;
-    property StubRegistry: TList<IWebMockRequestStub> read FStubRegistry;
+    property History: IInterfaceList read FHistory;
+    property StubRegistry: TInterfaceList read FStubRegistry;
     property Port: Integer read GetPort;
   end;
 
@@ -124,14 +124,13 @@ end;
 constructor TWebMock.Create(const APort: TWebWockPort = 0);
 begin
   inherited Create;
-  FStubRegistry := TList<IWebMockRequestStub>.Create;
-  FHistory := TList<IWebMockHTTPRequest>.Create;
+  FStubRegistry := TInterfaceList.Create;
+  FHistory := TInterfaceList.Create;
   InitializeServer(APort);
 end;
 
 destructor TWebMock.Destroy;
 begin
-  FHistory.Free;
   FStubRegistry.Free;
   FServer.Free;
   inherited;
@@ -155,10 +154,12 @@ end;
 
 function TWebMock.GetRequestStub(ARequestInfo: IWebMockHTTPRequest) : IWebMockRequestStub;
 var
+  I: Integer;
   LRequestStub: IWebMockRequestStub;
 begin
-  for LRequestStub in StubRegistry do
+  for I := 0 to StubRegistry.Count - 1 do
   begin
+    LRequestStub := StubRegistry[I] as IWebMockRequestStub;
     if LRequestStub.IsMatch(ARequestInfo) then
       Exit(LRequestStub);
   end;
@@ -201,12 +202,16 @@ end;
 
 procedure TWebMock.PrintStubRegistry;
 var
+  I: Integer;
   LRequestStub: IWebMockRequestStub;
 begin
   System.Writeln;
   System.Writeln('Registered Request Stubs');
-  for LRequestStub in StubRegistry do
+  for I := 0 to StubRegistry.Count - 1 do
+  begin
+    LRequestStub := StubRegistry[I] as IWebMockRequestStub;
     System.Writeln(LRequestStub.ToString);
+  end;
 end;
 
 procedure TWebMock.Reset;
@@ -225,7 +230,7 @@ begin
   StubRegistry.Clear;
 end;
 
-procedure TWebMock.RespondWith(AResponse: TWebMockResponse;
+procedure TWebMock.RespondWith(AResponse: IWebMockResponse;
   AResponseInfo: TIdHTTPResponseInfo);
 begin
   SetResponseStatus(AResponseInfo, AResponse.Status);
@@ -242,9 +247,12 @@ begin
 end;
 
 procedure TWebMock.SetResponseHeaders(AResponseInfo: TIdHTTPResponseInfo;
-  const AResponseHeaders: TStrings);
+  const AResponseHeaders: IWebMockHeaders);
+var
+  LHeader: TPair<string, string>;
 begin
-  AResponseInfo.CustomHeaders.AddStrings(AResponseHeaders);
+  for LHeader in AResponseHeaders do
+    AResponseInfo.CustomHeaders.AddValue(LHeader.Key, LHeader.Value);
 end;
 
 procedure TWebMock.SetResponseStatus(AResponseInfo: TIdHTTPResponseInfo;

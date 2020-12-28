@@ -66,7 +66,7 @@ var
 begin
   WebClient.Get(WebMock.URLFor('resource'));
 
-  LastRequest := WebMock.History.Last;
+  LastRequest := WebMock.History[WebMock.History.Count - 1] as IWebMockHTTPRequest;
   Assert.AreEqual('GET', LastRequest.Method);
   Assert.AreEqual('/resource', LastRequest.RequestURI);
 end;

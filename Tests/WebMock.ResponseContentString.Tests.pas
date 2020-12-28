@@ -76,14 +76,18 @@ end;
 procedure TWebMockResponseContentStringTests.ContentStream_Always_ReturnsAStringStreamContainingString;
 var
   LExpected: string;
+  LActual: TStringStream;
 begin
   LExpected := 'A String Value';
   WebMockResponseContentString := TWebMockResponseContentString.Create(LExpected);
 
+  LActual := WebMockResponseContentString.ContentStream as TStringStream;
   Assert.AreEqual(
     LExpected,
-    (WebMockResponseContentString.ContentStream as TStringStream).DataString
+    LActual.DataString
   );
+
+  LActual.Free;
 end;
 
 procedure TWebMockResponseContentStringTests.ContentString_Always_ReturnsValueInitializedOnCreate;

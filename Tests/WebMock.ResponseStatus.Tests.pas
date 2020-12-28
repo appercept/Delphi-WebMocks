@@ -38,12 +38,15 @@ type
   private
     WebMockResponseStatus: TWebMockResponseStatus;
   public
-    [Setup]
-    procedure Setup;
-    [TearDown]
-    procedure TearDown;
     [Test]
     procedure Create_GivenAStatus_CreatesResponseWithStatus;
+
+    [Test]
+    procedure Implicit_FromInteger_CreatesResponseWithStatusCode;
+    [Test]
+    procedure Implicit_FromStatusCodeConstant_CreatesResponseWithStatusCode;
+    [Test]
+    procedure Implicit_ToString_ReturnsFormattedString;
 
     [Test]
     procedure Continue_Always_CreatesResponseWithStatus100;
@@ -177,16 +180,6 @@ implementation
 
 { TWebMockResponseStatusTests }
 
-procedure TWebMockResponseStatusTests.Setup;
-begin
-
-end;
-
-procedure TWebMockResponseStatusTests.TearDown;
-begin
-  WebMockResponseStatus.Free;
-end;
-
 procedure TWebMockResponseStatusTests.Accepted_Always_CreatesResponseWithStatus202;
 begin
   WebMockResponseStatus := TWebMockResponseStatus.Accepted;
@@ -238,7 +231,7 @@ end;
 
 procedure TWebMockResponseStatusTests.Create_GivenAStatus_CreatesResponseWithStatus;
 begin
-  WebMockResponseStatus := TWebMockResponseStatus.Create(200);
+  WebMockResponseStatus := TWebMockResponseStatus.Create(200, '');
 
   Assert.AreEqual(200, WebMockResponseStatus.Code);
 end;
@@ -297,6 +290,31 @@ begin
   WebMockResponseStatus := TWebMockResponseStatus.ImATeapot;
 
   Assert.AreEqual(418, WebMockResponseStatus.Code);
+end;
+
+procedure TWebMockResponseStatusTests.Implicit_FromInteger_CreatesResponseWithStatusCode;
+begin
+  WebMockResponseStatus := 202;
+
+  Assert.AreEqual(202, WebMockResponseStatus.Code);
+end;
+
+procedure TWebMockResponseStatusTests.Implicit_FromStatusCodeConstant_CreatesResponseWithStatusCode;
+begin
+  WebMockResponseStatus := OK;
+
+  Assert.AreEqual(200, WebMockResponseStatus.Code);
+end;
+
+procedure TWebMockResponseStatusTests.Implicit_ToString_ReturnsFormattedString;
+var
+  LString: string;
+begin
+  WebMockResponseStatus := TWebMockResponseStatus.Create(200, 'OK');
+
+  LString := WebMockResponseStatus;
+
+  Assert.AreEqual('200 OK', LString);
 end;
 
 procedure TWebMockResponseStatusTests.IMUsed_Always_CreatesResponseWithStatus226;
