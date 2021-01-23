@@ -214,6 +214,29 @@ WebMock.StubRequest('*', '*')
 
 NOTE: Be sure to add `System.RegularExpressions` to your uses clause.
 
+#### Request matching by JSON
+HTTP requests can be matched by JSON data as submitted with `content-type` of
+`application/json` using `WithJSON`. Multiple matching field values can be
+combined. For example:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithJSON('ABoolean', True)
+  .WithJSON('AFloat', 0.123)
+  .WithJSON('AInteger', 1)
+  .WithJSON('AString', 'value');
+```
+
+The first argument can be a path. For example, in the following JSON, the path
+`objects[0].key` would match `value 1`.
+```JSON
+{
+  "objects": [
+    { "key": "value 1" },
+    { "key": "value 1" }
+  ]
+}
+```
+
 #### Request matching by predicate function
 If matching logic is required to be more complex than the simple matching, a
 predicate function can be provided in the test to allow custom inspection/logic
@@ -397,7 +420,7 @@ WebMock.Assert.Get('/').WasRequested; // Passes
 ```
 
 As with request stubbing you can match requests by HTTP Method, URI, Query
-Parameters, Headers, and Body content.
+Parameters, Headers, and Body content (including `WithJSON`).
 ```Delphi
 WebMock.Assert
   .Patch('/resource`)

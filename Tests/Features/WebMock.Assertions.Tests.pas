@@ -80,6 +80,10 @@ type
     [Test]
     procedure WasRequestedWithFormData_NotMatchingRequest_Fails;
     [Test]
+    procedure WasRequestedWithJSON_MatchingRequest_Passes;
+    [Test]
+    procedure WasRequestedWithJSON_NotMatchingRequest_Fails;
+    [Test]
     procedure DeleteWasRequested_MatchingRequest_Passes;
     [Test]
     procedure DeleteWasRequested_NotMatchingRequest_Fails;
@@ -548,6 +552,48 @@ begin
     end,
     ETestFailure
   );
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithJSON_MatchingRequest_Passes;
+var
+  LJSON: TStringStream;
+begin
+  LJSON := TStringStream.Create('{ "key": "value" }');
+  WebClient.Post(WebMock.URLFor('/json'), LJSON);
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert
+        .Post('/json')
+        .WithJSON('key', 'value')
+        .WasRequested;
+    end,
+    ETestPass
+  );
+
+  LJSON.Free;
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithJSON_NotMatchingRequest_Fails;
+var
+  LJSON: TStringStream;
+begin
+  LJSON := TStringStream.Create('{ "key": "value" }');
+  WebClient.Post(WebMock.URLFor('/json'), LJSON);
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert
+        .Post('/form')
+        .WithJSON('key', 'other value')
+        .WasRequested;
+    end,
+    ETestFailure
+  );
+
+  LJSON.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithQueryParam_MatchingRequest_Passes;

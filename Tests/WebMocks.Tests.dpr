@@ -1,4 +1,4 @@
-program WebMocks.Tests;
+﻿program WebMocks.Tests;
 
 {$IFNDEF TESTINSIGHT}
 {$APPTYPE CONSOLE}
@@ -62,7 +62,11 @@ uses
   WebMock.FormDataMatcher.Tests in 'WebMock.FormDataMatcher.Tests.pas',
   WebMock.FormDataMatcher in '..\Source\WebMock.FormDataMatcher.pas',
   WebMock.FormFieldMatcher.Tests in 'WebMock.FormFieldMatcher.Tests.pas',
-  WebMock.FormFieldMatcher in '..\Source\WebMock.FormFieldMatcher.pas';
+  WebMock.FormFieldMatcher in '..\Source\WebMock.FormFieldMatcher.pas',
+  WebMock.MatchingJSON.Tests in 'Features\WebMock.MatchingJSON.Tests.pas',
+  WebMock.JSONMatcher in '..\Source\WebMock.JSONMatcher.pas',
+  WebMock.JSONMatcher.Tests in 'WebMock.JSONMatcher.Tests.pas',
+  WebMock.JSONValueMatcher.Tests in 'WebMock.JSONValueMatcher.Tests.pas';
 
 var
   Runner: ITestRunner;

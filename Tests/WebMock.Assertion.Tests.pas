@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019-2020 Richard Hatherall                          }
+{           Copyright (c) 2019-2021 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -119,6 +119,22 @@ type
     procedure WithFormData_GivenNameAndValue_SetsValueForBodyMatcher;
     [Test]
     procedure WithFormData_GivenNameAndRegEx_SetsPatternForBodyMatcher;
+    [Test]
+    procedure WithJSON_GivenPathAndBoolean_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndBoolean_SetsValueForBodyMatcher;
+    [Test]
+    procedure WithJSON_GivenPathAndFloat_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndFloat_SetsValueForBodyMatcher;
+    [Test]
+    procedure WithJSON_GivenPathAndInteger_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndInteger_SetsValueForBodyMatcher;
+    [Test]
+    procedure WithJSON_GivenPathAndString_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndString_SetsValueForBodyMatcher;
   end;
 
 implementation
@@ -129,9 +145,11 @@ uses
   DUnitX.Exceptions,
   Mock.Indy.HTTPRequestInfo,
   System.RegularExpressions,
+  System.Rtti,
   WebMock.FormDataMatcher,
   WebMock.FormFieldMatcher,
   WebMock.HTTP.Request,
+  WebMock.JSONMatcher,
   WebMock.StringRegExMatcher,
   WebMock.StringMatcher,
   WebMock.StringWildcardMatcher;
@@ -516,6 +534,117 @@ begin
     LHeaderValue,
     (Matcher.Headers[LHeaderName] as TWebMockStringWildcardMatcher).Value
   );
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndBoolean_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Put('/').WithJSON('AKey', True));
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndBoolean_SetsValueForBodyMatcher;
+var
+  LPath: string;
+  LValue: Boolean;
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+  LJSONMatcher: TWebMockJSONMatcher;
+  LJSONValueMatcher: TWebMockJSONValueMatcher<Boolean>;
+begin
+  LPath := 'Key1';
+  LValue := True;
+
+  Assertion.Post('/').WithJSON(LPath, LValue);
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+  LJSONMatcher := LHTTPMatcher.Body as TWebMockJSONMatcher;
+  LJSONValueMatcher := LJSONMatcher.ValueMatchers[0] as TWebMockJSONValueMatcher<Boolean>;
+  Assert.AreEqual(LValue, LJSONValueMatcher.Value);
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndFloat_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Put('/').WithJSON('AKey', 0.12));
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndFloat_SetsValueForBodyMatcher;
+var
+  LPath: string;
+  LValue: Float64;
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+  LJSONMatcher: TWebMockJSONMatcher;
+  LJSONValueMatcher: TWebMockJSONValueMatcher<Float64>;
+begin
+  LPath := 'Key1';
+  LValue := 0.1;
+
+  Assertion.Post('/').WithJSON(LPath, LValue);
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+  LJSONMatcher := LHTTPMatcher.Body as TWebMockJSONMatcher;
+  LJSONValueMatcher := LJSONMatcher.ValueMatchers[0] as TWebMockJSONValueMatcher<Float64>;
+  Assert.AreEqual(LValue, LJSONValueMatcher.Value);
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndInteger_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Put('/').WithJSON('AKey', 1));
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndInteger_SetsValueForBodyMatcher;
+var
+  LPath: string;
+  LValue: Integer;
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+  LJSONMatcher: TWebMockJSONMatcher;
+  LJSONValueMatcher: TWebMockJSONValueMatcher<Integer>;
+begin
+  LPath := 'Key1';
+  LValue := 1;
+
+  Assertion.Post('/').WithJSON(LPath, LValue);
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+  LJSONMatcher := LHTTPMatcher.Body as TWebMockJSONMatcher;
+  LJSONValueMatcher := LJSONMatcher.ValueMatchers[0] as TWebMockJSONValueMatcher<Integer>;
+  Assert.AreEqual(LValue, LJSONValueMatcher.Value);
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndString_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Put('/').WithJSON('AKey', 'AValue'));
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndString_SetsValueForBodyMatcher;
+var
+  LPath, LValue: string;
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+  LJSONMatcher: TWebMockJSONMatcher;
+  LJSONValueMatcher: TWebMockJSONValueMatcher<string>;
+begin
+  LPath := 'Key1';
+  LValue := 'Value1';
+
+  Assertion.Post('/').WithJSON(LPath, LValue);
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+  LJSONMatcher := LHTTPMatcher.Body as TWebMockJSONMatcher;
+  LJSONValueMatcher := LJSONMatcher.ValueMatchers[0] as TWebMockJSONValueMatcher<string>;
+  Assert.AreEqual(LValue, LJSONValueMatcher.Value);
 
   Assertion.Free;
 end;

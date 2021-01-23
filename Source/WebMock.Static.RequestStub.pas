@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019-2020 Richard Hatherall                          }
+{           Copyright (c) 2019-2021 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -30,7 +30,6 @@ interface
 uses
   IdCustomHTTPServer,
   System.Classes,
-  System.Generics.Collections,
   System.RegularExpressions,
   WebMock.Dynamic.Responder,
   WebMock.HTTP.Messages,
@@ -63,6 +62,10 @@ type
     function WithHeader(AName: string; APattern: TRegEx)
       : TWebMockStaticRequestStub; overload;
     function WithHeaders(AHeaders: TStringList): TWebMockStaticRequestStub;
+    function WithJSON(const APath: string; const AValue: Boolean): TWebMockStaticRequestStub; overload;
+    function WithJSON(const APath: string; const AValue: Float64): TWebMockStaticRequestStub; overload;
+    function WithJSON(const APath: string; const AValue: Integer): TWebMockStaticRequestStub; overload;
+    function WithJSON(const APath: string; const AValue: string): TWebMockStaticRequestStub; overload;
 
     // IWebMockRequestStub
     function IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
@@ -79,6 +82,7 @@ implementation
 uses
   System.SysUtils,
   WebMock.FormDataMatcher,
+  WebMock.JSONMatcher,
   WebMock.Static.Responder,
   WebMock.StringWildcardMatcher,
   WebMock.StringRegExMatcher;
@@ -204,6 +208,50 @@ var
 begin
   for I := 0 to AHeaders.Count - 1 do
     WithHeader(AHeaders.Names[I], AHeaders.ValueFromIndex[I]);
+
+  Result := Self;
+end;
+
+function TWebMockStaticRequestStub.WithJSON(const APath: string;
+  const AValue: Integer): TWebMockStaticRequestStub;
+begin
+  if not (Matcher.Body is TWebMockJSONMatcher) then
+    Matcher.Body := TWebMockJSONMatcher.Create;
+
+  (Matcher.Body as TWebMockJSONMatcher).Add<Integer>(APath, AValue);
+
+  Result := Self;
+end;
+
+function TWebMockStaticRequestStub.WithJSON(const APath: string;
+  const AValue: Float64): TWebMockStaticRequestStub;
+begin
+  if not (Matcher.Body is TWebMockJSONMatcher) then
+    Matcher.Body := TWebMockJSONMatcher.Create;
+
+  (Matcher.Body as TWebMockJSONMatcher).Add<Float64>(APath, AValue);
+
+  Result := Self;
+end;
+
+function TWebMockStaticRequestStub.WithJSON(const APath,
+  AValue: string): TWebMockStaticRequestStub;
+begin
+  if not (Matcher.Body is TWebMockJSONMatcher) then
+    Matcher.Body := TWebMockJSONMatcher.Create;
+
+  (Matcher.Body as TWebMockJSONMatcher).Add<string>(APath, AValue);
+
+  Result := Self;
+end;
+
+function TWebMockStaticRequestStub.WithJSON(const APath: string;
+  const AValue: Boolean): TWebMockStaticRequestStub;
+begin
+  if not (Matcher.Body is TWebMockJSONMatcher) then
+    Matcher.Body := TWebMockJSONMatcher.Create;
+
+  (Matcher.Body as TWebMockJSONMatcher).Add<Boolean>(APath, AValue);
 
   Result := Self;
 end;

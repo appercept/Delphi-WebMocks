@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019-2020 Richard Hatherall                          }
+{           Copyright (c) 2019-2021 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -33,6 +33,7 @@ uses
   System.Classes,
   System.Generics.Collections,
   System.RegularExpressions,
+  System.Rtti,
   WebMock.HTTP.Messages,
   WebMock.StringMatcher;
 
@@ -56,6 +57,10 @@ type
     function WithHeaders(const AHeaders: TStrings): IWebMockHTTPRequestMatcherBuilder;
     function WithFormData(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithFormData(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
+    function WithJSON(const APath: string; AValue: Boolean): IWebMockHTTPRequestMatcherBuilder; overload;
+    function WithJSON(const APath: string; AValue: Float64): IWebMockHTTPRequestMatcherBuilder; overload;
+    function WithJSON(const APath: string; AValue: Integer): IWebMockHTTPRequestMatcherBuilder; overload;
+    function WithJSON(const APath: string; AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithQueryParam(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithQueryParam(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
   end;
@@ -79,6 +84,10 @@ type
       function WithHeaders(const AHeaders: TStrings): IWebMockHTTPRequestMatcherBuilder;
       function WithFormData(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithFormData(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
+      function WithJSON(const APath: string; AValue: Boolean): IWebMockHTTPRequestMatcherBuilder; overload;
+      function WithJSON(const APath: string; AValue: Float64): IWebMockHTTPRequestMatcherBuilder; overload;
+      function WithJSON(const APath: string; AValue: Integer): IWebMockHTTPRequestMatcherBuilder; overload;
+      function WithJSON(const APath: string; AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithQueryParam(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithQueryParam(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
     end;
@@ -118,6 +127,7 @@ uses
   System.NetEncoding,
   System.SysUtils,
   WebMock.FormDataMatcher,
+  WebMock.JSONMatcher,
   WebMock.StringWildcardMatcher,
   WebMock.StringAnyMatcher,
   WebMock.StringRegExMatcher;
@@ -358,6 +368,50 @@ var
 begin
   for I := 0 to AHeaders.Count - 1 do
     WithHeader(AHeaders.Names[I], AHeaders.ValueFromIndex[I]);
+
+  Result := Self;
+end;
+
+function TWebMockHTTPRequestMatcher.TBuilder.WithJSON(const APath: string;
+  AValue: Boolean): IWebMockHTTPRequestMatcherBuilder;
+begin
+  if not (Matcher.Body is TWebMockJSONMatcher) then
+    Matcher.Body := TWebMockJSONMatcher.Create;
+
+  (Matcher.Body as TWebMockJSONMatcher).Add<Boolean>(APath, AValue);
+
+  Result := Self;
+end;
+
+function TWebMockHTTPRequestMatcher.TBuilder.WithJSON(const APath: string;
+  AValue: Float64): IWebMockHTTPRequestMatcherBuilder;
+begin
+  if not (Matcher.Body is TWebMockJSONMatcher) then
+    Matcher.Body := TWebMockJSONMatcher.Create;
+
+  (Matcher.Body as TWebMockJSONMatcher).Add<Float64>(APath, AValue);
+
+  Result := Self;
+end;
+
+function TWebMockHTTPRequestMatcher.TBuilder.WithJSON(const APath: string;
+  AValue: Integer): IWebMockHTTPRequestMatcherBuilder;
+begin
+  if not (Matcher.Body is TWebMockJSONMatcher) then
+    Matcher.Body := TWebMockJSONMatcher.Create;
+
+  (Matcher.Body as TWebMockJSONMatcher).Add<Integer>(APath, AValue);
+
+  Result := Self;
+end;
+
+function TWebMockHTTPRequestMatcher.TBuilder.WithJSON(const APath: string;
+  AValue: string): IWebMockHTTPRequestMatcherBuilder;
+begin
+  if not (Matcher.Body is TWebMockJSONMatcher) then
+    Matcher.Body := TWebMockJSONMatcher.Create;
+
+  (Matcher.Body as TWebMockJSONMatcher).Add<string>(APath, AValue);
 
   Result := Self;
 end;

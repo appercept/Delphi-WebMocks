@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019-2020 Richard Hatherall                          }
+{           Copyright (c) 2019-2021 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -82,6 +82,22 @@ type
     procedure WithHeaders_Always_ReturnsSelf;
     [Test]
     procedure WithHeaders_Always_SetsAllValues;
+    [Test]
+    procedure WithJSON_GivenPathAndBoolean_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndBoolean_SetsMatcherForContent;
+    [Test]
+    procedure WithJSON_GivenPathAndFloat_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndFloat_SetsMatcherForContent;
+    [Test]
+    procedure WithJSON_GivenPathAndInteger_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndInteger_SetsMatcherForContent;
+    [Test]
+    procedure WithJSON_GivenPathAndString_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndString_SetsMatcherForContent;
   end;
 
 implementation
@@ -93,6 +109,7 @@ uses
   System.RegularExpressions,
   WebMock.FormDataMatcher,
   WebMock.FormFieldMatcher,
+  WebMock.JSONMatcher,
   WebMock.RequestStub,
   WebMock.Response,
   WebMock.ResponseStatus,
@@ -341,6 +358,54 @@ begin
     LHeaderValue,
     (StubbedRequest.Matcher.Headers[LHeaderName] as TWebMockStringWildcardMatcher).Value
   );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndBoolean_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithJSON('key', True));
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndBoolean_SetsMatcherForContent;
+begin
+  StubbedRequest.WithJSON('key', True);
+
+  Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockJSONMatcher);
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndFloat_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithJSON('key', 0.123));
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndFloat_SetsMatcherForContent;
+begin
+  StubbedRequest.WithJSON('key', 0.123);
+
+  Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockJSONMatcher);
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndInteger_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithJSON('key', 1));
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndInteger_SetsMatcherForContent;
+begin
+  StubbedRequest.WithJSON('key', 1);
+
+  Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockJSONMatcher);
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndString_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithJSON('key', 'value'));
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndString_SetsMatcherForContent;
+begin
+  StubbedRequest.WithJSON('key', 'value');
+
+  Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockJSONMatcher);
 end;
 
 initialization
