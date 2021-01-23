@@ -67,5 +67,6 @@ __recovery/
 
 # Ignore Build outputs
 Build
+TestInsightSettings.ini
 Tests/Win32
 Tests/Win64
