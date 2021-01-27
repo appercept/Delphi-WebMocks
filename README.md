@@ -238,7 +238,7 @@ The first argument can be a path. For example, in the following JSON, the path
 {
   "objects": [
     { "key": "value 1" },
-    { "key": "value 1" }
+    { "key": "value 2" }
   ]
 }
 ```
