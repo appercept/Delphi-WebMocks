@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2019-2021 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -29,15 +29,21 @@ interface
 
 uses
   DUnitX.TestFramework,
-  System.Classes, System.Generics.Collections, System.SysUtils,
-  WebMock.Assertion, WebMock.HTTP.Messages;
+  System.Classes,
+  System.Generics.Collections,
+  System.SysUtils,
+  WebMock.Assertion,
+  WebMock.HTTP.Messages,
+  WebMock.HTTP.RequestMatcher;
 
 type
   [TestFixture]
   TWebMockAssertionTests = class(TObject)
   private
-    History: TList<IWebMockHTTPRequest>;
+    History: IInterfaceList;
     Assertion: TWebMockAssertion;
+    function GetMatcher: TWebMockHTTPRequestMatcher;
+    property Matcher: TWebMockHTTPRequestMatcher read GetMatcher;
   public
     [Setup]
     procedure Setup;
@@ -101,6 +107,34 @@ type
     procedure WithHeaders_Always_ReturnsSelf;
     [Test]
     procedure WithHeaders_Always_SetsAllValues;
+    [Test]
+    procedure WithQueryParam_GivenNameAndValue_ReturnsSelf;
+    [Test]
+    procedure WithQueryParam_GivenNameAndValue_SetsValueForQueryParam;
+    [Test]
+    procedure WithQueryParam_GivenNameAndRegEx_SetsPatternForQueryParam;
+    [Test]
+    procedure WithFormData_GivenNameAndValue_ReturnsSelf;
+    [Test]
+    procedure WithFormData_GivenNameAndValue_SetsValueForBodyMatcher;
+    [Test]
+    procedure WithFormData_GivenNameAndRegEx_SetsPatternForBodyMatcher;
+    [Test]
+    procedure WithJSON_GivenPathAndBoolean_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndBoolean_SetsValueForBodyMatcher;
+    [Test]
+    procedure WithJSON_GivenPathAndFloat_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndFloat_SetsValueForBodyMatcher;
+    [Test]
+    procedure WithJSON_GivenPathAndInteger_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndInteger_SetsValueForBodyMatcher;
+    [Test]
+    procedure WithJSON_GivenPathAndString_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndString_SetsValueForBodyMatcher;
   end;
 
 implementation
@@ -111,12 +145,20 @@ uses
   DUnitX.Exceptions,
   Mock.Indy.HTTPRequestInfo,
   System.RegularExpressions,
-  WebMock.HTTP.Request, WebMock.StringRegExMatcher, WebMock.StringMatcher,
+  System.Rtti,
+  WebMock.FormDataMatcher,
+  WebMock.FormFieldMatcher,
+  WebMock.HTTP.Request,
+  WebMock.JSONMatcher,
+  WebMock.StringRegExMatcher,
+  WebMock.StringMatcher,
   WebMock.StringWildcardMatcher;
 
 procedure TWebMockAssertionTests.Delete_Always_ReturnsSelf;
 begin
   Assert.AreSame(Assertion, Assertion.Delete('/'));
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.Delete_GivenMethodAndURI_SetsMatcherValues;
@@ -127,16 +169,21 @@ begin
 
   Assertion.Delete(LURI);
 
-  Assert.AreEqual('DELETE', Assertion.Matcher.HTTPMethod);
-  Assert.AreEqual(
-    LURI,
-    (Assertion.Matcher.URIMatcher as TWebMockStringWildcardMatcher).Value
-  );
+  Assert.IsMatch('DELETE\s/resource', Assertion.Matcher.ToString);
+
+  Assertion.Free;
+end;
+
+function TWebMockAssertionTests.GetMatcher: TWebMockHTTPRequestMatcher;
+begin
+  Result := Assertion.Matcher as TWebMockHTTPRequestMatcher;
 end;
 
 procedure TWebMockAssertionTests.Get_Always_ReturnsSelf;
 begin
   Assert.AreSame(Assertion, Assertion.Get('/'));
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.Get_GivenMethodAndURI_SetsMatcherValues;
@@ -147,16 +194,16 @@ begin
 
   Assertion.Get(LURI);
 
-  Assert.AreEqual('GET', Assertion.Matcher.HTTPMethod);
-  Assert.AreEqual(
-    LURI,
-    (Assertion.Matcher.URIMatcher as TWebMockStringWildcardMatcher).Value
-  );
+  Assert.IsMatch('GET\s/resource', Assertion.Matcher.ToString);
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.Patch_Always_ReturnsSelf;
 begin
   Assert.AreSame(Assertion, Assertion.Patch('/'));
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.Patch_GivenMethodAndURI_SetsMatcherValues;
@@ -167,16 +214,16 @@ begin
 
   Assertion.Patch(LURI);
 
-  Assert.AreEqual('PATCH', Assertion.Matcher.HTTPMethod);
-  Assert.AreEqual(
-    LURI,
-    (Assertion.Matcher.URIMatcher as TWebMockStringWildcardMatcher).Value
-  );
+  Assert.IsMatch('PATCH\s/resource', Assertion.Matcher.ToString);
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.Post_Always_ReturnsSelf;
 begin
   Assert.AreSame(Assertion, Assertion.Post('/'));
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.Post_GivenMethodAndURI_SetsMatcherValues;
@@ -187,16 +234,16 @@ begin
 
   Assertion.Post(LURI);
 
-  Assert.AreEqual('POST', Assertion.Matcher.HTTPMethod);
-  Assert.AreEqual(
-    LURI,
-    (Assertion.Matcher.URIMatcher as TWebMockStringWildcardMatcher).Value
-  );
+  Assert.IsMatch('POST\s/resource', Assertion.Matcher.ToString);
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.Put_Always_ReturnsSelf;
 begin
   Assert.AreSame(Assertion, Assertion.Put('/'));
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.Put_GivenMethodAndURI_SetsMatcherValues;
@@ -207,21 +254,23 @@ begin
 
   Assertion.Put(LURI);
 
-  Assert.AreEqual('PUT', Assertion.Matcher.HTTPMethod);
-  Assert.AreEqual(
-    LURI,
-    (Assertion.Matcher.URIMatcher as TWebMockStringWildcardMatcher).Value
-  );
+  Assert.IsMatch('PUT\s/resource', Assertion.Matcher.ToString);
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.Request_GiveMethodAndURIRegEx_ReturnsSelf;
 begin
   Assert.AreSame(Assertion, Assertion.Request('GET', TRegEx.Create('.+')));
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.Request_GiveMethodAndURIString_ReturnsSelf;
 begin
   Assert.AreSame(Assertion, Assertion.Request('GET', '/'));
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.Request_GivenMethodAndURIRegEx_SetsMatcherValues;
@@ -234,11 +283,9 @@ begin
 
   Assertion.Request(LMethod, LPattern);
 
-  Assert.AreEqual(LMethod, Assertion.Matcher.HTTPMethod);
-  Assert.AreEqual(
-    LPattern,
-    (Assertion.Matcher.URIMatcher as TWebMockStringRegExMatcher).RegEx
-  );
+  Assert.IsMatch('PATCH\sRegular Expression', Assertion.Matcher.ToString);
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.Request_GivenMethodAndURIString_SetsMatcherValues;
@@ -250,23 +297,20 @@ begin
 
   Assertion.Request(LMethod, LURI);
 
-  Assert.AreEqual(LMethod, Assertion.Matcher.HTTPMethod);
-  Assert.AreEqual(
-    LURI,
-    (Assertion.Matcher.URIMatcher as TWebMockStringWildcardMatcher).Value
-  );
+  Assert.IsMatch('PATCH\s/resource', Assertion.Matcher.ToString);
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.Setup;
 begin
-  History := TList<IWebMockHTTPRequest>.Create;
+  History := TInterfaceList.Create;
   Assertion := TWebMockAssertion.Create(History);
 end;
 
 procedure TWebMockAssertionTests.TearDown;
 begin
-  Assertion.Free;
-  History.Free;
+  History := nil;
 end;
 
 procedure TWebMockAssertionTests.WasRequested_NotMatchingHistory_RaisesFailingException;
@@ -275,6 +319,7 @@ var
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/');
   History.Add(TWebMockHTTPRequest.Create(LRequestInfo));
+  LRequestInfo.Free;
 
   Assert.WillRaise(
     procedure
@@ -283,18 +328,20 @@ begin
     end,
     ETestFailure
   );
-
-  LRequestInfo.Free;
 end;
 
 procedure TWebMockAssertionTests.WithBody_GivenString_ReturnsSelf;
 begin
   Assert.AreSame(Assertion, Assertion.Put('/').WithBody(''));
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.WithBody_GivenRegEx_ReturnsSelf;
 begin
   Assert.AreSame(Assertion, Assertion.Put('/').WithBody(TRegEx.Create('.+')));
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.WithBody_GivenRegEx_SetsMatcherValue;
@@ -307,8 +354,10 @@ begin
 
   Assert.AreEqual(
     LPattern,
-    (Assertion.Matcher.Body as TWebMockStringRegExMatcher).RegEx
+    (Matcher.Body as TWebMockStringRegExMatcher).RegEx
   );
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.WithBody_GivenString_SetsMatcherValue;
@@ -321,8 +370,64 @@ begin
 
   Assert.AreEqual(
     LBody,
-    (Assertion.Matcher.Body as TWebMockStringWildcardMatcher).Value
+    (Matcher.Body as TWebMockStringWildcardMatcher).Value
   );
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithFormData_GivenNameAndRegEx_SetsPatternForBodyMatcher;
+var
+  LName: string;
+  LPattern: TRegEx;
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+  LFormDataMatcher: TWebMockFormDataMatcher;
+  LFormFieldMatcher: TWebMockFormFieldMatcher;
+begin
+  LName := 'Param1';
+  LPattern := TRegEx.Create('');
+
+  Assertion.Put('/').WithFormData(LName, LPattern);
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+  LFormDataMatcher := LHTTPMatcher.Body as TWebMockFormDataMatcher;
+  LFormFieldMatcher := LFormDataMatcher.FieldMatchers[0] as TWebMockFormFieldMatcher;
+  Assert.AreEqual(
+    LPattern,
+    (LFormFieldMatcher.ValueMatcher as TWebMockStringRegExMatcher).RegEx
+  );
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithFormData_GivenNameAndValue_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Put('/').WithFormData('AName', 'AValue'));
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithFormData_GivenNameAndValue_SetsValueForBodyMatcher;
+var
+  LName, LValue: string;
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+  LFormDataMatcher: TWebMockFormDataMatcher;
+  LFormFieldMatcher: TWebMockFormFieldMatcher;
+begin
+  LName := 'Param1';
+  LValue := 'Value1';
+
+  Assertion.Get('/').WithFormData(LName, LValue);
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+  LFormDataMatcher := LHTTPMatcher.Body as TWebMockFormDataMatcher;
+  LFormFieldMatcher := LFormDataMatcher.FieldMatchers[0] as TWebMockFormFieldMatcher;
+  Assert.AreEqual(
+    LValue,
+    (LFormFieldMatcher.ValueMatcher as TWebMockStringWildcardMatcher).Value
+  );
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.WithHeaders_Always_ReturnsSelf;
@@ -334,6 +439,7 @@ begin
   Assert.AreSame(Assertion, Assertion.Get('/').WithHeaders(LHeaders));
 
   LHeaders.Free;
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.WithHeaders_Always_SetsAllValues;
@@ -354,11 +460,12 @@ begin
     LHeaderValue := LHeaders.ValueFromIndex[I];
     Assert.AreEqual(
       LHeaderValue,
-      (Assertion.Matcher.Headers[LHeaderName] as TWebMockStringWildcardMatcher).Value
+      (Matcher.Headers[LHeaderName] as TWebMockStringWildcardMatcher).Value
     );
   end;
 
   LHeaders.Free;
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.WithHeader_Always_OverwritesExistingValues;
@@ -371,10 +478,12 @@ begin
   LHeaderValue2 := 'Value2';
 
   Assertion.Get('/').WithHeader(LHeaderName, LHeaderValue1);
-  LMatcher := Assertion.Matcher.Headers[LHeaderName];
+  LMatcher := Matcher.Headers[LHeaderName];
   Assertion.WithHeader(LHeaderName, LHeaderValue2);
 
-  Assert.AreNotSame(LMatcher, Assertion.Matcher.Headers[LHeaderName]);
+  Assert.AreNotSame(LMatcher, Matcher.Headers[LHeaderName]);
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.WithHeader_GivenRegEx_ReturnsSelf;
@@ -383,6 +492,8 @@ begin
     Assertion,
     Assertion.Get('/').WithHeader('Header', TRegEx.Create(''))
   );
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.WithHeader_GivenRegEx_SetsPatternForHeader;
@@ -397,13 +508,17 @@ begin
 
   Assert.AreEqual(
     LHeaderPattern,
-    (Assertion.Matcher.Headers[LHeaderName] as TWebMockStringRegExMatcher).RegEx
+    (Matcher.Headers[LHeaderName] as TWebMockStringRegExMatcher).RegEx
   );
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.WithHeader_GivenString_ReturnsSelf;
 begin
   Assert.AreSame(Assertion, Assertion.Get('/').WithHeader('Header', 'Value'));
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.WithHeader_GivenString_SetsValueForHeader;
@@ -417,8 +532,163 @@ begin
 
   Assert.AreEqual(
     LHeaderValue,
-    (Assertion.Matcher.Headers[LHeaderName] as TWebMockStringWildcardMatcher).Value
+    (Matcher.Headers[LHeaderName] as TWebMockStringWildcardMatcher).Value
   );
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndBoolean_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Put('/').WithJSON('AKey', True));
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndBoolean_SetsValueForBodyMatcher;
+var
+  LPath: string;
+  LValue: Boolean;
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+  LJSONMatcher: TWebMockJSONMatcher;
+  LJSONValueMatcher: TWebMockJSONValueMatcher<Boolean>;
+begin
+  LPath := 'Key1';
+  LValue := True;
+
+  Assertion.Post('/').WithJSON(LPath, LValue);
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+  LJSONMatcher := LHTTPMatcher.Body as TWebMockJSONMatcher;
+  LJSONValueMatcher := LJSONMatcher.ValueMatchers[0] as TWebMockJSONValueMatcher<Boolean>;
+  Assert.AreEqual(LValue, LJSONValueMatcher.Value);
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndFloat_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Put('/').WithJSON('AKey', 0.12));
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndFloat_SetsValueForBodyMatcher;
+var
+  LPath: string;
+  LValue: Float64;
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+  LJSONMatcher: TWebMockJSONMatcher;
+  LJSONValueMatcher: TWebMockJSONValueMatcher<Float64>;
+begin
+  LPath := 'Key1';
+  LValue := 0.1;
+
+  Assertion.Post('/').WithJSON(LPath, LValue);
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+  LJSONMatcher := LHTTPMatcher.Body as TWebMockJSONMatcher;
+  LJSONValueMatcher := LJSONMatcher.ValueMatchers[0] as TWebMockJSONValueMatcher<Float64>;
+  Assert.AreEqual(LValue, LJSONValueMatcher.Value);
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndInteger_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Put('/').WithJSON('AKey', 1));
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndInteger_SetsValueForBodyMatcher;
+var
+  LPath: string;
+  LValue: Integer;
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+  LJSONMatcher: TWebMockJSONMatcher;
+  LJSONValueMatcher: TWebMockJSONValueMatcher<Integer>;
+begin
+  LPath := 'Key1';
+  LValue := 1;
+
+  Assertion.Post('/').WithJSON(LPath, LValue);
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+  LJSONMatcher := LHTTPMatcher.Body as TWebMockJSONMatcher;
+  LJSONValueMatcher := LJSONMatcher.ValueMatchers[0] as TWebMockJSONValueMatcher<Integer>;
+  Assert.AreEqual(LValue, LJSONValueMatcher.Value);
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndString_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Put('/').WithJSON('AKey', 'AValue'));
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndString_SetsValueForBodyMatcher;
+var
+  LPath, LValue: string;
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+  LJSONMatcher: TWebMockJSONMatcher;
+  LJSONValueMatcher: TWebMockJSONValueMatcher<string>;
+begin
+  LPath := 'Key1';
+  LValue := 'Value1';
+
+  Assertion.Post('/').WithJSON(LPath, LValue);
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+  LJSONMatcher := LHTTPMatcher.Body as TWebMockJSONMatcher;
+  LJSONValueMatcher := LJSONMatcher.ValueMatchers[0] as TWebMockJSONValueMatcher<string>;
+  Assert.AreEqual(LValue, LJSONValueMatcher.Value);
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithQueryParam_GivenNameAndValue_SetsValueForQueryParam;
+var
+  LParamName, LParamValue: string;
+begin
+  LParamName := 'Param1';
+  LParamValue := 'Value1';
+
+  Assertion.Get('/').WithQueryParam(LParamName, LParamValue);
+
+  Assert.AreEqual(
+    LParamValue,
+    (Matcher.QueryParams[LParamName] as TWebMockStringWildcardMatcher).Value
+  );
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithQueryParam_GivenNameAndRegEx_SetsPatternForQueryParam;
+var
+  LParamName: string;
+  LParamPattern: TRegEx;
+begin
+  LParamName := 'Header1';
+  LParamPattern := TRegEx.Create('');
+
+  Assertion.Get('/').WithQueryParam(LParamName, LParamPattern);
+
+  Assert.AreEqual(
+    LParamPattern,
+    (Matcher.QueryParams[LParamName] as TWebMockStringRegExMatcher).RegEx
+  );
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithQueryParam_GivenNameAndValue_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Get('/').WithQueryParam('ParamName', 'Value'));
+
+  Assertion.Free;
 end;
 
 procedure TWebMockAssertionTests.WasNotRequested_MatchingHistory_RaisesFailingException;
@@ -427,6 +697,7 @@ var
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/');
   History.Add(TWebMockHTTPRequest.Create(LRequestInfo));
+  LRequestInfo.Free;
 
   Assert.WillRaise(
     procedure
@@ -435,8 +706,6 @@ begin
     end,
     ETestFailure
   );
-
-  LRequestInfo.Free;
 end;
 
 procedure TWebMockAssertionTests.WasNotRequested_NotMatchingHistory_RaisesPassingException;
@@ -445,6 +714,7 @@ var
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/');
   History.Add(TWebMockHTTPRequest.Create(LRequestInfo));
+  LRequestInfo.Free;
 
   Assert.WillRaise(
     procedure
@@ -453,8 +723,6 @@ begin
     end,
     ETestPass
   );
-
-  LRequestInfo.Free;
 end;
 
 procedure TWebMockAssertionTests.WasRequested_MatchingHistory_RaisesPassingException;
@@ -463,6 +731,7 @@ var
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/');
   History.Add(TWebMockHTTPRequest.Create(LRequestInfo));
+  LRequestInfo.Free;
 
   Assert.WillRaise(
     procedure
@@ -471,8 +740,6 @@ begin
     end,
     ETestPass
   );
-
-  LRequestInfo.Free;
 end;
 
 initialization

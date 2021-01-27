@@ -44,12 +44,13 @@ type
   private
     FMatcher: TWebMockDynamicRequestMatcher;
     FResponder: IWebMockResponder;
-    FResponse: TWebMockResponse;
-    property Response: TWebMockResponse read FResponse;
+    FResponse: IWebMockResponse;
+    property Response: IWebMockResponse read FResponse;
   public
     constructor Create(const AMatcher: TWebMockDynamicRequestMatcher);
-    function ToRespond(AResponseStatus: TWebMockResponseStatus = nil)
-      : IWebMockResponseBuilder;
+    function ToRespond: IWebMockResponseBuilder; overload;
+    function ToRespond(AResponseStatus: TWebMockResponseStatus)
+      : IWebMockResponseBuilder; overload;
     procedure ToRespondWith(const AProc: TWebMockDynamicResponse);
 
     { IWebMockRequestStub }
@@ -99,10 +100,12 @@ end;
 function TWebMockDynamicRequestStub.ToRespond(
   AResponseStatus: TWebMockResponseStatus): IWebMockResponseBuilder;
 begin
-  if Assigned(AResponseStatus) then
-    Response.Status := AResponseStatus;
+  Result := Response.Builder.WithStatus(AResponseStatus);
+end;
 
-  Result := Response;
+function TWebMockDynamicRequestStub.ToRespond: IWebMockResponseBuilder;
+begin
+  Result := Response.Builder;
 end;
 
 procedure TWebMockDynamicRequestStub.ToRespondWith(

@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2019-2021 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -29,17 +29,20 @@ interface
 
 uses
   DUnitX.TestFramework,
-  System.Classes, System.Generics.Collections, System.RegularExpressions,
-  WebMock.HTTP.Messages, WebMock.HTTP.RequestMatcher;
+  System.Classes,
+  System.RegularExpressions,
+  System.Rtti,
+  WebMock.HTTP.Messages,
+  WebMock.HTTP.RequestMatcher;
 
 type
   TWebMockAssertion = class(TObject)
   private
-    FMatcher: TWebMockHTTPRequestMatcher;
-    FHistory: TList<IWebMockHTTPRequest>;
+    FMatcher: IWebMockHTTPRequestMatcher;
+    FHistory: IInterfaceList;
     function MatchesHistory: Boolean;
   public
-    constructor Create(AHistory: TList<IWebMockHTTPRequest>);
+    constructor Create(const AHistory: IInterfaceList);
     function Delete(const AURI: string): TWebMockAssertion;
     function Get(const AURI: string): TWebMockAssertion;
     function Patch(const AURI: string): TWebMockAssertion;
@@ -52,10 +55,18 @@ type
     function WithHeader(const AName, AValue: string): TWebMockAssertion; overload;
     function WithHeader(const AName: string; const APattern: TRegEx): TWebMockAssertion; overload;
     function WithHeaders(const AHeaders: TStringList): TWebMockAssertion;
+    function WithQueryParam(const AName, AValue: string): TWebMockAssertion; overload;
+    function WithQueryParam(const AName: string; const APattern: TRegEx): TWebMockAssertion; overload;
+    function WithFormData(const AName, AValue: string): TWebMockAssertion; overload;
+    function WithFormData(const AName: string; const APattern: TRegEx): TWebMockAssertion; overload;
+    function WithJSON(const APath: string; AValue: Boolean): TWebMockAssertion; overload;
+    function WithJSON(const APath: string; AValue: Float64): TWebMockAssertion; overload;
+    function WithJSON(const APath: string; AValue: Integer): TWebMockAssertion; overload;
+    function WithJSON(const APath: string; AValue: string): TWebMockAssertion; overload;
     procedure WasRequested;
     procedure WasNotRequested;
-    property History: TList<IWebMockHTTPRequest> read FHistory;
-    property Matcher: TWebMockHTTPRequestMatcher read FMatcher;
+    property History: IInterfaceList read FHistory;
+    property Matcher: IWebMockHTTPRequestMatcher read FMatcher;
   end;
 
 implementation
@@ -64,9 +75,11 @@ implementation
 
 uses
   System.SysUtils,
-  WebMock.StringRegExMatcher, WebMock.StringWildcardMatcher;
+  WebMock.FormDataMatcher,
+  WebMock.StringRegExMatcher,
+  WebMock.StringWildcardMatcher;
 
-constructor TWebMockAssertion.Create(AHistory: TList<IWebMockHTTPRequest>);
+constructor TWebMockAssertion.Create(const AHistory: IInterfaceList);
 begin
   inherited Create;
   FHistory := AHistory;
@@ -84,12 +97,15 @@ end;
 
 function TWebMockAssertion.MatchesHistory: Boolean;
 var
+  I: Integer;
   LRequest: IWebMockHTTPRequest;
 begin
   Result := False;
 
-  for LRequest in History do
+  for I := 0 to History.Count - 1 do
   begin
+    LRequest := History[I] as IWebMockHTTPRequest;
+
     if Matcher.IsMatch(LRequest) then
     begin
       Result := True;
@@ -130,23 +146,47 @@ end;
 
 procedure TWebMockAssertion.WasNotRequested;
 begin
-  if MatchesHistory then
-    Assert.Fail(Format('Found request matching %s', [Matcher.ToString]))
-  else
-    Assert.Pass(Format('Did not find request matching %s', [Matcher.ToString]));
+  try
+    if MatchesHistory then
+      Assert.Fail(Format('Found request matching %s', [Matcher.ToString]))
+    else
+      Assert.Pass(Format('Did not find request matching %s', [Matcher.ToString]));
+  finally
+    Free;
+  end;
 end;
 
 procedure TWebMockAssertion.WasRequested;
 begin
-  if MatchesHistory then
-    Assert.Pass(Format('Found request matching %s', [Matcher.ToString]))
-  else
-    Assert.Fail(Format('Expected to find request matching %s', [Matcher.ToString]));
+  try
+    if MatchesHistory then
+      Assert.Pass(Format('Found request matching %s', [Matcher.ToString]))
+    else
+      Assert.Fail(Format('Expected to find request matching %s', [Matcher.ToString]));
+  finally
+    Free;
+  end;
 end;
 
 function TWebMockAssertion.WithBody(const APattern: TRegEx): TWebMockAssertion;
 begin
-  Matcher.Body := TWebMockStringRegExMatcher.Create(APattern);
+  Matcher.Builder.WithBody(APattern);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithFormData(const AName: string;
+  const APattern: TRegEx): TWebMockAssertion;
+begin
+  Matcher.Builder.WithFormData(AName, APattern);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithFormData(const AName,
+  AValue: string): TWebMockAssertion;
+begin
+  Matcher.Builder.WithFormData(AName, AValue);
 
   Result := Self;
 end;
@@ -154,27 +194,21 @@ end;
 function TWebMockAssertion.WithHeader(const AName,
   AValue: string): TWebMockAssertion;
 begin
-  Matcher.Headers.AddOrSetValue(
-    AName,
-    TWebMockStringWildcardMatcher.Create(AValue)
-  );
+  Matcher.Builder.WithHeader(AName, AValue);
 
   Result := Self;
 end;
 
 function TWebMockAssertion.WithBody(const AContent: string): TWebMockAssertion;
 begin
-  Matcher.Body := TWebMockStringWildcardMatcher.Create(AContent);
+  Matcher.Builder.WithBody(AContent);
 
   Result := Self;
 end;
 
 function TWebMockAssertion.WithHeader(const AName: string; const APattern: TRegEx): TWebMockAssertion;
 begin
-  Matcher.Headers.AddOrSetValue(
-    AName,
-    TWebMockStringRegExMatcher.Create(APattern)
-  );
+  Matcher.Builder.WithHeader(AName, APattern);
 
   Result := Self;
 end;
@@ -186,6 +220,54 @@ var
 begin
   for I := 0 to AHeaders.Count - 1 do
     WithHeader(AHeaders.Names[I], AHeaders.ValueFromIndex[I]);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithJSON(const APath: string;
+  AValue: Boolean): TWebMockAssertion;
+begin
+  Matcher.Builder.WithJSON(APath, AValue);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithJSON(const APath: string;
+  AValue: Float64): TWebMockAssertion;
+begin
+  Matcher.Builder.WithJSON(APath, AValue);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithJSON(const APath: string;
+  AValue: Integer): TWebMockAssertion;
+begin
+  Matcher.Builder.WithJSON(APath, AValue);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithJSON(const APath: string;
+  AValue: string): TWebMockAssertion;
+begin
+  Matcher.Builder.WithJSON(APath, AValue);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithQueryParam(const AName: string;
+  const APattern: TRegEx): TWebMockAssertion;
+begin
+  Matcher.Builder.WithQueryParam(AName, APattern);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithQueryParam(const AName,
+  AValue: string): TWebMockAssertion;
+begin
+  Matcher.Builder.WithQueryParam(AName, AValue);
 
   Result := Self;
 end;

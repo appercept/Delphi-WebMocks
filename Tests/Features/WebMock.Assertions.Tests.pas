@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2019-2020 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -71,6 +71,18 @@ type
     procedure WasRequestedWithHeadersStrings_MatchingRequest_Passes;
     [Test]
     procedure WasRequestedWithHeadersStrings_NotMatchingRequest_Fails;
+    [Test]
+    procedure WasRequestedWithQueryParam_MatchingRequest_Passes;
+    [Test]
+    procedure WasRequestedWithQueryParam_NotMatchingRequest_Fails;
+    [Test]
+    procedure WasRequestedWithFormData_MatchingRequest_Passes;
+    [Test]
+    procedure WasRequestedWithFormData_NotMatchingRequest_Fails;
+    [Test]
+    procedure WasRequestedWithJSON_MatchingRequest_Passes;
+    [Test]
+    procedure WasRequestedWithJSON_NotMatchingRequest_Fails;
     [Test]
     procedure DeleteWasRequested_MatchingRequest_Passes;
     [Test]
@@ -212,8 +224,11 @@ begin
 end;
 
 procedure TWebMockAssertionsTests.PostWasRequested_MatchingRequest_Passes;
+var
+  LContentStream: TStringStream;
 begin
-  WebClient.Post(WebMock.URLFor('/'), TStringStream.Create(''));
+  LContentStream := TStringStream.Create('');
+  WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
   Assert.WillRaise(
     procedure
@@ -222,11 +237,16 @@ begin
     end,
     ETestPass
   );
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockAssertionsTests.PostWasRequested_NotMatchingRequest_Fails;
+var
+  LContentStream: TStringStream;
 begin
-  WebClient.Post(WebMock.URLFor('/'), TStringStream.Create(''));
+  LContentStream := TStringStream.Create('');
+  WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
   Assert.WillRaise(
     procedure
@@ -235,6 +255,8 @@ begin
     end,
     ETestFailure
   );
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockAssertionsTests.PutWasRequested_MatchingRequest_Passes;
@@ -264,8 +286,11 @@ begin
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithBodyRegEx_MatchingRequestBody_Passes;
+var
+  LContentStream: TStringStream;
 begin
-  WebClient.Post(WebMock.URLFor('/'), TStringStream.Create('HELLO'));
+  LContentStream := TStringStream.Create('HELLO');
+  WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
   Assert.WillRaise(
     procedure
@@ -274,11 +299,16 @@ begin
     end,
     ETestPass
   );
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithBodyRegEx_NotMatchingRequestBody_Fails;
+var
+  LContentStream: TStringStream;
 begin
-  WebClient.Post(WebMock.URLFor('/'), TStringStream.Create('HELLO'));
+  LContentStream := TStringStream.Create('HELLO');
+  WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
   Assert.WillRaise(
     procedure
@@ -287,14 +317,18 @@ begin
     end,
     ETestFailure
   );
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithBodyString_MatchingRequestBody_Passes;
 var
   LContent: string;
+  LContentStream: TStringStream;
 begin
   LContent := 'OK';
-  WebClient.Post(WebMock.URLFor('/'), TStringStream.Create(LContent));
+  LContentStream := TStringStream.Create('OK');
+  WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
   Assert.WillRaise(
     procedure
@@ -303,11 +337,16 @@ begin
     end,
     ETestPass
   );
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithBodyString_NotMatchingRequestBody_Fails;
+var
+  LContentStream: TStringStream;
 begin
-  WebClient.Post(WebMock.URLFor('/'), TStringStream.Create('HELLO'));
+  LContentStream := TStringStream.Create('HELLO');
+  WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
   Assert.WillRaise(
     procedure
@@ -316,6 +355,52 @@ begin
     end,
     ETestFailure
   );
+
+  LContentStream.Free;
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithFormData_MatchingRequest_Passes;
+var
+  LFormData: TStringList;
+begin
+  LFormData := TStringList.Create;
+  LFormData.AddPair('AField', 'AValue');
+  WebClient.Post(WebMock.URLFor('/form'), LFormData);
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert
+        .Post('/form')
+        .WithFormData('AField', 'AValue')
+        .WasRequested;
+    end,
+    ETestPass
+  );
+
+  LFormData.Free;
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithFormData_NotMatchingRequest_Fails;
+var
+  LFormData: TStringList;
+begin
+  LFormData := TStringList.Create;
+  LFormData.AddPair('AField', 'AValue');
+  WebClient.Post(WebMock.URLFor('/form'), LFormData);
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert
+        .Post('/form')
+        .WithFormData('AField', 'OtherValue')
+        .WasRequested;
+    end,
+    ETestFailure
+  );
+
+  LFormData.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithHeaderRegEx_MatchingRequest_Passes;
@@ -392,6 +477,8 @@ begin
     end,
     ETestPass
   );
+
+  LHeaders.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithHeadersStrings_NotMatchingRequest_Fails;
@@ -418,6 +505,8 @@ begin
     end,
     ETestFailure
   );
+
+  LHeaders.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequestedWithHeaderString_MatchingRequest_Passes;
@@ -460,6 +549,82 @@ begin
     procedure
     begin
       WebMock.Assert.Get('/').WithHeader(LHeaderName, 'Value-2').WasRequested;
+    end,
+    ETestFailure
+  );
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithJSON_MatchingRequest_Passes;
+var
+  LJSON: TStringStream;
+begin
+  LJSON := TStringStream.Create('{ "key": "value" }');
+  WebClient.Post(WebMock.URLFor('/json'), LJSON);
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert
+        .Post('/json')
+        .WithJSON('key', 'value')
+        .WasRequested;
+    end,
+    ETestPass
+  );
+
+  LJSON.Free;
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithJSON_NotMatchingRequest_Fails;
+var
+  LJSON: TStringStream;
+begin
+  LJSON := TStringStream.Create('{ "key": "value" }');
+  WebClient.Post(WebMock.URLFor('/json'), LJSON);
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert
+        .Post('/form')
+        .WithJSON('key', 'other value')
+        .WasRequested;
+    end,
+    ETestFailure
+  );
+
+  LJSON.Free;
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithQueryParam_MatchingRequest_Passes;
+var
+  LParamName, LParamValue: string;
+begin
+  LParamName := 'Param1';
+  LParamValue := 'Value1';
+  WebClient.Get(WebMock.URLFor('/') + Format('?%s=%s', [LParamName, LParamValue]));
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert.Get('/').WithQueryParam(LParamName, LParamValue).WasRequested;
+    end,
+    ETestPass
+  );
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithQueryParam_NotMatchingRequest_Fails;
+var
+  LParamName, LParamValue: string;
+begin
+  LParamName := 'Param1';
+  LParamValue := 'Value1';
+  WebClient.Get(WebMock.URLFor('/'));
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert.Get('/').WithQueryParam(LParamName, LParamValue).WasRequested;
     end,
     ETestFailure
   );

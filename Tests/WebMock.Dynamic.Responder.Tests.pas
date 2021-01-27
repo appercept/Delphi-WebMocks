@@ -64,6 +64,8 @@ uses
 { TWebMockDynamicResponderTests }
 
 procedure TWebMockDynamicResponderTests.GetResponseTo_Always_CallsProcWithInitialisedResponseBuilder;
+var
+  LResponse: IWebMockResponse;
 begin
   Responder := TWebMockDynamicResponder.Create(
     procedure(const ARequest: IWebMockHTTPRequest; const AResponse: IWebMockResponseBuilder)
@@ -71,12 +73,14 @@ begin
       Assert.IsNotNull(AResponse, 'Response builder should be initialised.');
     end
   );
-  Responder.GetResponseTo(Request);
+  LResponse := Responder.GetResponseTo(Request);
 
   Responder.Free;
 end;
 
 procedure TWebMockDynamicResponderTests.GetResponseTo_Always_CallsProcWithRequest;
+var
+  LResponse: IWebMockResponse;
 begin
   Responder := TWebMockDynamicResponder.Create(
     procedure(const ARequest: IWebMockHTTPRequest; const AResponse: IWebMockResponseBuilder)
@@ -84,14 +88,14 @@ begin
       Assert.AreSame(Request, ARequest);
     end
   );
-  Responder.GetResponseTo(Request);
+  LResponse := Responder.GetResponseTo(Request);
 
   Responder.Free;
 end;
 
 procedure TWebMockDynamicResponderTests.GetResponseTo_Always_ReturnsBuiltResponse;
 var
-  LResponse: TWebMockResponse;
+  LResponse: IWebMockResponse;
 begin
   Responder := TWebMockDynamicResponder.Create(
     procedure(const ARequest: IWebMockHTTPRequest; const AResponse: IWebMockResponseBuilder)
@@ -107,6 +111,8 @@ begin
 end;
 
 procedure TWebMockDynamicResponderTests.GetResponseTo_Always_ReturnsResponse;
+var
+  LResponse: IWebMockResponse;
 begin
   Responder := TWebMockDynamicResponder.Create(
     procedure(const ARequest: IWebMockHTTPRequest; const AResponse: IWebMockResponseBuilder)
@@ -115,7 +121,9 @@ begin
     end
   );
 
-  Assert.IsNotNull(Responder.GetResponseTo(nil));
+  LResponse := Responder.GetResponseTo(nil);
+
+  Assert.IsNotNull(LResponse);
 
   Responder.Free;
 end;

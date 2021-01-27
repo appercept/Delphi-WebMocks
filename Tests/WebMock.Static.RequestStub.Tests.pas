@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019-2020 Richard Hatherall                          }
+{           Copyright (c) 2019-2021 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -29,6 +29,7 @@ interface
 
 uses
   DUnitX.TestFramework,
+  WebMock.HTTP.RequestMatcher,
   WebMock.Static.RequestStub;
 
 type
@@ -37,13 +38,12 @@ type
   TWebMockStaticRequestStubTests = class(TObject)
   private
     StubbedRequest: TWebMockStaticRequestStub;
+    Matcher: TWebMockHTTPRequestMatcher;
   public
     [Setup]
     procedure Setup;
     [TearDown]
     procedure TearDown;
-    [Test]
-    procedure Class_Always_ImplementsIWebMockRequestStub;
     [Test]
     procedure ToRespond_Always_ReturnsAResponseStub;
     [Test]
@@ -61,6 +61,14 @@ type
     [Test]
     procedure WithBody_GivenRegEx_SetsValueForContent;
     [Test]
+    procedure WithFormData_GivenString_ReturnsSelf;
+    [Test]
+    procedure WithFormData_GivenStringValue_SetsValueForFormData;
+    [Test]
+    procedure WithFormData_GivenRegExValue_ReturnsSelf;
+    [Test]
+    procedure WithFormData_GivenRegExValue_SetsValueForFormData;
+    [Test]
     procedure WithHeader_GivenString_ReturnsSelf;
     [Test]
     procedure WithHeader_GivenString_SetsValueForHeader;
@@ -74,6 +82,22 @@ type
     procedure WithHeaders_Always_ReturnsSelf;
     [Test]
     procedure WithHeaders_Always_SetsAllValues;
+    [Test]
+    procedure WithJSON_GivenPathAndBoolean_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndBoolean_SetsMatcherForContent;
+    [Test]
+    procedure WithJSON_GivenPathAndFloat_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndFloat_SetsMatcherForContent;
+    [Test]
+    procedure WithJSON_GivenPathAndInteger_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndInteger_SetsMatcherForContent;
+    [Test]
+    procedure WithJSON_GivenPathAndString_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndString_SetsMatcherForContent;
   end;
 
 implementation
@@ -83,7 +107,9 @@ uses
   Mock.Indy.HTTPRequestInfo,
   System.Classes,
   System.RegularExpressions,
-  WebMock.HTTP.RequestMatcher,
+  WebMock.FormDataMatcher,
+  WebMock.FormFieldMatcher,
+  WebMock.JSONMatcher,
   WebMock.RequestStub,
   WebMock.Response,
   WebMock.ResponseStatus,
@@ -93,31 +119,21 @@ uses
 
 { TWebMockRequestStubTests }
 
-procedure TWebMockStaticRequestStubTests.Class_Always_ImplementsIWebMockRequestStub;
-var
-  LSubject: IInterface;
-begin
-  LSubject := StubbedRequest;
-
-  Assert.Implements<IWebMockRequestStub>(LSubject);
-end;
-
 procedure TWebMockStaticRequestStubTests.Setup;
-var
-  LMatcher: TWebMockHTTPRequestMatcher;
 begin
-  LMatcher := TWebMockHTTPRequestMatcher.Create('');
-  StubbedRequest := TWebMockStaticRequestStub.Create(LMatcher);
+  Matcher := TWebMockHTTPRequestMatcher.Create('');
+  StubbedRequest := TWebMockStaticRequestStub.Create(Matcher);
 end;
 
 procedure TWebMockStaticRequestStubTests.TearDown;
 begin
-  StubbedRequest := nil;
+  StubbedRequest.Free;
+  Matcher := nil;
 end;
 
 procedure TWebMockStaticRequestStubTests.ToRespond_Always_ReturnsAResponseStub;
 begin
-  Assert.IsNotNull(StubbedRequest.ToRespond as IWebMockResponseBuilder);
+  Assert.IsNotNull(StubbedRequest.ToRespond);
 end;
 
 procedure TWebMockStaticRequestStubTests.ToRespond_WithNoArguments_DoesNotRaiseException;
@@ -131,14 +147,14 @@ end;
 
 procedure TWebMockStaticRequestStubTests.ToRespond_WithNoArguments_DoesNotChangeStatus;
 var
-  LExpectedStatus: TWebMockResponseStatus;
+  LExpected, LActual: IWebMockResponse;
 begin
-  LExpectedStatus := StubbedRequest.Responder.GetResponseTo(nil).Status;
+  LExpected := StubbedRequest.Responder.GetResponseTo(nil);
 
   StubbedRequest.ToRespond;
 
-  Assert.AreSame(LExpectedStatus,
-                 StubbedRequest.Responder.GetResponseTo(nil).Status);
+  LActual := StubbedRequest.Responder.GetResponseTo(nil);
+  Assert.AreEqual(LExpected.Status, LActual.Status);
 end;
 
 procedure TWebMockStaticRequestStubTests.ToRespond_WithResponse_SetsResponseStatus;
@@ -149,7 +165,7 @@ begin
 
   StubbedRequest.ToRespond(LResponse);
 
-  Assert.AreSame(LResponse, StubbedRequest.Responder.GetResponseTo(nil).Status);
+  Assert.AreEqual(LResponse, StubbedRequest.Responder.GetResponseTo(nil).Status);
 end;
 
 procedure TWebMockStaticRequestStubTests.WithBody_GivenRegEx_ReturnsSelf;
@@ -190,6 +206,61 @@ begin
   Assert.AreEqual(
     LContent,
     (StubbedRequest.Matcher.Body as TWebMockStringWildcardMatcher).Value
+  );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithFormData_GivenRegExValue_ReturnsSelf;
+begin
+  Assert.AreSame(
+    StubbedRequest,
+    StubbedRequest.WithFormData('AField', TRegEx.Create(''))
+  );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithFormData_GivenRegExValue_SetsValueForFormData;
+var
+  LName: string;
+  LValuePattern: TRegEx;
+  LFormDataMatcher: TWebMockFormDataMatcher;
+  LFormFieldMatcher: TWebMockFormFieldMatcher;
+begin
+  LName := 'AName';
+  LValuePattern := TRegEx.Create('');
+
+  StubbedRequest.WithFormData(LName, LValuePattern);
+
+  LFormDataMatcher := (StubbedRequest.Matcher.Body as TWebMockFormDataMatcher);
+  LFormFieldMatcher := (LFormDataMatcher.FieldMatchers[0] as TWebMockFormFieldMatcher);
+  Assert.AreEqual(
+    LValuePattern,
+    (LFormFieldMatcher.ValueMatcher as TWebMockStringRegExMatcher).RegEx
+  );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithFormData_GivenStringValue_SetsValueForFormData;
+var
+  LName, LValue: string;
+  LFormDataMatcher: TWebMockFormDataMatcher;
+  LFormFieldMatcher: TWebMockFormFieldMatcher;
+begin
+  LName := 'AName';
+  LValue := 'AValue';
+
+  StubbedRequest.WithFormData(LName, LValue);
+
+  LFormDataMatcher := (StubbedRequest.Matcher.Body as TWebMockFormDataMatcher);
+  LFormFieldMatcher := (LFormDataMatcher.FieldMatchers[0] as TWebMockFormFieldMatcher);
+  Assert.AreEqual(
+    LValue,
+    (LFormFieldMatcher.ValueMatcher as TWebMockStringWildcardMatcher).Value
+  );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithFormData_GivenString_ReturnsSelf;
+begin
+  Assert.AreSame(
+    StubbedRequest,
+    StubbedRequest.WithFormData('AField', 'AValue')
   );
 end;
 
@@ -287,6 +358,54 @@ begin
     LHeaderValue,
     (StubbedRequest.Matcher.Headers[LHeaderName] as TWebMockStringWildcardMatcher).Value
   );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndBoolean_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithJSON('key', True));
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndBoolean_SetsMatcherForContent;
+begin
+  StubbedRequest.WithJSON('key', True);
+
+  Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockJSONMatcher);
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndFloat_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithJSON('key', 0.123));
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndFloat_SetsMatcherForContent;
+begin
+  StubbedRequest.WithJSON('key', 0.123);
+
+  Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockJSONMatcher);
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndInteger_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithJSON('key', 1));
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndInteger_SetsMatcherForContent;
+begin
+  StubbedRequest.WithJSON('key', 1);
+
+  Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockJSONMatcher);
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndString_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithJSON('key', 'value'));
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndString_SetsMatcherForContent;
+begin
+  StubbedRequest.WithJSON('key', 'value');
+
+  Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockJSONMatcher);
 end;
 
 initialization

@@ -1,4 +1,4 @@
-![Delphi compatibility](https://img.shields.io/badge/Delphi-XE8%20or%20newer-brightgreen)
+![Delphi compatibility](https://img.shields.io/badge/Delphi%20compatability-10.3%20or%20newer-brightgreen)
 ![Platform compatibility](https://img.shields.io/badge/platform-Linux64%20%7C%20macOS64%20%7C%20Win32%20%7C%20Win64-lightgrey)
 ![License](https://img.shields.io/github/license/appercept/Delphi-WebMocks)
 ![Lines of Code](https://tokei.rs/b1/github/appercept/Delphi-WebMocks)
@@ -8,14 +8,22 @@ Library for stubbing and setting expectations on HTTP requests in Delphi with
 [DUnitX](https://github.com/VSoftTechnologies/DUnitX).
 
 ## Requirements
-* [Delphi](https://www.embarcadero.com/products/delphi) XE8 or later*
+* [Delphi](https://www.embarcadero.com/products/delphi) 10.3 (Rio) or later*
 * [DUnitX](https://github.com/VSoftTechnologies/DUnitX)
 * [Indy](https://www.indyproject.org)
 
-\* WebMocks was developed in Delphi 10.3 (Rio) and 10.4 (Sydney). WebMocks has
-been reported working on 10.1 (Berlin). I'd be interested to hear from anyone
-working on other versions. As WebMocks makes use of the `System.Net`
-library introduced with XE8 it will not be compatible with earlier versions.
+\* WebMocks was developed in Delphi 10.3 (Rio) and 10.4 (Sydney) and until
+version 3.0 was compatible back to XE8. As WebMocks makes use of the
+`System.Net` library introduced with XE8 it will not be compatible with earlier
+versions. Should you require installing on Delphi versions prior to 10.3 you
+should install version
+[2.0.0](https://github.com/appercept/Delphi-WebMocks/releases/tag/2.0.0).
+
+## Installation: GetIt
+[WebMocks 2.0](https://getitnow.embarcadero.com/WebMocks-2.0/) is available
+through Embarcadero's package manager for Delphi
+[GetIt](https://getitnow.embarcadero.com/). If you have a recent version of
+Delphi including GetIt then this should be the preferred installation method.
 
 ## Installation: Delphinus-Support
 WebMocks should now be listed in
@@ -26,11 +34,11 @@ not be found in your test projects.
 
 ## Installation: Manual
 1. Download and extract the latest version
-   [2.0.0](https://github.com/appercept/Delphi-WebMocks/archive/2.0.0.zip).
+   [3.0.0](https://github.com/appercept/Delphi-WebMocks/archive/3.0.0.zip).
 2. In "Tools > Options" under the "Language / Delphi / Library" add the
    extracted `Source` directory to the "Library path" and "Browsing path".
 
-## Upgrading to versions prior to 2.0.0
+## Upgrading from versions prior to 2.0.0
 Version 2 has dropped the `Delphi.` namespace from all units. Any projects
 upgrade to version 2 or later will need to drop the `Delphi.` prefix from any
 included WebMocks units.
@@ -169,6 +177,23 @@ HTTP request can be matched by content like:
 WebMock.StubRequest('*', '*').WithBody('String content.');
 ```
 
+#### Request matching by form-data
+HTTP requests can be matched by form-data as submitted with `content-type` of
+`application/x-www-form-urlencoded`. Multiple matching field values can be
+combined. For example:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithFormData('AField', 'A value.')
+  .WithFormData('AOtherField', 'Another value.');
+```
+
+To simply match the presence of a field, a wildcard `*` can be passed for the
+value.
+
+NOTE: You cannot match form-data (`WithFormData`) and body content (`WithBody`)
+at the same time. Specifying both will result in the latest call overwriting the
+previous matcher.
+
 #### Matching request document path, headers, or content by regular-expression
 Matching a request by regular-expression can be useful for stubbing dynamic
 routes for a ReSTful resource involving a resource name and an unknown resource
@@ -189,7 +214,36 @@ WebMock.StubRequest('*', '*')
   .WithBody(TRegEx.Create('Hello'));
 ```
 
+Matching form-data content can be performed like:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithFormData('AField', TRegEx.Create('.*'));
+```
+
 NOTE: Be sure to add `System.RegularExpressions` to your uses clause.
+
+#### Request matching by JSON
+HTTP requests can be matched by JSON data as submitted with `content-type` of
+`application/json` using `WithJSON`. Multiple matching field values can be
+combined. For example:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithJSON('ABoolean', True)
+  .WithJSON('AFloat', 0.123)
+  .WithJSON('AInteger', 1)
+  .WithJSON('AString', 'value');
+```
+
+The first argument can be a path. For example, in the following JSON, the path
+`objects[0].key` would match `value 1`.
+```JSON
+{
+  "objects": [
+    { "key": "value 1" },
+    { "key": "value 2" }
+  ]
+}
+```
 
 #### Request matching by predicate function
 If matching logic is required to be more complex than the simple matching, a
@@ -373,11 +427,12 @@ WebClient.Get(WebMock.URLFor('/'));
 WebMock.Assert.Get('/').WasRequested; // Passes
 ```
 
-As with request stubbing you can match requests by HTTP Method, URI, Headers,
-and Body content.
+As with request stubbing you can match requests by HTTP Method, URI, Query
+Parameters, Headers, and Body content (including `WithJSON`).
 ```Delphi
 WebMock.Assert
   .Patch('/resource`)
+  .WithQueryParam('ParamName', 'Value')
   .WithHeader('Content-Type', 'application/json')
   .WithBody('{ "resource": { "propertyA": "Value" } }')
   .WasRequested;
@@ -398,7 +453,7 @@ performing extra unwanted requests.
 This project follows [Semantic Versioning](https://semver.org).
 
 ## License
-Copyright ©2019-2020 Richard Hatherall <richard@appercept.com>
+Copyright ©2019-2021 Richard Hatherall <richard@appercept.com>
 
 WebMocks is distributed under the terms of the Apache License (Version 2.0).
 

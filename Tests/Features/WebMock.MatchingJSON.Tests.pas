@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019-2020 Richard Hatherall                          }
+{           Copyright (c) 2021 Richard Hatherall                               }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -23,75 +23,94 @@
 {                                                                              }
 {******************************************************************************}
 
-unit WebMock.Response.Tests;
+unit WebMock.MatchingJSON.Tests;
 
 interface
 
 uses
   DUnitX.TestFramework,
-  WebMock.Response;
+  System.Classes,
+  System.SysUtils,
+  WebMock;
 
 type
   [TestFixture]
-  TWebMockResponseTests = class(TObject)
+  TWebMockMatchingJSONTests = class(TObject)
   private
-    WebMockResponse: TWebMockResponse;
+    WebMock: TWebMock;
   public
+    [Setup]
+    procedure Setup;
     [TearDown]
     procedure TearDown;
     [Test]
-    procedure Create_WithoutArguments_SetsStatusToOK;
+    procedure Request_MatchingJSONContent_RespondsOK;
     [Test]
-    procedure Create_WithStatus_SetsStatus;
-    [Test]
-    procedure BodySource_WhenNotSet_ReturnsEmptyContentSource;
+    procedure Request_NotMatchingJSONContent_RespondsNotImplemented;
   end;
 
 implementation
 
-{ TWebMockResponseTests }
-
 uses
-  System.Classes,
-  TestHelpers,
-  WebMock.ResponseStatus;
+  System.Net.HttpClient,
+  System.Net.URLClient,
+  System.RegularExpressions,
+  TestHelpers;
 
-procedure TWebMockResponseTests.TearDown;
-begin
-  WebMockResponse.Free;
-end;
+{ TWebMockMatchingJSONTests }
 
-procedure TWebMockResponseTests.BodySource_WhenNotSet_ReturnsEmptyContentSource;
+procedure TWebMockMatchingJSONTests.Request_MatchingJSONContent_RespondsOK;
 var
-  LStream: TStream;
+  LContent: string;
+  LContentStream: TStringStream;
+  LHeaders: TNetHeaders;
+  LResponse: IHTTPResponse;
 begin
-  WebMockResponse := TWebMockResponse.Create;
+  LContent := '{ "key": "value" }';
+  LContentStream := TStringStream.Create(LContent);
+  LHeaders := TNetHeaders.Create(
+    TNetHeader.Create('content-type', 'application/json')
+  );
 
-  LStream := WebMockResponse.BodySource.ContentStream;
+  WebMock.StubRequest('*', '*').WithJSON('key', 'value');
+  LResponse := WebClient.Post(WebMock.BaseURL, LContentStream, nil, LHeaders);
 
-  Assert.AreEqual(Int64(0), LStream.Size);
+  Assert.AreEqual(200, LResponse.StatusCode);
 
-  LStream.Free;
+  LContentStream.Free;
 end;
 
-procedure TWebMockResponseTests.Create_WithoutArguments_SetsStatusToOK;
-begin
-  WebMockResponse := TWebMockResponse.Create;
-
-  Assert.AreEqual(200, WebMockResponse.Status.Code);
-end;
-
-procedure TWebMockResponseTests.Create_WithStatus_SetsStatus;
+procedure TWebMockMatchingJSONTests.Request_NotMatchingJSONContent_RespondsNotImplemented;
 var
-  LExpectedStatus: TWebMockResponseStatus;
+  LContent: string;
+  LContentStream: TStringStream;
+  LHeaders: TNetHeaders;
+  LResponse: IHTTPResponse;
 begin
-  LExpectedStatus := TWebMockResponseStatus.Accepted;
+  LContent := '{ "key": "value" }';
+  LContentStream := TStringStream.Create(LContent);
+  LHeaders := TNetHeaders.Create(
+    TNetHeader.Create('content-type', 'application/json')
+  );
 
-  WebMockResponse := TWebMockResponse.Create(LExpectedStatus);
+  WebMock.StubRequest('*', '*').WithJSON('key', 'othervalue');
+  LResponse := WebClient.Post(WebMock.BaseURL, LContentStream, nil, LHeaders);
 
-  Assert.AreEqual(LExpectedStatus, WebMockResponse.Status);
+  Assert.AreEqual(501, LResponse.StatusCode);
+
+  LContentStream.Free;
+end;
+
+procedure TWebMockMatchingJSONTests.Setup;
+begin
+  WebMock := TWebMock.Create;
+end;
+
+procedure TWebMockMatchingJSONTests.TearDown;
+begin
+  WebMock.Free;
 end;
 
 initialization
-  TDUnitX.RegisterTestFixture(TWebMockResponseTests);
+  TDUnitX.RegisterTestFixture(TWebMockMatchingJSONTests);
 end.

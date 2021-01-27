@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019-2020 Richard Hatherall                          }
+{           Copyright (c) 2020 Richard Hatherall                               }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -23,75 +23,83 @@
 {                                                                              }
 {******************************************************************************}
 
-unit WebMock.Response.Tests;
+unit WebMock.FormFieldMatcher;
 
 interface
 
 uses
-  DUnitX.TestFramework,
-  WebMock.Response;
+  System.Classes,
+  System.Net.URLClient,
+  System.RegularExpressions,
+  WebMock.StringMatcher;
 
 type
-  [TestFixture]
-  TWebMockResponseTests = class(TObject)
+  TWebMockFormFieldMatcher = class(TInterfacedObject, IStringMatcher)
   private
-    WebMockResponse: TWebMockResponse;
+    FName: string;
+    FValueMatcher: IStringMatcher;
+    function ParseFormField(const AValue: string): TNameValuePair;
   public
-    [TearDown]
-    procedure TearDown;
-    [Test]
-    procedure Create_WithoutArguments_SetsStatusToOK;
-    [Test]
-    procedure Create_WithStatus_SetsStatus;
-    [Test]
-    procedure BodySource_WhenNotSet_ReturnsEmptyContentSource;
+    constructor Create(const AName: string; const AValue: string = '*'); overload;
+    constructor Create(const AName: string; const APattern: TRegEx); overload;
+    function IsMatch(AValue: string): Boolean;
+    function ToString: string; override;
+    property Name: string read FName;
+    property ValueMatcher: IStringMatcher read FValueMatcher;
   end;
 
 implementation
 
-{ TWebMockResponseTests }
-
 uses
-  System.Classes,
-  TestHelpers,
-  WebMock.ResponseStatus;
+  System.NetEncoding,
+  System.SysUtils,
+  WebMock.StringRegExMatcher,
+  WebMock.StringWildcardMatcher;
 
-procedure TWebMockResponseTests.TearDown;
+{ TWebMockFormFieldMatcher }
+
+constructor TWebMockFormFieldMatcher.Create(const AName, AValue: string);
 begin
-  WebMockResponse.Free;
+  inherited Create;
+  FName := AName;
+  FValueMatcher := TWebMockStringWildcardMatcher.Create(AValue);
 end;
 
-procedure TWebMockResponseTests.BodySource_WhenNotSet_ReturnsEmptyContentSource;
+constructor TWebMockFormFieldMatcher.Create(const AName: string;
+  const APattern: TRegEx);
+begin
+  inherited Create;
+  FName := AName;
+  FValueMatcher := TWebMockStringRegExMatcher.Create(APattern);
+end;
+
+function TWebMockFormFieldMatcher.IsMatch(AValue: string): Boolean;
 var
-  LStream: TStream;
+  LFormField: TNameValuePair;
 begin
-  WebMockResponse := TWebMockResponse.Create;
+  LFormField := ParseFormField(AValue);
+  if not Name.Equals(LFormField.Name) then
+    Exit(False);
 
-  LStream := WebMockResponse.BodySource.ContentStream;
-
-  Assert.AreEqual(Int64(0), LStream.Size);
-
-  LStream.Free;
+  Result := ValueMatcher.IsMatch(LFormField.Value);
 end;
 
-procedure TWebMockResponseTests.Create_WithoutArguments_SetsStatusToOK;
-begin
-  WebMockResponse := TWebMockResponse.Create;
-
-  Assert.AreEqual(200, WebMockResponse.Status.Code);
-end;
-
-procedure TWebMockResponseTests.Create_WithStatus_SetsStatus;
+function TWebMockFormFieldMatcher.ParseFormField(
+  const AValue: string): TNameValuePair;
 var
-  LExpectedStatus: TWebMockResponseStatus;
+  LEqualsPos: Integer;
 begin
-  LExpectedStatus := TWebMockResponseStatus.Accepted;
-
-  WebMockResponse := TWebMockResponse.Create(LExpectedStatus);
-
-  Assert.AreEqual(LExpectedStatus, WebMockResponse.Status);
+  LEqualsPos := AValue.IndexOf('=');
+  if (LEqualsPos > 0) then
+  begin
+    Result.Name := TNetEncoding.URL.Decode(AValue.Substring(0, LEqualsPos));
+    Result.Value := TNetEncoding.URL.Decode(AValue.Substring(LEqualsPos + 1));
+  end;
 end;
 
-initialization
-  TDUnitX.RegisterTestFixture(TWebMockResponseTests);
+function TWebMockFormFieldMatcher.ToString: string;
+begin
+  Result := Format('%s=%s', [Name, ValueMatcher.ToString]);
+end;
+
 end.

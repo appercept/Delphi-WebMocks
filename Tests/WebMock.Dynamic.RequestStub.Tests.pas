@@ -36,7 +36,10 @@ type
   TWebMockDynamicRequestStubTests = class(TObject)
   private
     StubbedRequest: TWebMockDynamicRequestStub;
+    function CreateStubbedRequest(const ASuccess: Boolean = True): TWebMockDynamicRequestStub;
   public
+    [TearDown]
+    procedure TearDown;
     [Test]
     procedure Class_Always_ImplementsIWebMockRequestStub;
     [Test]
@@ -70,14 +73,20 @@ procedure TWebMockDynamicRequestStubTests.Class_Always_ImplementsIWebMockRequest
 var
   LSubject: IInterface;
 begin
-  LSubject := TWebMockDynamicRequestStub.Create(
-    function(ARequest: IWebMockHTTPRequest): Boolean
-    begin
-      Result := False;
-    end
-  );
+  LSubject := CreateStubbedRequest(False);
 
   Assert.Implements<IWebMockRequestStub>(LSubject);
+end;
+
+function TWebMockDynamicRequestStubTests.CreateStubbedRequest(
+  const ASuccess: Boolean = True): TWebMockDynamicRequestStub;
+begin
+  Result := TWebMockDynamicRequestStub.Create(
+    function(ARequest: IWebMockHTTPRequest): Boolean
+    begin
+      Result := ASuccess;
+    end
+  );
 end;
 
 procedure TWebMockDynamicRequestStubTests.IsMatch_WhenInitializedWithFunctionReturningFalse_ReturnsFalse;
@@ -87,13 +96,9 @@ var
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/');
   LRequest := TWebMockHTTPRequest.Create(LRequestInfo);
+  LRequestInfo.Free;
 
-  StubbedRequest := TWebMockDynamicRequestStub.Create(
-    function(ARequest: IWebMockHTTPRequest): Boolean
-    begin
-      Result := False;
-    end
-  );
+  StubbedRequest := CreateStubbedRequest(False);
 
   Assert.IsFalse(StubbedRequest.IsMatch(LRequest));
 end;
@@ -105,19 +110,22 @@ var
 begin
   LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/');
   LRequest := TWebMockHTTPRequest.Create(LRequestInfo);
+  LRequestInfo.Free;
 
-  StubbedRequest := TWebMockDynamicRequestStub.Create(
-    function(ARequest: IWebMockHTTPRequest): Boolean
-    begin
-      Result := True;
-    end
-  );
+  StubbedRequest := CreateStubbedRequest(True);
 
   Assert.IsTrue(StubbedRequest.IsMatch(LRequest));
 end;
 
+procedure TWebMockDynamicRequestStubTests.TearDown;
+begin
+  StubbedRequest.Free;
+end;
+
 procedure TWebMockDynamicRequestStubTests.ToRespond_Always_ReturnsAResponseStub;
 begin
+  StubbedRequest := CreateStubbedRequest;
+
   Assert.IsNotNull(StubbedRequest.ToRespond as IWebMockResponseBuilder);
 end;
 
@@ -125,16 +133,19 @@ procedure TWebMockDynamicRequestStubTests.ToRespond_WithNoArguments_DoesNotChang
 var
   LExpectedStatus: TWebMockResponseStatus;
 begin
+  StubbedRequest := CreateStubbedRequest(True);
   LExpectedStatus := StubbedRequest.Responder.GetResponseTo(nil).Status;
 
   StubbedRequest.ToRespond;
 
-  Assert.AreSame(LExpectedStatus,
+  Assert.AreEqual(LExpectedStatus,
                  StubbedRequest.Responder.GetResponseTo(nil).Status);
 end;
 
 procedure TWebMockDynamicRequestStubTests.ToRespond_WithNoArguments_DoesNotRaiseException;
 begin
+  StubbedRequest := CreateStubbedRequest;
+
   Assert.WillNotRaiseAny(
     procedure
     begin
@@ -145,6 +156,8 @@ end;
 
 procedure TWebMockDynamicRequestStubTests.ToString_Always_ReturnsAStringDescription;
 begin
+  StubbedRequest := CreateStubbedRequest;
+
   Assert.IsTrue(Length(StubbedRequest.ToString) > 0, 'ToString should return a description');
 end;
 

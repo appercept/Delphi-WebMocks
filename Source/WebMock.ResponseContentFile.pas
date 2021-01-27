@@ -45,6 +45,7 @@ type
     procedure LoadContentFromFile(const AFileName: string);
   public
     constructor Create(const AFileName: string; const AContentType: string = '');
+    destructor Destroy; override;
     property ContentStream: TStream read GetContentStream;
     property ContentType: string read GetContentType;
   end;
@@ -65,6 +66,12 @@ begin
     FContentType := InferContentType(AFileName)
   else
     FContentType := AContentType;
+end;
+
+destructor TWebMockResponseContentFile.Destroy;
+begin
+  FContentStream.Free;
+  inherited;
 end;
 
 class constructor TWebMockResponseContentFile.Create;

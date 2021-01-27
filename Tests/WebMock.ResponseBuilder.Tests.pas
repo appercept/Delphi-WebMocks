@@ -101,18 +101,23 @@ end;
 procedure TWebMockResponseBuilderTests.WithBodyFile_WithValidFile_SetsResponseContent;
 var
   LExpectedContent: string;
-  LActualStream: TStringStream;
+  LActualStream: TStream;
+  LActualStringStream: TStringStream;
 begin
   LExpectedContent := 'Sample Text';
 
   Builder.WithBodyFile(FixturePath('Sample.txt'));
 
-  LActualStream := TStringStream.Create;
-  LActualStream.CopyFrom(Response.BodySource.ContentStream, 0);
+  LActualStream := Response.BodySource.ContentStream;
+  LActualStringStream := TStringStream.Create;
+  LActualStringStream.CopyFrom(LActualStream, 0);
   Assert.AreEqual(
     LExpectedContent,
-    LActualStream.DataString
+    LActualStringStream.DataString
   );
+
+  LActualStringStream.Free;
+  LActualStream.Free;
 end;
 
 procedure TWebMockResponseBuilderTests.WithBody_Always_ReturnsBuilder;
@@ -123,15 +128,19 @@ end;
 procedure TWebMockResponseBuilderTests.WithBody_WithString_SetsResponseContent;
 var
   LExpectedContent: string;
+  LActualContent: TStringStream;
 begin
   LExpectedContent := 'Text Body.';
 
   Builder.WithBody(LExpectedContent);
 
+  LActualContent := Response.BodySource.ContentStream as TStringStream;
   Assert.AreEqual(
     LExpectedContent,
-    (Response.BodySource.ContentStream as TStringStream).DataString
+    LActualContent.DataString
   );
+
+  LActualContent.Free;
 end;
 
 procedure TWebMockResponseBuilderTests.WithHeaders_Always_ReturnsBuilder;

@@ -2,7 +2,7 @@
 {                                                                              }
 {           Delphi-WebMocks                                                    }
 {                                                                              }
-{           Copyright (c) 2019 Richard Hatherall                               }
+{           Copyright (c) 2019-2020 Richard Hatherall                          }
 {                                                                              }
 {           richard@appercept.com                                              }
 {           https://appercept.com                                              }
@@ -25,93 +25,160 @@
 
 unit WebMock.ResponseStatus;
 
-{$WARN DUPLICATE_CTOR_DTOR OFF}
-
 interface
 
 type
-  TWebMockResponseStatus = class(TObject)
-  private
-    FCode: Integer;
-    FText: string;
+  TWebMockResponseStatusCode = (
+    Continue = 100,
+    SwitchingProtocols = 101,
+    Processing = 102,
+
+    OK = 200,
+    Created = 201,
+    Accepted = 202,
+    NonAuthoritativeInformation = 203,
+    NoContent = 204,
+    ResetContent = 205,
+    PartialContent = 206,
+    MultiStatus = 207,
+    AlreadyReported = 208,
+    IMUsed = 209,
+
+    MultipleChoices = 300,
+    MovedPermanently =  301,
+    Found = 302,
+    SeeOther = 303,
+    NotModified = 304,
+    UseProxy = 305,
+    TemporaryRedirect = 307,
+    PermanentRedirect = 308,
+
+    BadRequest = 400,
+    Unauthorized = 401,
+    PaymentRequired = 402,
+    Forbidden = 403,
+    NotFound = 404,
+    MethodNotAllowed = 405,
+    NotAcceptable = 406,
+    ProxyAuthenticationRequired = 407,
+    RequestTimeout = 408,
+    Conflict = 409,
+    Gone = 410,
+    LengthRequired = 411,
+    PreconditionFailed = 412,
+    PayloadTooLarge = 413,
+    RequestURITooLong = 414,
+    UnsupportedMediaType = 415,
+    RequestedRangeNotSatisfiable = 416,
+    ExpectationFailed = 417,
+    ImATeapot = 418,
+    MisdirectedRequest = 421,
+    UnprocessableEntity = 422,
+    Locked = 423,
+    FailedDependency = 424,
+    UpgradeRequired = 426,
+    PreconditionRequired = 428,
+    TooManyRequests = 429,
+    RequestHeaderFieldsTooLarge = 431,
+    UnavailableForLegalReasons = 451,
+
+    InternalServerError = 500,
+    NotImplemented = 501,
+    BadGateway = 502,
+    ServiceUnavailable = 503,
+    GatewayTimeout = 504,
+    HTTPVersionNotSupported = 505,
+    VariantAlsoNegotiates = 506,
+    InsufficientStorage = 507,
+    LoopDetected = 508,
+    NotExtended = 510,
+    NetworkAuthenticationRequired = 511,
+    NetworkConnectTimeoutError = 599
+  );
+
+  TWebMockResponseStatus = record
+    Code: Integer;
+    Text: string;
   public
-    constructor Create(const ACode: Integer = 0; const AText: string = '');
-    function ToString: string; override;
+    constructor Create(const ACode: Integer; const AText: string);
+    function ToString: string;
 
-    // Informational Constructors
-    constructor Continue;
-    constructor SwitchingProtocols;
-    constructor Processing;
+    class operator Implicit(const ACode: Integer): TWebMockResponseStatus;
+    class operator Implicit(const ACode: TWebMockResponseStatusCode): TWebMockResponseStatus;
+    class operator Implicit(const AResponseStatus: TWebMockResponseStatus): string;
 
-    // Success Constructors
-    constructor OK;
-    constructor Created;
-    constructor Accepted;
-    constructor NonAuthoritativeInformation;
-    constructor NoContent;
-    constructor ResetContent;
-    constructor PartialContent;
-    constructor MultiStatus;
-    constructor AlreadyReported;
-    constructor IMUsed;
+    // Informational
+    class function Continue: TWebMockResponseStatus; static;
+    class function SwitchingProtocols: TWebMockResponseStatus; static;
+    class function Processing: TWebMockResponseStatus; static;
 
-    // Redirection Constructors
-    constructor MultipleChoices;
-    constructor MovedPermanently;
-    constructor Found;
-    constructor SeeOther;
-    constructor NotModified;
-    constructor UseProxy;
-    constructor TemporaryRedirect;
-    constructor PermanentRedirect;
+    // Success
+    class function OK: TWebMockResponseStatus; static;
+    class function Created: TWebMockResponseStatus; static;
+    class function Accepted: TWebMockResponseStatus; static;
+    class function NonAuthoritativeInformation: TWebMockResponseStatus; static;
+    class function NoContent: TWebMockResponseStatus; static;
+    class function ResetContent: TWebMockResponseStatus; static;
+    class function PartialContent: TWebMockResponseStatus; static;
+    class function MultiStatus: TWebMockResponseStatus; static;
+    class function AlreadyReported: TWebMockResponseStatus; static;
+    class function IMUsed: TWebMockResponseStatus; static;
 
-    // Client Error Constructors
-    constructor BadRequest;
-    constructor Unauthorized;
-    constructor PaymentRequired;
-    constructor Forbidden;
-    constructor NotFound;
-    constructor MethodNotAllowed;
-    constructor NotAcceptable;
-    constructor ProxyAuthenticationRequired;
-    constructor RequestTimeout;
-    constructor Conflict;
-    constructor Gone;
-    constructor LengthRequired;
-    constructor PreconditionFailed;
-    constructor PayloadTooLarge;
-    constructor RequestURITooLong;
-    constructor UnsupportedMediaType;
-    constructor RequestedRangeNotSatisfiable;
-    constructor ExpectationFailed;
-    constructor ImATeapot;
-    constructor MisdirectedRequest;
-    constructor UnprocessableEntity;
-    constructor Locked;
-    constructor FailedDependency;
-    constructor UpgradeRequired;
-    constructor PreconditionRequired;
-    constructor TooManyRequests;
-    constructor RequestHeaderFieldsTooLarge;
-    constructor UnavailableForLegalReasons;
+    // Redirection
+    class function MultipleChoices: TWebMockResponseStatus; static;
+    class function MovedPermanently: TWebMockResponseStatus; static;
+    class function Found: TWebMockResponseStatus; static;
+    class function SeeOther: TWebMockResponseStatus; static;
+    class function NotModified: TWebMockResponseStatus; static;
+    class function UseProxy: TWebMockResponseStatus; static;
+    class function TemporaryRedirect: TWebMockResponseStatus; static;
+    class function PermanentRedirect: TWebMockResponseStatus; static;
 
-    // Server Error Constructors
-    constructor InternalServerError;
-    constructor NotImplemented;
-    constructor BadGateway;
-    constructor ServiceUnavailable;
-    constructor GatewayTimeout;
-    constructor HTTPVersionNotSupported;
-    constructor VariantAlsoNegotiates;
-    constructor InsufficientStorage;
-    constructor LoopDetected;
-    constructor NotExtended;
-    constructor NetworkAuthenticationRequired;
-    constructor NetworkConnectTimeoutError;
+    // Client Error
+    class function BadRequest: TWebMockResponseStatus; static;
+    class function Unauthorized: TWebMockResponseStatus; static;
+    class function PaymentRequired: TWebMockResponseStatus; static;
+    class function Forbidden: TWebMockResponseStatus; static;
+    class function NotFound: TWebMockResponseStatus; static;
+    class function MethodNotAllowed: TWebMockResponseStatus; static;
+    class function NotAcceptable: TWebMockResponseStatus; static;
+    class function ProxyAuthenticationRequired: TWebMockResponseStatus; static;
+    class function RequestTimeout: TWebMockResponseStatus; static;
+    class function Conflict: TWebMockResponseStatus; static;
+    class function Gone: TWebMockResponseStatus; static;
+    class function LengthRequired: TWebMockResponseStatus; static;
+    class function PreconditionFailed: TWebMockResponseStatus; static;
+    class function PayloadTooLarge: TWebMockResponseStatus; static;
+    class function RequestURITooLong: TWebMockResponseStatus; static;
+    class function UnsupportedMediaType: TWebMockResponseStatus; static;
+    class function RequestedRangeNotSatisfiable: TWebMockResponseStatus; static;
+    class function ExpectationFailed: TWebMockResponseStatus; static;
+    class function ImATeapot: TWebMockResponseStatus; static;
+    class function MisdirectedRequest: TWebMockResponseStatus; static;
+    class function UnprocessableEntity: TWebMockResponseStatus; static;
+    class function Locked: TWebMockResponseStatus; static;
+    class function FailedDependency: TWebMockResponseStatus; static;
+    class function UpgradeRequired: TWebMockResponseStatus; static;
+    class function PreconditionRequired: TWebMockResponseStatus; static;
+    class function TooManyRequests: TWebMockResponseStatus; static;
+    class function RequestHeaderFieldsTooLarge: TWebMockResponseStatus; static;
+    class function UnavailableForLegalReasons: TWebMockResponseStatus; static;
 
-    property Code: Integer read FCode;
-    property Text: string read FText;
+    // Server Error
+    class function InternalServerError: TWebMockResponseStatus; static;
+    class function NotImplemented: TWebMockResponseStatus; static;
+    class function BadGateway: TWebMockResponseStatus; static;
+    class function ServiceUnavailable: TWebMockResponseStatus; static;
+    class function GatewayTimeout: TWebMockResponseStatus; static;
+    class function HTTPVersionNotSupported: TWebMockResponseStatus; static;
+    class function VariantAlsoNegotiates: TWebMockResponseStatus; static;
+    class function InsufficientStorage: TWebMockResponseStatus; static;
+    class function LoopDetected: TWebMockResponseStatus; static;
+    class function NotExtended: TWebMockResponseStatus; static;
+    class function NetworkAuthenticationRequired: TWebMockResponseStatus; static;
+    class function NetworkConnectTimeoutError: TWebMockResponseStatus; static;
   end;
+
 
 implementation
 
@@ -120,322 +187,339 @@ implementation
 uses
   System.SysUtils;
 
-constructor TWebMockResponseStatus.Accepted;
+class function TWebMockResponseStatus.Accepted: TWebMockResponseStatus;
 begin
-  Create(202);
+  Result := TWebMockResponseStatus.Create(202, '');
 end;
 
-constructor TWebMockResponseStatus.AlreadyReported;
+class function TWebMockResponseStatus.AlreadyReported: TWebMockResponseStatus;
 begin
-  Create(208);
+  Result := TWebMockResponseStatus.Create(208, '');
 end;
 
-constructor TWebMockResponseStatus.BadGateway;
+class function TWebMockResponseStatus.BadGateway: TWebMockResponseStatus;
 begin
-  Create(502);
+  Result := TWebMockResponseStatus.Create(502, '');
 end;
 
-constructor TWebMockResponseStatus.BadRequest;
+class function TWebMockResponseStatus.BadRequest: TWebMockResponseStatus;
 begin
-  Create(400);
+  Result := TWebMockResponseStatus.Create(400, '');
 end;
 
-constructor TWebMockResponseStatus.Conflict;
+class function TWebMockResponseStatus.Conflict: TWebMockResponseStatus;
 begin
-  Create(409);
+  Result := TWebMockResponseStatus.Create(409, '');
 end;
 
-constructor TWebMockResponseStatus.Continue;
+class function TWebMockResponseStatus.Continue: TWebMockResponseStatus;
 begin
-  Create(100);
+  Result := TWebMockResponseStatus.Create(100, '');
 end;
 
-constructor TWebMockResponseStatus.Create(const ACode: Integer = 0;
-  const AText: string = '');
+constructor TWebMockResponseStatus.Create(const ACode: Integer;
+  const AText: string);
 begin
-  inherited Create;
-  FCode := ACode;
-  FText := AText;
+  Code := ACode;
+  Text := AText;
 end;
 
-constructor TWebMockResponseStatus.Created;
+class function TWebMockResponseStatus.Created: TWebMockResponseStatus;
 begin
-  Create(201);
+  Result := TWebMockResponseStatus.Create(201, '');
 end;
 
-constructor TWebMockResponseStatus.ExpectationFailed;
+class function TWebMockResponseStatus.ExpectationFailed: TWebMockResponseStatus;
 begin
-  Create(417);
+  Result := TWebMockResponseStatus.Create(417, '');
 end;
 
-constructor TWebMockResponseStatus.FailedDependency;
+class function TWebMockResponseStatus.FailedDependency: TWebMockResponseStatus;
 begin
-  Create(424);
+  Result := TWebMockResponseStatus.Create(424, '');
 end;
 
-constructor TWebMockResponseStatus.Forbidden;
+class function TWebMockResponseStatus.Forbidden: TWebMockResponseStatus;
 begin
-  Create(403);
+  Result := TWebMockResponseStatus.Create(403, '');
 end;
 
-constructor TWebMockResponseStatus.Found;
+class function TWebMockResponseStatus.Found: TWebMockResponseStatus;
 begin
-  Create(302);
+  Result := TWebMockResponseStatus.Create(302, '');
 end;
 
-constructor TWebMockResponseStatus.GatewayTimeout;
+class function TWebMockResponseStatus.GatewayTimeout: TWebMockResponseStatus;
 begin
-  Create(504);
+  Result := TWebMockResponseStatus.Create(504, '');
 end;
 
-constructor TWebMockResponseStatus.Gone;
+class function TWebMockResponseStatus.Gone: TWebMockResponseStatus;
 begin
-  Create(410);
+  Result := TWebMockResponseStatus.Create(410, '');
 end;
 
-constructor TWebMockResponseStatus.VariantAlsoNegotiates;
+class function TWebMockResponseStatus.VariantAlsoNegotiates: TWebMockResponseStatus;
 begin
-  Create(506);
+  Result := TWebMockResponseStatus.Create(506, '');
 end;
 
-constructor TWebMockResponseStatus.HTTPVersionNotSupported;
+class function TWebMockResponseStatus.HTTPVersionNotSupported: TWebMockResponseStatus;
 begin
-  Create(505);
+  Result := TWebMockResponseStatus.Create(505, '');
 end;
 
-constructor TWebMockResponseStatus.ImATeapot;
+class function TWebMockResponseStatus.ImATeapot: TWebMockResponseStatus;
 begin
-  Create(418);
+  Result := TWebMockResponseStatus.Create(418, '');
 end;
 
-constructor TWebMockResponseStatus.IMUsed;
+class operator TWebMockResponseStatus.Implicit(
+  const AResponseStatus: TWebMockResponseStatus): string;
 begin
-  Create(226);
+  Result := AResponseStatus.ToString;
 end;
 
-constructor TWebMockResponseStatus.InsufficientStorage;
+class operator TWebMockResponseStatus.Implicit(
+  const ACode: TWebMockResponseStatusCode): TWebMockResponseStatus;
 begin
-  Create(507);
+  Result := TWebMockResponseStatus.Create(Ord(ACode), '');
 end;
 
-constructor TWebMockResponseStatus.InternalServerError;
+class operator TWebMockResponseStatus.Implicit(
+  const ACode: Integer): TWebMockResponseStatus;
 begin
-  Create(500);
+  Result := TWebMockResponseStatus.Create(ACode, '');
 end;
 
-constructor TWebMockResponseStatus.LengthRequired;
+class function TWebMockResponseStatus.IMUsed: TWebMockResponseStatus;
 begin
-  Create(411);
+  Result := TWebMockResponseStatus.Create(226, '');
 end;
 
-constructor TWebMockResponseStatus.Locked;
+class function TWebMockResponseStatus.InsufficientStorage: TWebMockResponseStatus;
 begin
-  Create(423);
+  Result := TWebMockResponseStatus.Create(507, '');
 end;
 
-constructor TWebMockResponseStatus.LoopDetected;
+class function TWebMockResponseStatus.InternalServerError: TWebMockResponseStatus;
 begin
-  Create(508);
+  Result := TWebMockResponseStatus.Create(500, '');
 end;
 
-constructor TWebMockResponseStatus.MethodNotAllowed;
+class function TWebMockResponseStatus.LengthRequired: TWebMockResponseStatus;
 begin
-  Create(405);
+  Result := TWebMockResponseStatus.Create(411, '');
 end;
 
-constructor TWebMockResponseStatus.MisdirectedRequest;
+class function TWebMockResponseStatus.Locked: TWebMockResponseStatus;
 begin
-  Create(421);
+  Result := TWebMockResponseStatus.Create(423, '');
 end;
 
-constructor TWebMockResponseStatus.MovedPermanently;
+class function TWebMockResponseStatus.LoopDetected: TWebMockResponseStatus;
 begin
-  Create(301);
+  Result := TWebMockResponseStatus.Create(508, '');
 end;
 
-constructor TWebMockResponseStatus.MultipleChoices;
+class function TWebMockResponseStatus.MethodNotAllowed: TWebMockResponseStatus;
 begin
-  Create(300);
+  Result := TWebMockResponseStatus.Create(405, '');
 end;
 
-constructor TWebMockResponseStatus.MultiStatus;
+class function TWebMockResponseStatus.MisdirectedRequest: TWebMockResponseStatus;
 begin
-  Create(207);
+  Result := TWebMockResponseStatus.Create(421, '');
 end;
 
-constructor TWebMockResponseStatus.NetworkAuthenticationRequired;
+class function TWebMockResponseStatus.MovedPermanently: TWebMockResponseStatus;
 begin
-  Create(511);
+  Result := TWebMockResponseStatus.Create(301, '');
 end;
 
-constructor TWebMockResponseStatus.NetworkConnectTimeoutError;
+class function TWebMockResponseStatus.MultipleChoices: TWebMockResponseStatus;
 begin
-  Create(599);
+  Result := TWebMockResponseStatus.Create(300, '');
 end;
 
-constructor TWebMockResponseStatus.NoContent;
+class function TWebMockResponseStatus.MultiStatus: TWebMockResponseStatus;
 begin
-  Create(204);
+  Result := TWebMockResponseStatus.Create(207, '');
 end;
 
-constructor TWebMockResponseStatus.NonAuthoritativeInformation;
+class function TWebMockResponseStatus.NetworkAuthenticationRequired: TWebMockResponseStatus;
 begin
-  Create(203);
+  Result := TWebMockResponseStatus.Create(511, '');
 end;
 
-constructor TWebMockResponseStatus.NotAcceptable;
+class function TWebMockResponseStatus.NetworkConnectTimeoutError: TWebMockResponseStatus;
 begin
-  Create(406);
+  Result := TWebMockResponseStatus.Create(599, '');
 end;
 
-constructor TWebMockResponseStatus.NotExtended;
+class function TWebMockResponseStatus.NoContent: TWebMockResponseStatus;
 begin
-  Create(510);
+  Result := TWebMockResponseStatus.Create(204, '');
 end;
 
-constructor TWebMockResponseStatus.NotFound;
+class function TWebMockResponseStatus.NonAuthoritativeInformation: TWebMockResponseStatus;
 begin
-  Create(404);
+  Result := TWebMockResponseStatus.Create(203, '');
 end;
 
-constructor TWebMockResponseStatus.NotImplemented;
+class function TWebMockResponseStatus.NotAcceptable: TWebMockResponseStatus;
 begin
-  Create(501);
+  Result := TWebMockResponseStatus.Create(406, '');
 end;
 
-constructor TWebMockResponseStatus.NotModified;
+class function TWebMockResponseStatus.NotExtended: TWebMockResponseStatus;
 begin
-  Create(304);
+  Result := TWebMockResponseStatus.Create(510, '');
 end;
 
-constructor TWebMockResponseStatus.OK;
+class function TWebMockResponseStatus.NotFound: TWebMockResponseStatus;
 begin
-  Create(200);
+  Result := TWebMockResponseStatus.Create(404, '');
 end;
 
-constructor TWebMockResponseStatus.PartialContent;
+class function TWebMockResponseStatus.NotImplemented: TWebMockResponseStatus;
 begin
-  Create(206);
+  Result := TWebMockResponseStatus.Create(501, '');
 end;
 
-constructor TWebMockResponseStatus.PayloadTooLarge;
+class function TWebMockResponseStatus.NotModified: TWebMockResponseStatus;
 begin
-  Create(413);
+  Result := TWebMockResponseStatus.Create(304, '');
 end;
 
-constructor TWebMockResponseStatus.PaymentRequired;
+class function TWebMockResponseStatus.OK: TWebMockResponseStatus;
 begin
-  Create(402);
+  Result := TWebMockResponseStatus.Create(200, '');
 end;
 
-constructor TWebMockResponseStatus.PermanentRedirect;
+class function TWebMockResponseStatus.PartialContent: TWebMockResponseStatus;
 begin
-  Create(308);
+  Result := TWebMockResponseStatus.Create(206, '');
 end;
 
-constructor TWebMockResponseStatus.PreconditionFailed;
+class function TWebMockResponseStatus.PayloadTooLarge: TWebMockResponseStatus;
 begin
-  Create(412);
+  Result := TWebMockResponseStatus.Create(413, '');
 end;
 
-constructor TWebMockResponseStatus.PreconditionRequired;
+class function TWebMockResponseStatus.PaymentRequired: TWebMockResponseStatus;
 begin
-  Create(428);
+  Result := TWebMockResponseStatus.Create(402, '');
 end;
 
-constructor TWebMockResponseStatus.Processing;
+class function TWebMockResponseStatus.PermanentRedirect: TWebMockResponseStatus;
 begin
-  Create(102);
+  Result := TWebMockResponseStatus.Create(308, '');
 end;
 
-constructor TWebMockResponseStatus.ProxyAuthenticationRequired;
+class function TWebMockResponseStatus.PreconditionFailed: TWebMockResponseStatus;
 begin
-  Create(407);
+  Result := TWebMockResponseStatus.Create(412, '');
 end;
 
-constructor TWebMockResponseStatus.RequestHeaderFieldsTooLarge;
+class function TWebMockResponseStatus.PreconditionRequired: TWebMockResponseStatus;
 begin
-  Create(431);
+  Result := TWebMockResponseStatus.Create(428, '');
 end;
 
-constructor TWebMockResponseStatus.RequestedRangeNotSatisfiable;
+class function TWebMockResponseStatus.Processing: TWebMockResponseStatus;
 begin
-  Create(416);
+  Result := TWebMockResponseStatus.Create(102, '');
 end;
 
-constructor TWebMockResponseStatus.RequestTimeout;
+class function TWebMockResponseStatus.ProxyAuthenticationRequired: TWebMockResponseStatus;
 begin
-  Create(408);
+  Result := TWebMockResponseStatus.Create(407, '');
 end;
 
-constructor TWebMockResponseStatus.RequestURITooLong;
+class function TWebMockResponseStatus.RequestHeaderFieldsTooLarge: TWebMockResponseStatus;
 begin
-  Create(414);
+  Result := TWebMockResponseStatus.Create(431, '');
 end;
 
-constructor TWebMockResponseStatus.ResetContent;
+class function TWebMockResponseStatus.RequestedRangeNotSatisfiable: TWebMockResponseStatus;
 begin
-  Create(205);
+  Result := TWebMockResponseStatus.Create(416, '');
 end;
 
-constructor TWebMockResponseStatus.SeeOther;
+class function TWebMockResponseStatus.RequestTimeout: TWebMockResponseStatus;
 begin
-  Create(303);
+  Result := TWebMockResponseStatus.Create(408, '');
 end;
 
-constructor TWebMockResponseStatus.ServiceUnavailable;
+class function TWebMockResponseStatus.RequestURITooLong: TWebMockResponseStatus;
 begin
-  Create(503);
+  Result := TWebMockResponseStatus.Create(414, '');
 end;
 
-constructor TWebMockResponseStatus.SwitchingProtocols;
+class function TWebMockResponseStatus.ResetContent: TWebMockResponseStatus;
 begin
-  Create(101);
+  Result := TWebMockResponseStatus.Create(205, '');
 end;
 
-constructor TWebMockResponseStatus.TemporaryRedirect;
+class function TWebMockResponseStatus.SeeOther: TWebMockResponseStatus;
 begin
-  Create(307);
+  Result := TWebMockResponseStatus.Create(303, '');
 end;
 
-constructor TWebMockResponseStatus.TooManyRequests;
+class function TWebMockResponseStatus.ServiceUnavailable: TWebMockResponseStatus;
 begin
-  Create(429);
+  Result := TWebMockResponseStatus.Create(503, '');
+end;
+
+class function TWebMockResponseStatus.SwitchingProtocols: TWebMockResponseStatus;
+begin
+  Result := TWebMockResponseStatus.Create(101, '');
+end;
+
+class function TWebMockResponseStatus.TemporaryRedirect: TWebMockResponseStatus;
+begin
+  Result := TWebMockResponseStatus.Create(307, '');
+end;
+
+class function TWebMockResponseStatus.TooManyRequests: TWebMockResponseStatus;
+begin
+  Result := TWebMockResponseStatus.Create(429, '');
 end;
 
 function TWebMockResponseStatus.ToString: string;
 begin
-  Result := Format('%d', [Code]);
+  Result := Format('%d %s', [Code, Text]);
 end;
 
-constructor TWebMockResponseStatus.Unauthorized;
+class function TWebMockResponseStatus.Unauthorized: TWebMockResponseStatus;
 begin
-  Create(401);
+  Result := TWebMockResponseStatus.Create(401, '');
 end;
 
-constructor TWebMockResponseStatus.UnavailableForLegalReasons;
+class function TWebMockResponseStatus.UnavailableForLegalReasons: TWebMockResponseStatus;
 begin
-  Create(451);
+  Result := TWebMockResponseStatus.Create(451, '');
 end;
 
-constructor TWebMockResponseStatus.UnprocessableEntity;
+class function TWebMockResponseStatus.UnprocessableEntity: TWebMockResponseStatus;
 begin
-  Create(422);
+  Result := TWebMockResponseStatus.Create(422, '');
 end;
 
-constructor TWebMockResponseStatus.UnsupportedMediaType;
+class function TWebMockResponseStatus.UnsupportedMediaType: TWebMockResponseStatus;
 begin
-  Create(415);
+  Result := TWebMockResponseStatus.Create(415, '');
 end;
 
-constructor TWebMockResponseStatus.UpgradeRequired;
+class function TWebMockResponseStatus.UpgradeRequired: TWebMockResponseStatus;
 begin
-  Create(426);
+  Result := TWebMockResponseStatus.Create(426, '');
 end;
 
-constructor TWebMockResponseStatus.UseProxy;
+class function TWebMockResponseStatus.UseProxy: TWebMockResponseStatus;
 begin
-  Create(305);
+  Result := TWebMockResponseStatus.Create(305, '');
 end;
 
 end.

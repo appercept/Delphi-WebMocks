@@ -63,7 +63,9 @@ implementation
 { TWebMockResponsesTests }
 
 uses
-  System.Net.HttpClient, System.Net.URLClient, System.StrUtils,
+  System.Net.HttpClient,
+  System.Net.URLClient,
+  System.StrUtils,
   TestHelpers,
   WebMock.ResponseStatus;
 
@@ -105,33 +107,45 @@ procedure TWebMockResponsesTests.Response_WhenToRespondSetsCustomStatus_ReturnsS
 var
   LExpectedStatus: TWebMockResponseStatus;
   LResponse: IHTTPResponse;
+  LContentStream: TStringStream;
 begin
   LExpectedStatus := TWebMockResponseStatus.Create(999, 'My Status');
 
   WebMock.StubRequest('POST', '/response').ToRespond(LExpectedStatus);
-  LResponse := WebClient.Post(WebMock.URLFor('response'), TStringStream.Create(''));
+  LContentStream := TStringStream.Create('');
+  LResponse := WebClient.Post(WebMock.URLFor('response'), LContentStream);
 
   Assert.IsTrue(EndsStr('My Status', LResponse.StatusText));
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockResponsesTests.Response_WhenToRespondSetsStatus_ReturnsSpecifiedStatusCode;
 var
   LResponse: IHTTPResponse;
+  LContentStream: TStringStream;
 begin
-  WebMock.StubRequest('POST', '/response').ToRespond(TWebMockResponseStatus.Created);
-  LResponse := WebClient.Post(WebMock.URLFor('response'), TStringStream.Create(''));
+  WebMock.StubRequest('POST', '/response').ToRespond(Created);
+  LContentStream := TStringStream.Create('');
+  LResponse := WebClient.Post(WebMock.URLFor('response'), LContentStream);
 
   Assert.AreEqual(201, LResponse.StatusCode);
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockResponsesTests.Response_WhenToRespondSetsStatus_ReturnsSpecifiedStatusText;
 var
   LResponse: IHTTPResponse;
+  LContentStream: TStringStream;
 begin
-  WebMock.StubRequest('POST', '/response').ToRespond(TWebMockResponseStatus.Created);
-  LResponse := WebClient.Post(WebMock.URLFor('response'), TStringStream.Create(''));
+  WebMock.StubRequest('POST', '/response').ToRespond(Created);
+  LContentStream := TStringStream.Create('');
+  LResponse := WebClient.Post(WebMock.URLFor('response'), LContentStream);
 
   Assert.IsTrue(EndsStr('Created', LResponse.StatusText));
+
+  LContentStream.Free;
 end;
 
 procedure TWebMockResponsesTests.Setup;

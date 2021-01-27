@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.0.0](https://github.com/appercept/Delphi-WebMocks/tree/3.0.0) (2021-01-27)
+
+[Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/2.0.0...3.0.0)
+
+**Implemented enhancements:**
+
+- Assertion matching by URL query parameters [\#41](https://github.com/appercept/Delphi-WebMocks/issues/41)
+- Request content matching by Form-Data [\#20](https://github.com/appercept/Delphi-WebMocks/issues/20)
+- Request matching by JSON values
+
+**Fixed bugs:**
+
+- Test failure due to platform line endings [\#43](https://github.com/appercept/Delphi-WebMocks/issues/43)
+- Request history is not persisting query parameters [\#42](https://github.com/appercept/Delphi-WebMocks/issues/42)
+
 ## [2.0.0](https://github.com/appercept/Delphi-WebMocks/tree/2.0.0) (2020-11-25)
 
 [Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/1.3.0...2.0.0)
