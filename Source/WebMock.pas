@@ -282,6 +282,7 @@ begin
       LPort := GetNextPort;
     Server.Bindings.Clear;
     LSocketHandle := Server.Bindings.Add;
+    LSocketHandle.IP := '127.0.0.1';
     LSocketHandle.Port := LPort;
     try
       Server.Active := True;
