@@ -34,7 +34,7 @@ not be found in your test projects.
 
 ## Installation: Manual
 1. Download and extract the latest version
-   [3.0.1](https://github.com/appercept/Delphi-WebMocks/archive/3.0.1.zip).
+   [3.1.0](https://github.com/appercept/Delphi-WebMocks/archive/3.1.0.zip).
 2. In "Tools > Options" under the "Language / Delphi / Library" add the
    extracted `Source` directory to the "Library path" and "Browsing path".
 
