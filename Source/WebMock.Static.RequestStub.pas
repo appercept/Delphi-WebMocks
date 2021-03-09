@@ -66,6 +66,8 @@ type
     function WithJSON(const APath: string; const AValue: Float64): TWebMockStaticRequestStub; overload;
     function WithJSON(const APath: string; const AValue: Integer): TWebMockStaticRequestStub; overload;
     function WithJSON(const APath: string; const AValue: string): TWebMockStaticRequestStub; overload;
+    function WithQueryParam(const AName, AValue: string): TWebMockStaticRequestStub; overload;
+    function WithQueryParam(const AName: string; const APattern: TRegEx): TWebMockStaticRequestStub; overload;
 
     // IWebMockRequestStub
     function IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
@@ -241,6 +243,28 @@ begin
     Matcher.Body := TWebMockJSONMatcher.Create;
 
   (Matcher.Body as TWebMockJSONMatcher).Add<string>(APath, AValue);
+
+  Result := Self;
+end;
+
+function TWebMockStaticRequestStub.WithQueryParam(const AName: string;
+  const APattern: TRegEx): TWebMockStaticRequestStub;
+begin
+  Matcher.QueryParams.AddOrSetValue(
+    AName,
+    TWebMockStringRegExMatcher.Create(APattern)
+  );
+
+  Result := Self;
+end;
+
+function TWebMockStaticRequestStub.WithQueryParam(const AName,
+  AValue: string): TWebMockStaticRequestStub;
+begin
+  Matcher.QueryParams.AddOrSetValue(
+    AName,
+    TWebMockStringWildcardMatcher.Create(AValue)
+  );
 
   Result := Self;
 end;

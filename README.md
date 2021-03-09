@@ -20,7 +20,7 @@ should install version
 [2.0.0](https://github.com/appercept/Delphi-WebMocks/releases/tag/2.0.0).
 
 ## Installation: GetIt
-[WebMocks 2.0](https://getitnow.embarcadero.com/WebMocks-2.0/) is available
+[WebMocks 3.0.1](https://getitnow.embarcadero.com/WebMocks-3.0.1/) is available
 through Embarcadero's package manager for Delphi
 [GetIt](https://getitnow.embarcadero.com/). If you have a recent version of
 Delphi including GetIt then this should be the preferred installation method.
@@ -34,9 +34,17 @@ not be found in your test projects.
 
 ## Installation: Manual
 1. Download and extract the latest version
-   [3.0.0](https://github.com/appercept/Delphi-WebMocks/archive/3.0.0.zip).
+   [3.1.0](https://github.com/appercept/Delphi-WebMocks/archive/3.1.0.zip).
 2. In "Tools > Options" under the "Language / Delphi / Library" add the
    extracted `Source` directory to the "Library path" and "Browsing path".
+
+## Getting Started
+If you'd like a gentle introduction to WebMocks for Delphi, there is a series of
+articles published on [DEV](https://dev.to) starting with [Testing HTTP clients
+in Delphi with DUnitX and WebMocks](https://dev.to/rhatherall/testing-http-clients-in-delphi-with-dunitx-and-webmocks-25ck).
+
+[Delphi-WebMocks-Demos](https://github.com/appercept/Delphi-WebMocks-Demos)
+contains a set of demonstrations to accompany the articles.
 
 ## Upgrading from versions prior to 2.0.0
 Version 2 has dropped the `Delphi.` namespace from all units. Any projects

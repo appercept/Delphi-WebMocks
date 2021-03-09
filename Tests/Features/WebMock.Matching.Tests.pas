@@ -62,6 +62,14 @@ type
     [TestCase('No Resource by ID', 'GET,^/resource/\d+$,resource/abc')]
     procedure RequestWithMethodAndRegExPath_NotMatching_RespondsNotImplemented(const AMatcherMethod, AMatcherURIPattern, ARequestURI: string);
     [Test]
+    procedure Request_MatchingQueryParam_RespondsOK;
+    [Test]
+    procedure Request_NotMatchingQueryParam_RespondsNotImplemented;
+    [Test]
+    procedure Request_MatchingQueryParamByRegEx_RespondsOK;
+    [Test]
+    procedure Request_NotMatchingQueryParamByRegEx_RespondsNotImplemented;
+    [Test]
     procedure Request_MatchingSingleHeader_RespondsOK;
     [Test]
     procedure Request_NotMatchingSingleHeader_RespondsNotImplemented;
@@ -133,6 +141,26 @@ begin
   Assert.AreEqual(200, LResponse.StatusCode);
 end;
 
+procedure TWebMockMatchingTests.Request_MatchingQueryParamByRegEx_RespondsOK;
+var
+  LResponse: IHTTPResponse;
+begin
+  WebMock.StubRequest('*', '*').WithQueryParam('Param1', TRegEx.Create('Value\d'));
+  LResponse := WebClient.Get(WebMock.URLFor('/endpoint?Param1=Value1'));
+
+  Assert.AreEqual(200, LResponse.StatusCode);
+end;
+
+procedure TWebMockMatchingTests.Request_MatchingQueryParam_RespondsOK;
+var
+  LResponse: IHTTPResponse;
+begin
+  WebMock.StubRequest('*', '*').WithQueryParam('Param1', 'Value1');
+  LResponse := WebClient.Get(WebMock.URLFor('/endpoint?Param1=Value1'));
+
+  Assert.AreEqual(200, LResponse.StatusCode);
+end;
+
 procedure TWebMockMatchingTests.Request_MatchingSingleHeaderByRegEx_RespondsOK;
 var
   LHeaderName: string;
@@ -175,6 +203,26 @@ var
 begin
   WebMock.StubRequest(AMatcherMethod, AMatcherURI);
   LResponse := WebClient.Get(WebMock.URLFor(ARequestURI));
+
+  Assert.AreEqual(501, LResponse.StatusCode);
+end;
+
+procedure TWebMockMatchingTests.Request_NotMatchingQueryParamByRegEx_RespondsNotImplemented;
+var
+  LResponse: IHTTPResponse;
+begin
+  WebMock.StubRequest('*', '*').WithQueryParam('Param1', TRegEx.Create('Value\d'));
+  LResponse := WebClient.Get(WebMock.URLFor('/endpoint?Param1=ValueA'));
+
+  Assert.AreEqual(501, LResponse.StatusCode);
+end;
+
+procedure TWebMockMatchingTests.Request_NotMatchingQueryParam_RespondsNotImplemented;
+var
+  LResponse: IHTTPResponse;
+begin
+  WebMock.StubRequest('*', '*').WithQueryParam('Param1', 'Value1');
+  LResponse := WebClient.Get(WebMock.URLFor('/endpoint?Param1=Value2'));
 
   Assert.AreEqual(501, LResponse.StatusCode);
 end;
