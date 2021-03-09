@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.0](https://github.com/appercept/Delphi-WebMocks/tree/3.1.0) (2021-03-09)
+
+[Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/3.0.1...3.1.0)
+
+**Implemented enhancements:**
+
+- Add support for matching requests by query params [\#46](https://github.com/appercept/Delphi-WebMocks/pull/46) ([rhatherall](https://github.com/rhatherall))
+
 ## [3.0.1](https://github.com/appercept/Delphi-WebMocks/tree/3.0.1) (2021-02-08)
 
 [Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/3.0.0...3.0.1)
@@ -131,7 +139,6 @@
 - Add `URLFor` method [\#12](https://github.com/appercept/Delphi-WebMocks/issues/12)
 - Replace usages of Indy HTTP terms with terms used in the RFCs [\#11](https://github.com/appercept/Delphi-WebMocks/issues/11)
 - Request history logging [\#10](https://github.com/appercept/Delphi-WebMocks/issues/10)
-- Request header matching by regular-expressions [\#5](https://github.com/appercept/Delphi-WebMocks/issues/5)
 
 **Merged pull requests:**
 
@@ -146,6 +153,7 @@
 - Request content matching by regular-expressions [\#9](https://github.com/appercept/Delphi-WebMocks/issues/9)
 - Request content matching by value [\#8](https://github.com/appercept/Delphi-WebMocks/issues/8)
 - Response headers [\#7](https://github.com/appercept/Delphi-WebMocks/issues/7)
+- Request header matching by regular-expressions [\#5](https://github.com/appercept/Delphi-WebMocks/issues/5)
 - Request path matching by regular-expressions [\#4](https://github.com/appercept/Delphi-WebMocks/issues/4)
 - Delphi 10.3.2 is out [\#2](https://github.com/appercept/Delphi-WebMocks/issues/2)
 - Request header matching by value [\#1](https://github.com/appercept/Delphi-WebMocks/issues/1)
