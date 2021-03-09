@@ -98,6 +98,14 @@ type
     procedure WithJSON_GivenPathAndString_ReturnsSelf;
     [Test]
     procedure WithJSON_GivenPathAndString_SetsMatcherForContent;
+    [Test]
+    procedure WithQueryParam_GivenString_ReturnsSelf;
+    [Test]
+    procedure WithQueryParam_GivenString_SetsMatcherForParam;
+    [Test]
+    procedure WithQueryParam_GivenRegEx_ReturnsSelf;
+    [Test]
+    procedure WithQueryParam_GivenRegEx_SetsMatcherForParam;
   end;
 
 implementation
@@ -406,6 +414,50 @@ begin
   StubbedRequest.WithJSON('key', 'value');
 
   Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockJSONMatcher);
+end;
+
+procedure TWebMockStaticRequestStubTests.WithQueryParam_GivenRegEx_ReturnsSelf;
+begin
+  Assert.AreSame(
+    StubbedRequest,
+    StubbedRequest.WithQueryParam('name', TRegEx.Create('pattern'))
+  );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithQueryParam_GivenRegEx_SetsMatcherForParam;
+var
+  LParamName: string;
+  LParamPattern: TRegEx;
+begin
+  LParamName := 'Header2';
+  LParamPattern := TRegEx.Create('');
+
+  StubbedRequest.WithQueryParam(LParamName, LParamPattern);
+
+  Assert.AreEqual(
+    LParamPattern,
+    (StubbedRequest.Matcher.QueryParams[LParamName] as TWebMockStringRegExMatcher).RegEx
+  );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithQueryParam_GivenString_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithQueryParam('name', 'value'));
+end;
+
+procedure TWebMockStaticRequestStubTests.WithQueryParam_GivenString_SetsMatcherForParam;
+var
+  LParamName, LParamValue: string;
+begin
+  LParamName := 'Name1';
+  LParamValue := 'Value1';
+
+  StubbedRequest.WithQueryParam(LParamName, LParamValue);
+
+  Assert.AreEqual(
+    LParamValue,
+    (StubbedRequest.Matcher.QueryParams[LParamName] as TWebMockStringWildcardMatcher).Value
+  );
 end;
 
 initialization
