@@ -36,6 +36,7 @@ uses
   WebMock.HTTP.RequestMatcher;
 
 type
+
   TWebMockAssertion = class(TObject)
   private
     FMatcher: IWebMockHTTPRequestMatcher;
@@ -45,6 +46,7 @@ type
     constructor Create(const AHistory: IInterfaceList);
     function Delete(const AURI: string): TWebMockAssertion;
     function Get(const AURI: string): TWebMockAssertion;
+    function Head(const AURI: string): TWebMockAssertion;
     function Patch(const AURI: string): TWebMockAssertion;
     function Post(const AURI: string): TWebMockAssertion;
     function Put(const AURI: string): TWebMockAssertion;
@@ -93,6 +95,11 @@ end;
 function TWebMockAssertion.Get(const AURI: string): TWebMockAssertion;
 begin
   Result := Request('GET', AURI);
+end;
+
+function TWebMockAssertion.Head(const AURI: string): TWebMockAssertion;
+begin
+  Result := Request('HEAD', AURI);
 end;
 
 function TWebMockAssertion.MatchesHistory: Boolean;

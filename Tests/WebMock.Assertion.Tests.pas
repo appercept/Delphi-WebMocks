@@ -66,6 +66,10 @@ type
     [Test]
     procedure Get_Always_ReturnsSelf;
     [Test]
+    procedure Head_GivenMethodAndURI_SetsMatcherValues;
+    [Test]
+    procedure Head_Always_ReturnsSelf;
+    [Test]
     procedure Patch_GivenMethodAndURI_SetsMatcherValues;
     [Test]
     procedure Patch_Always_ReturnsSelf;
@@ -195,6 +199,26 @@ begin
   Assertion.Get(LURI);
 
   Assert.IsMatch('GET\s/resource', Assertion.Matcher.ToString);
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.Head_Always_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Head('/'));
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.Head_GivenMethodAndURI_SetsMatcherValues;
+var
+  LURI: string;
+begin
+  LURI := '/resource';
+
+  Assertion.Head(LURI);
+
+  Assert.IsMatch('HEAD\s/resource', Assertion.Matcher.ToString);
 
   Assertion.Free;
 end;

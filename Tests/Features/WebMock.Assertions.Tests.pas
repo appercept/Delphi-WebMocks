@@ -92,6 +92,10 @@ type
     [Test]
     procedure GetWasRequested_NotMatchingRequest_Fails;
     [Test]
+    procedure HeadWasRequested_MatchingRequest_Passes;
+    [Test]
+    procedure HeadWasRequested_NotMatchingRequest_Fails;
+    [Test]
     procedure PatchWasRequested_MatchingRequest_Passes;
     [Test]
     procedure PatchWasRequested_NotMatchingRequest_Fails;
@@ -166,6 +170,32 @@ begin
     procedure
     begin
       WebMock.Assert.Get('/resource').WasRequested;
+    end,
+    ETestFailure
+  );
+end;
+
+procedure TWebMockAssertionsTests.HeadWasRequested_MatchingRequest_Passes;
+begin
+  WebClient.Head(WebMock.URLFor('/'));
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert.Head('/').WasRequested;
+    end,
+    ETestPass
+  );
+end;
+
+procedure TWebMockAssertionsTests.HeadWasRequested_NotMatchingRequest_Fails;
+begin
+  WebClient.Head(WebMock.URLFor('/'));
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert.Head('/resource').WasRequested;
     end,
     ETestFailure
   );
