@@ -68,6 +68,8 @@ type
     function WithJSON(const APath: string; const AValue: string): TWebMockStaticRequestStub; overload;
     function WithQueryParam(const AName, AValue: string): TWebMockStaticRequestStub; overload;
     function WithQueryParam(const AName: string; const APattern: TRegEx): TWebMockStaticRequestStub; overload;
+    function WithXML(const AXPath, AValue: string): TWebMockStaticRequestStub; overload;
+    function WithXML(const AXPath: string; const APattern: TRegEx): TWebMockStaticRequestStub; overload;
 
     // IWebMockRequestStub
     function IsMatch(ARequest: IWebMockHTTPRequest): Boolean;
@@ -87,7 +89,8 @@ uses
   WebMock.JSONMatcher,
   WebMock.Static.Responder,
   WebMock.StringWildcardMatcher,
-  WebMock.StringRegExMatcher;
+  WebMock.StringRegExMatcher,
+  WebMock.XMLMatcher;
 
 { TWebMockRequestStub }
 
@@ -100,7 +103,6 @@ begin
 end;
 
 destructor TWebMockStaticRequestStub.Destroy;
-
 begin
   Matcher.Free;
   inherited;
@@ -254,6 +256,28 @@ begin
     AName,
     TWebMockStringRegExMatcher.Create(APattern)
   );
+
+  Result := Self;
+end;
+
+function TWebMockStaticRequestStub.WithXML(const AXPath: string;
+  const APattern: TRegEx): TWebMockStaticRequestStub;
+begin
+  if not (Matcher.Body is TWebMockXMLMatcher) then
+    Matcher.Body := TWebMockXMLMatcher.Create;
+
+  (Matcher.Body as TWebMockXMLMatcher).Add(AXPath, APattern);
+
+  Result := Self;
+end;
+
+function TWebMockStaticRequestStub.WithXML(const AXPath,
+  AValue: string): TWebMockStaticRequestStub;
+begin
+  if not (Matcher.Body is TWebMockXMLMatcher) then
+    Matcher.Body := TWebMockXMLMatcher.Create;
+
+  (Matcher.Body as TWebMockXMLMatcher).Add(AXPath, AValue);
 
   Result := Self;
 end;
