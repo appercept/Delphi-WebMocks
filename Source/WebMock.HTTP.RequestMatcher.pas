@@ -63,6 +63,8 @@ type
     function WithJSON(const APath: string; AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithQueryParam(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithQueryParam(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
+    function WithXML(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
+    function WithXML(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
   end;
 
   TWebMockHTTPRequestMatcher = class(TInterfacedObject,
@@ -90,6 +92,8 @@ type
       function WithJSON(const APath: string; AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithQueryParam(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithQueryParam(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
+      function WithXML(const AXPath, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
+      function WithXML(const AXPath: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
     end;
 
   private
@@ -130,7 +134,8 @@ uses
   WebMock.JSONMatcher,
   WebMock.StringWildcardMatcher,
   WebMock.StringAnyMatcher,
-  WebMock.StringRegExMatcher;
+  WebMock.StringRegExMatcher,
+  WebMock.XMLMatcher;
 
 { TWebMockHTTPRequestMatcher }
 
@@ -429,6 +434,28 @@ begin
     AName,
     TWebMockStringRegExMatcher.Create(APattern)
   );
+
+  Result := Self;
+end;
+
+function TWebMockHTTPRequestMatcher.TBuilder.WithXML(const AXPath: string;
+  const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder;
+begin
+  if not (Matcher.Body is TWebMockXMLMatcher) then
+    Matcher.Body := TWebMockXMLMatcher.Create;
+
+  (Matcher.Body as TWebMockXMLMatcher).Add(AXPath, APattern);
+
+  Result := Self;
+end;
+
+function TWebMockHTTPRequestMatcher.TBuilder.WithXML(const AXPath,
+  AValue: string): IWebMockHTTPRequestMatcherBuilder;
+begin
+  if not (Matcher.Body is TWebMockXMLMatcher) then
+    Matcher.Body := TWebMockXMLMatcher.Create;
+
+  (Matcher.Body as TWebMockXMLMatcher).Add(AXPath, AValue);
 
   Result := Self;
 end;
