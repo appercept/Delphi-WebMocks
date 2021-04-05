@@ -199,7 +199,13 @@ begin
     for LQueryPair in LQueryPairs do
     begin
       LQueryParts := LQueryPair.Split(['='], 2);
-      Result.Add(TNetEncoding.URL.Decode(LQueryParts[0]), TNetEncoding.URL.Decode(LQueryParts[1]));
+      if Length(LQueryParts) = 1 then
+        Result.Add(TNetEncoding.URL.Decode(LQueryParts[0]), '')
+      else
+        Result.Add(
+          TNetEncoding.URL.Decode(LQueryParts[0]),
+          TNetEncoding.URL.Decode(LQueryParts[1])
+        );
     end;
   end
 end;
