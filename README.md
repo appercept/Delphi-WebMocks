@@ -253,6 +253,25 @@ The first argument can be a path. For example, in the following JSON, the path
 }
 ```
 
+#### Request matching by XML
+HTTP request can be matched by XML data values submitted. For example:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithXML('/Object/Attr1', 'Value 1');
+```
+
+The first argument is an XPath expression. The previous example would make a
+positive match against the following document:
+```XML
+<?xml version="1.0" encoding="UTF-8"?>
+<Object>
+  <Attr1>Value 1</Attr1>
+</Object>
+```
+
+The second argument can be a boolean, floating point, integer, or string
+value.
+
 #### Request matching by predicate function
 If matching logic is required to be more complex than the simple matching, a
 predicate function can be provided in the test to allow custom inspection/logic
@@ -436,7 +455,7 @@ WebMock.Assert.Get('/').WasRequested; // Passes
 ```
 
 As with request stubbing you can match requests by HTTP Method, URI, Query
-Parameters, Headers, and Body content (including `WithJSON`).
+Parameters, Headers, and Body content (including `WithJSON` and `WithXML`).
 ```Delphi
 WebMock.Assert
   .Patch('/resource`)

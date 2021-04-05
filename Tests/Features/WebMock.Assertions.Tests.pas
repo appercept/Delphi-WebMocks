@@ -34,6 +34,7 @@ uses
   WebMock;
 
 type
+
   [TestFixture]
   TWebMockAssertionsTests = class(TObject)
   private
@@ -83,6 +84,10 @@ type
     procedure WasRequestedWithJSON_MatchingRequest_Passes;
     [Test]
     procedure WasRequestedWithJSON_NotMatchingRequest_Fails;
+    [Test]
+    procedure WasRequestedWithXML_MatchingRequest_Passes;
+    [Test]
+    procedure WasRequestedWithXML_NotMatchingRequest_Fails;
     [Test]
     procedure DeleteWasRequested_MatchingRequest_Passes;
     [Test]
@@ -658,6 +663,48 @@ begin
     end,
     ETestFailure
   );
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithXML_MatchingRequest_Passes;
+var
+  LXML: TStringStream;
+begin
+  LXML := TStringStream.Create('<Object><Attr1>Value 1</Attr1></Object>');
+  WebClient.Post(WebMock.URLFor('/xml'), LXML);
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert
+        .Post('/xml')
+        .WithXML('/Object/Attr1', 'Value 1')
+        .WasRequested;
+    end,
+    ETestPass
+  );
+
+  LXML.Free;
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithXML_NotMatchingRequest_Fails;
+var
+  LXML: TStringStream;
+begin
+  LXML := TStringStream.Create('<Object><Attr1>Other Value</Attr1></Object>');
+  WebClient.Post(WebMock.URLFor('/xml'), LXML);
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert
+        .Post('/xml')
+        .WithXML('/Object/Attr1', 'Value 1')
+        .WasRequested;
+    end,
+    ETestFailure
+  );
+
+  LXML.Free;
 end;
 
 procedure TWebMockAssertionsTests.WasRequested_WithRegExURIMatchingRequest_Passes;

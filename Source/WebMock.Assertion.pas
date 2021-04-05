@@ -65,6 +65,8 @@ type
     function WithJSON(const APath: string; AValue: Float64): TWebMockAssertion; overload;
     function WithJSON(const APath: string; AValue: Integer): TWebMockAssertion; overload;
     function WithJSON(const APath: string; AValue: string): TWebMockAssertion; overload;
+    function WithXML(const AXPath, AValue: string): TWebMockAssertion; overload;
+    function WithXML(const AXPath: string; APattern: TRegEx): TWebMockAssertion; overload;
     procedure WasRequested;
     procedure WasNotRequested;
     property History: IInterfaceList read FHistory;
@@ -267,6 +269,22 @@ function TWebMockAssertion.WithQueryParam(const AName: string;
   const APattern: TRegEx): TWebMockAssertion;
 begin
   Matcher.Builder.WithQueryParam(AName, APattern);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithXML(const AXPath: string;
+  APattern: TRegEx): TWebMockAssertion;
+begin
+  Matcher.Builder.WithXML(AXPath, APattern);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithXML(const AXPath,
+  AValue: string): TWebMockAssertion;
+begin
+  Matcher.Builder.WithXML(AXPath, AValue);
 
   Result := Self;
 end;
