@@ -253,6 +253,13 @@ The first argument can be a path. For example, in the following JSON, the path
 }
 ```
 
+NOTE: Strings patterns can be matched by passing a regular expression as the
+second argument. For example:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithJSON('objects[0].key', TRegEx.Create('value\s\d+'));
+```
+
 #### Request matching by XML
 HTTP request can be matched by XML data values submitted. For example:
 ```Delphi
