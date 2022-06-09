@@ -70,7 +70,8 @@ uses
   WebMock.MatchingXML.Tests in 'Features\WebMock.MatchingXML.Tests.pas',
   WebMock.XMLMatcher.Tests in 'WebMock.XMLMatcher.Tests.pas',
   WebMock.XMLMatcher in '..\Source\WebMock.XMLMatcher.pas',
-  WebMock.XMLValueMatcher.Tests in 'WebMock.XMLValueMatcher.Tests.pas';
+  WebMock.XMLValueMatcher.Tests in 'WebMock.XMLValueMatcher.Tests.pas',
+  WebMock.JSONPatternMatcher.Tests in 'WebMock.JSONPatternMatcher.Tests.pas';
 
 var
   Runner: ITestRunner;

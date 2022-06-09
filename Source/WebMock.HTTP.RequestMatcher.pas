@@ -61,6 +61,7 @@ type
     function WithJSON(const APath: string; AValue: Float64): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithJSON(const APath: string; AValue: Integer): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithJSON(const APath: string; AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
+    function WithJSON(const APath: string; APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithQueryParam(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithQueryParam(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithXML(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
@@ -90,6 +91,7 @@ type
       function WithJSON(const APath: string; AValue: Float64): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithJSON(const APath: string; AValue: Integer): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithJSON(const APath: string; AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
+      function WithJSON(const APath: string; APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithQueryParam(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithQueryParam(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithXML(const AXPath, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
@@ -467,6 +469,17 @@ begin
     AName,
     TWebMockStringWildcardMatcher.Create(AValue)
   );
+
+  Result := Self;
+end;
+
+function TWebMockHTTPRequestMatcher.TBuilder.WithJSON(const APath: string;
+  APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder;
+begin
+  if not (Matcher.Body is TWebMockJSONMatcher) then
+    Matcher.Body := TWebMockJSONMatcher.Create;
+
+  (Matcher.Body as TWebMockJSONMatcher).Add(APath, APattern);
 
   Result := Self;
 end;

@@ -66,6 +66,7 @@ type
     function WithJSON(const APath: string; const AValue: Float64): TWebMockStaticRequestStub; overload;
     function WithJSON(const APath: string; const AValue: Integer): TWebMockStaticRequestStub; overload;
     function WithJSON(const APath: string; const AValue: string): TWebMockStaticRequestStub; overload;
+    function WithJSON(const APath: string; const APattern: TRegEx): TWebMockStaticRequestStub; overload;
     function WithQueryParam(const AName, AValue: string): TWebMockStaticRequestStub; overload;
     function WithQueryParam(const AName: string; const APattern: TRegEx): TWebMockStaticRequestStub; overload;
     function WithXML(const AXPath, AValue: string): TWebMockStaticRequestStub; overload;
@@ -300,6 +301,17 @@ begin
     Matcher.Body := TWebMockJSONMatcher.Create;
 
   (Matcher.Body as TWebMockJSONMatcher).Add<Boolean>(APath, AValue);
+
+  Result := Self;
+end;
+
+function TWebMockStaticRequestStub.WithJSON(const APath: string;
+  const APattern: TRegEx): TWebMockStaticRequestStub;
+begin
+  if not (Matcher.Body is TWebMockXMLMatcher) then
+    Matcher.Body := TWebMockJSONMatcher.Create;
+
+  (Matcher.Body as TWebMockJSONMatcher).Add(APath, APattern);
 
   Result := Self;
 end;

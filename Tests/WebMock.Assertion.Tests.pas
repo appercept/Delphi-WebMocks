@@ -140,6 +140,10 @@ type
     [Test]
     procedure WithJSON_GivenPathAndString_SetsValueForBodyMatcher;
     [Test]
+    procedure WithJSON_GivenPathAndPattern_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndPattern_SetsValueForBodyMatcher;
+    [Test]
     procedure WithXML_GivenPathAndString_ReturnsSelf;
     [Test]
     procedure WithXML_GivenPathAndString_SetsValueForBodyMatcher;
@@ -651,6 +655,29 @@ begin
   LJSONMatcher := LHTTPMatcher.Body as TWebMockJSONMatcher;
   LJSONValueMatcher := LJSONMatcher.ValueMatchers[0] as TWebMockJSONValueMatcher<Integer>;
   Assert.AreEqual(LValue, LJSONValueMatcher.Value);
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndPattern_ReturnsSelf;
+begin
+  Assert.AreSame(
+    Assertion,
+    Assertion.Put('/').WithJSON('key', TRegEx.Create('\d+'))
+  );
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndPattern_SetsValueForBodyMatcher;
+var
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+begin
+  Assertion.Post('/').WithJSON('key', TRegEx.Create('\d+'));
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+
+  Assert.IsTrue(LHTTPMatcher.Body is TWebMockJSONMatcher);
 
   Assertion.Free;
 end;

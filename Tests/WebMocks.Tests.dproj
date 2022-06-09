@@ -236,6 +236,7 @@
         <DCCReference Include="WebMock.XMLMatcher.Tests.pas"/>
         <DCCReference Include="..\Source\WebMock.XMLMatcher.pas"/>
         <DCCReference Include="WebMock.XMLValueMatcher.Tests.pas"/>
+        <DCCReference Include="WebMock.JSONPatternMatcher.Tests.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

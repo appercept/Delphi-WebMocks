@@ -27,6 +27,8 @@ type
     [Test]
     procedure Add_CalledMultipleTimes_AddsMultipleValueMatchers;
     [Test]
+    procedure Add_GivenPattern_AddsRegExMatcher;
+    [Test]
     procedure IsMatch_WhenGivenValueMatchesValue_ReturnsTrue;
     [Test]
     procedure IsMatch_WhenGivenValueDoesNotMatchValue_ReturnsFalse;
@@ -41,6 +43,7 @@ type
 implementation
 
 uses
+  System.RegularExpressions,
   WebMock.StringMatcher;
 
 { TWebMockJSONMatcherTests }
@@ -59,6 +62,13 @@ begin
   Matcher.Add<string>('Path3', '*');
 
   Assert.AreEqual(3, Matcher.ValueMatchers.Count);
+end;
+
+procedure TWebMockJSONMatcherTests.Add_GivenPattern_AddsRegExMatcher;
+begin
+  Matcher.Add('/APath', TRegEx.Create('.*'));
+
+  Assert.AreEqual(1, Matcher.ValueMatchers.Count);
 end;
 
 procedure TWebMockJSONMatcherTests.Class_Always_ImplementsStringMatcher;

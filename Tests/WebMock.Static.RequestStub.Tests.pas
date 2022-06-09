@@ -99,6 +99,10 @@ type
     [Test]
     procedure WithJSON_GivenPathAndString_SetsMatcherForContent;
     [Test]
+    procedure WithJSON_GivenPathAndPattern_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndPattern_SetsMatcherForContent;
+    [Test]
     procedure WithQueryParam_GivenString_ReturnsSelf;
     [Test]
     procedure WithQueryParam_GivenString_SetsMatcherForParam;
@@ -409,6 +413,21 @@ end;
 procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndInteger_SetsMatcherForContent;
 begin
   StubbedRequest.WithJSON('key', 1);
+
+  Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockJSONMatcher);
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndPattern_ReturnsSelf;
+begin
+  Assert.AreSame(
+    StubbedRequest,
+    StubbedRequest.WithJSON('key', TRegEx.Create('.*'))
+  );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndPattern_SetsMatcherForContent;
+begin
+  StubbedRequest.WithJSON('key', TRegEx.Create('.*'));
 
   Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockJSONMatcher);
 end;

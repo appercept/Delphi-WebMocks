@@ -47,6 +47,10 @@ type
     procedure Request_MatchingJSONContent_RespondsOK;
     [Test]
     procedure Request_NotMatchingJSONContent_RespondsNotImplemented;
+    [Test]
+    procedure Request_MatchingJSONContentByRegEx_RespondsOK;
+    [Test]
+    procedure Request_NotMatchingJSONContentByRegEx_RespondsNotImplemented;
   end;
 
 implementation
@@ -58,6 +62,27 @@ uses
   TestHelpers;
 
 { TWebMockMatchingJSONTests }
+
+procedure TWebMockMatchingJSONTests.Request_MatchingJSONContentByRegEx_RespondsOK;
+var
+  LContent: string;
+  LContentStream: TStringStream;
+  LHeaders: TNetHeaders;
+  LResponse: IHTTPResponse;
+begin
+  LContent := '{ "key": "123" }';
+  LContentStream := TStringStream.Create(LContent);
+  LHeaders := TNetHeaders.Create(
+    TNetHeader.Create('content-type', 'application/json')
+  );
+
+  WebMock.StubRequest('*', '*').WithJSON('key', TRegEx.Create('\d+'));
+  LResponse := WebClient.Post(WebMock.BaseURL, LContentStream, nil, LHeaders);
+
+  Assert.AreEqual(200, LResponse.StatusCode);
+
+  LContentStream.Free;
+end;
 
 procedure TWebMockMatchingJSONTests.Request_MatchingJSONContent_RespondsOK;
 var
@@ -76,6 +101,27 @@ begin
   LResponse := WebClient.Post(WebMock.BaseURL, LContentStream, nil, LHeaders);
 
   Assert.AreEqual(200, LResponse.StatusCode);
+
+  LContentStream.Free;
+end;
+
+procedure TWebMockMatchingJSONTests.Request_NotMatchingJSONContentByRegEx_RespondsNotImplemented;
+var
+  LContent: string;
+  LContentStream: TStringStream;
+  LHeaders: TNetHeaders;
+  LResponse: IHTTPResponse;
+begin
+  LContent := '{ "key": "abc" }';
+  LContentStream := TStringStream.Create(LContent);
+  LHeaders := TNetHeaders.Create(
+    TNetHeader.Create('content-type', 'application/json')
+  );
+
+  WebMock.StubRequest('*', '*').WithJSON('key', TRegEx.Create('\d+'));
+  LResponse := WebClient.Post(WebMock.BaseURL, LContentStream, nil, LHeaders);
+
+  Assert.AreEqual(501, LResponse.StatusCode);
 
   LContentStream.Free;
 end;
