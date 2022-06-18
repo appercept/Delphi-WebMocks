@@ -91,8 +91,9 @@ var
   LResponse: IHTTPResponse;
 begin
   LFormData := TStringList.Create;
-  LFormData.AddPair('Field1', 'Value1');
-  LFormData.AddPair('Field2', 'Value2');
+  LFormData
+    .AddPair('Field1', 'Value1')
+    .AddPair('Field2', 'Value2');
 
   WebMock.StubRequest('*', '*')
     .WithFormData('Field1', 'Value1')
