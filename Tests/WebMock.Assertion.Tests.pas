@@ -66,6 +66,10 @@ type
     [Test]
     procedure Get_Always_ReturnsSelf;
     [Test]
+    procedure Head_GivenMethodAndURI_SetsMatcherValues;
+    [Test]
+    procedure Head_Always_ReturnsSelf;
+    [Test]
     procedure Patch_GivenMethodAndURI_SetsMatcherValues;
     [Test]
     procedure Patch_Always_ReturnsSelf;
@@ -135,6 +139,18 @@ type
     procedure WithJSON_GivenPathAndString_ReturnsSelf;
     [Test]
     procedure WithJSON_GivenPathAndString_SetsValueForBodyMatcher;
+    [Test]
+    procedure WithJSON_GivenPathAndPattern_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndPattern_SetsValueForBodyMatcher;
+    [Test]
+    procedure WithXML_GivenPathAndString_ReturnsSelf;
+    [Test]
+    procedure WithXML_GivenPathAndString_SetsValueForBodyMatcher;
+    [Test]
+    procedure WithXML_GivenPathAndPattern_ReturnsSelf;
+    [Test]
+    procedure WithXML_GivenPathAndPattern_SetsValueForBodyMatcher;
   end;
 
 implementation
@@ -152,7 +168,8 @@ uses
   WebMock.JSONMatcher,
   WebMock.StringRegExMatcher,
   WebMock.StringMatcher,
-  WebMock.StringWildcardMatcher;
+  WebMock.StringWildcardMatcher,
+  WebMock.XMLMatcher;
 
 procedure TWebMockAssertionTests.Delete_Always_ReturnsSelf;
 begin
@@ -195,6 +212,26 @@ begin
   Assertion.Get(LURI);
 
   Assert.IsMatch('GET\s/resource', Assertion.Matcher.ToString);
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.Head_Always_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Head('/'));
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.Head_GivenMethodAndURI_SetsMatcherValues;
+var
+  LURI: string;
+begin
+  LURI := '/resource';
+
+  Assertion.Head(LURI);
+
+  Assert.IsMatch('HEAD\s/resource', Assertion.Matcher.ToString);
 
   Assertion.Free;
 end;
@@ -622,6 +659,29 @@ begin
   Assertion.Free;
 end;
 
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndPattern_ReturnsSelf;
+begin
+  Assert.AreSame(
+    Assertion,
+    Assertion.Put('/').WithJSON('key', TRegEx.Create('\d+'))
+  );
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithJSON_GivenPathAndPattern_SetsValueForBodyMatcher;
+var
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+begin
+  Assertion.Post('/').WithJSON('key', TRegEx.Create('\d+'));
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+
+  Assert.IsTrue(LHTTPMatcher.Body is TWebMockJSONMatcher);
+
+  Assertion.Free;
+end;
+
 procedure TWebMockAssertionTests.WithJSON_GivenPathAndString_ReturnsSelf;
 begin
   Assert.AreSame(Assertion, Assertion.Put('/').WithJSON('AKey', 'AValue'));
@@ -662,6 +722,47 @@ begin
     LParamValue,
     (Matcher.QueryParams[LParamName] as TWebMockStringWildcardMatcher).Value
   );
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithXML_GivenPathAndPattern_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion,
+                 Assertion.Put('/').WithXML('/Object/Attr1', TRegEx.Create('.*')));
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithXML_GivenPathAndPattern_SetsValueForBodyMatcher;
+var
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+begin
+  Assertion.Post('/').WithXML('/Object/Attr1', 'Value');
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+
+  Assert.IsTrue(LHTTPMatcher.Body is TWebMockXMLMatcher);
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithXML_GivenPathAndString_ReturnsSelf;
+begin
+  Assert.AreSame(Assertion, Assertion.Put('/').WithXML('/Object/Attr1', 'Value'));
+
+  Assertion.Free;
+end;
+
+procedure TWebMockAssertionTests.WithXML_GivenPathAndString_SetsValueForBodyMatcher;
+var
+  LHTTPMatcher: TWebMockHTTPRequestMatcher;
+begin
+  Assertion.Post('/').WithXML('/Object/Attr1', 'Value');
+
+  LHTTPMatcher := Assertion.Matcher as TWebMockHTTPRequestMatcher;
+
+  Assert.IsTrue(LHTTPMatcher.Body is TWebMockXMLMatcher);
 
   Assertion.Free;
 end;

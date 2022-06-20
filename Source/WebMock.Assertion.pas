@@ -36,6 +36,7 @@ uses
   WebMock.HTTP.RequestMatcher;
 
 type
+
   TWebMockAssertion = class(TObject)
   private
     FMatcher: IWebMockHTTPRequestMatcher;
@@ -45,6 +46,7 @@ type
     constructor Create(const AHistory: IInterfaceList);
     function Delete(const AURI: string): TWebMockAssertion;
     function Get(const AURI: string): TWebMockAssertion;
+    function Head(const AURI: string): TWebMockAssertion;
     function Patch(const AURI: string): TWebMockAssertion;
     function Post(const AURI: string): TWebMockAssertion;
     function Put(const AURI: string): TWebMockAssertion;
@@ -63,6 +65,9 @@ type
     function WithJSON(const APath: string; AValue: Float64): TWebMockAssertion; overload;
     function WithJSON(const APath: string; AValue: Integer): TWebMockAssertion; overload;
     function WithJSON(const APath: string; AValue: string): TWebMockAssertion; overload;
+    function WithJSON(const APath: string; APattern: TRegEx): TWebMockAssertion; overload;
+    function WithXML(const AXPath, AValue: string): TWebMockAssertion; overload;
+    function WithXML(const AXPath: string; APattern: TRegEx): TWebMockAssertion; overload;
     procedure WasRequested;
     procedure WasNotRequested;
     property History: IInterfaceList read FHistory;
@@ -93,6 +98,11 @@ end;
 function TWebMockAssertion.Get(const AURI: string): TWebMockAssertion;
 begin
   Result := Request('GET', AURI);
+end;
+
+function TWebMockAssertion.Head(const AURI: string): TWebMockAssertion;
+begin
+  Result := Request('HEAD', AURI);
 end;
 
 function TWebMockAssertion.MatchesHistory: Boolean;
@@ -264,10 +274,34 @@ begin
   Result := Self;
 end;
 
+function TWebMockAssertion.WithXML(const AXPath: string;
+  APattern: TRegEx): TWebMockAssertion;
+begin
+  Matcher.Builder.WithXML(AXPath, APattern);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithXML(const AXPath,
+  AValue: string): TWebMockAssertion;
+begin
+  Matcher.Builder.WithXML(AXPath, AValue);
+
+  Result := Self;
+end;
+
 function TWebMockAssertion.WithQueryParam(const AName,
   AValue: string): TWebMockAssertion;
 begin
   Matcher.Builder.WithQueryParam(AName, AValue);
+
+  Result := Self;
+end;
+
+function TWebMockAssertion.WithJSON(const APath: string;
+  APattern: TRegEx): TWebMockAssertion;
+begin
+  Matcher.Builder.WithJSON(APath, APattern);
 
   Result := Self;
 end;

@@ -20,7 +20,7 @@ should install version
 [2.0.0](https://github.com/appercept/Delphi-WebMocks/releases/tag/2.0.0).
 
 ## Installation: GetIt
-[WebMocks 3.0.1](https://getitnow.embarcadero.com/WebMocks-3.0.1/) is available
+[WebMocks 3.1.0](https://getitnow.embarcadero.com/webmocks/) is available
 through Embarcadero's package manager for Delphi
 [GetIt](https://getitnow.embarcadero.com/). If you have a recent version of
 Delphi including GetIt then this should be the preferred installation method.
@@ -34,7 +34,7 @@ not be found in your test projects.
 
 ## Installation: Manual
 1. Download and extract the latest version
-   [3.1.0](https://github.com/appercept/Delphi-WebMocks/archive/3.1.0.zip).
+   [3.2.0](https://github.com/appercept/Delphi-WebMocks/archive/3.2.0.zip).
 2. In "Tools > Options" under the "Language / Delphi / Library" add the
    extracted `Source` directory to the "Library path" and "Browsing path".
 
@@ -253,6 +253,32 @@ The first argument can be a path. For example, in the following JSON, the path
 }
 ```
 
+NOTE: Strings patterns can be matched by passing a regular expression as the
+second argument. For example:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithJSON('objects[0].key', TRegEx.Create('value\s\d+'));
+```
+
+#### Request matching by XML
+HTTP request can be matched by XML data values submitted. For example:
+```Delphi
+WebMock.StubRequest('*', '*')
+  .WithXML('/Object/Attr1', 'Value 1');
+```
+
+The first argument is an XPath expression. The previous example would make a
+positive match against the following document:
+```XML
+<?xml version="1.0" encoding="UTF-8"?>
+<Object>
+  <Attr1>Value 1</Attr1>
+</Object>
+```
+
+The second argument can be a boolean, floating point, integer, or string
+value.
+
 #### Request matching by predicate function
 If matching logic is required to be more complex than the simple matching, a
 predicate function can be provided in the test to allow custom inspection/logic
@@ -436,7 +462,7 @@ WebMock.Assert.Get('/').WasRequested; // Passes
 ```
 
 As with request stubbing you can match requests by HTTP Method, URI, Query
-Parameters, Headers, and Body content (including `WithJSON`).
+Parameters, Headers, and Body content (including `WithJSON` and `WithXML`).
 ```Delphi
 WebMock.Assert
   .Patch('/resource`)
@@ -461,7 +487,7 @@ performing extra unwanted requests.
 This project follows [Semantic Versioning](https://semver.org).
 
 ## License
-Copyright ©2019-2021 Richard Hatherall <richard@appercept.com>
+Copyright ©2019-2022 Richard Hatherall <richard@appercept.com>
 
 WebMocks is distributed under the terms of the Apache License (Version 2.0).
 

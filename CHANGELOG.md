@@ -1,5 +1,27 @@
 # Changelog
 
+## [3.2.0](https://github.com/appercept/Delphi-WebMocks/tree/3.2.0) (2022-06-20)
+
+[Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/3.1.0...3.2.0)
+
+**Implemented enhancements:**
+
+- Add support for matching JSON content by RegEx [\#52](https://github.com/appercept/Delphi-WebMocks/pull/52) ([rhatherall](https://github.com/rhatherall))
+- Add support for matching content by XML values [\#51](https://github.com/appercept/Delphi-WebMocks/pull/51) ([rhatherall](https://github.com/rhatherall))
+- Add support for asserting HEAD requests [\#48](https://github.com/appercept/Delphi-WebMocks/pull/48) ([rhatherall](https://github.com/rhatherall))
+
+**Fixed bugs:**
+
+- Plain query parameters \(without values\) can cause exceptions [\#49](https://github.com/appercept/Delphi-WebMocks/issues/49)
+
+**Closed issues:**
+
+- It is not currently possible to make assertions on HEAD requests [\#47](https://github.com/appercept/Delphi-WebMocks/issues/47)
+
+**Merged pull requests:**
+
+- Fix exception matching query params with no value [\#50](https://github.com/appercept/Delphi-WebMocks/pull/50) ([rhatherall](https://github.com/rhatherall))
+
 ## [3.1.0](https://github.com/appercept/Delphi-WebMocks/tree/3.1.0) (2021-03-09)
 
 [Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/3.0.1...3.1.0)

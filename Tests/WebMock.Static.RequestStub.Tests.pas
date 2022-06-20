@@ -99,6 +99,10 @@ type
     [Test]
     procedure WithJSON_GivenPathAndString_SetsMatcherForContent;
     [Test]
+    procedure WithJSON_GivenPathAndPattern_ReturnsSelf;
+    [Test]
+    procedure WithJSON_GivenPathAndPattern_SetsMatcherForContent;
+    [Test]
     procedure WithQueryParam_GivenString_ReturnsSelf;
     [Test]
     procedure WithQueryParam_GivenString_SetsMatcherForParam;
@@ -106,6 +110,14 @@ type
     procedure WithQueryParam_GivenRegEx_ReturnsSelf;
     [Test]
     procedure WithQueryParam_GivenRegEx_SetsMatcherForParam;
+    [Test]
+    procedure WithXML_GivenPathAndString_ReturnsSelf;
+    [Test]
+    procedure WithXML_GivenPathAndString_SetsMatcherForContent;
+    [Test]
+    procedure WithXML_GivenPathAndPattern_ReturnsSelf;
+    [Test]
+    procedure WithXML_GivenPathAndPattern_SetsMatcherForContent;
   end;
 
 implementation
@@ -123,7 +135,8 @@ uses
   WebMock.ResponseStatus,
   WebMock.StringMatcher,
   WebMock.StringWildcardMatcher,
-  WebMock.StringRegExMatcher;
+  WebMock.StringRegExMatcher,
+  WebMock.XMLMatcher;
 
 { TWebMockRequestStubTests }
 
@@ -404,6 +417,21 @@ begin
   Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockJSONMatcher);
 end;
 
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndPattern_ReturnsSelf;
+begin
+  Assert.AreSame(
+    StubbedRequest,
+    StubbedRequest.WithJSON('key', TRegEx.Create('.*'))
+  );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndPattern_SetsMatcherForContent;
+begin
+  StubbedRequest.WithJSON('key', TRegEx.Create('.*'));
+
+  Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockJSONMatcher);
+end;
+
 procedure TWebMockStaticRequestStubTests.WithJSON_GivenPathAndString_ReturnsSelf;
 begin
   Assert.AreSame(StubbedRequest, StubbedRequest.WithJSON('key', 'value'));
@@ -458,6 +486,31 @@ begin
     LParamValue,
     (StubbedRequest.Matcher.QueryParams[LParamName] as TWebMockStringWildcardMatcher).Value
   );
+end;
+
+procedure TWebMockStaticRequestStubTests.WithXML_GivenPathAndPattern_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest,
+                 StubbedRequest.WithXML('/path', TRegEx.Create('.*')));
+end;
+
+procedure TWebMockStaticRequestStubTests.WithXML_GivenPathAndPattern_SetsMatcherForContent;
+begin
+  StubbedRequest.WithXML('/Key', TRegEx.Create('.*'));
+
+  Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockXMLMatcher);
+end;
+
+procedure TWebMockStaticRequestStubTests.WithXML_GivenPathAndString_ReturnsSelf;
+begin
+  Assert.AreSame(StubbedRequest, StubbedRequest.WithXML('/path', 'value'));
+end;
+
+procedure TWebMockStaticRequestStubTests.WithXML_GivenPathAndString_SetsMatcherForContent;
+begin
+  StubbedRequest.WithXML('/Key', 'Value');
+
+  Assert.IsTrue(StubbedRequest.Matcher.Body is TWebMockXMLMatcher);
 end;
 
 initialization

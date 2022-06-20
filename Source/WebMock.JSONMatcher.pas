@@ -30,11 +30,25 @@ interface
 uses
   System.Classes,
   System.JSON,
+  System.RegularExpressions,
   WebMock.StringMatcher;
 
 type
   IWebMockJSONValueMatcher = interface(IInterface)
     ['{3B642735-9B0B-4923-A79B-51A04F284B6C}']
+    function IsMatch(const AJSON: TJSONValue): Boolean;
+  end;
+
+  TWebMockJSONPatternMatcher = class(TInterfacedObject, IWebMockJSONValueMatcher)
+  private
+    FPath: string;
+    FPattern: TRegEx;
+  public
+    constructor Create(const APath: string; const APattern: TRegEx);
+    property Path: string read FPath;
+    property Pattern: TRegEx read FPattern;
+
+    { IWebMockJSONValueMatcher }
     function IsMatch(const AJSON: TJSONValue): Boolean;
   end;
 
@@ -58,7 +72,8 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Add<T>(const APath: string; const AValue: T);
+    procedure Add<T>(const APath: string; const AValue: T); overload;
+    procedure Add(const APath: string; const APattern: TRegEx); overload;
     property ValueMatchers: TInterfaceList read GetValueMatchers;
 
     { IStringMatcher }
@@ -72,6 +87,11 @@ uses
   System.Generics.Defaults;
 
 { TWebMockJSONMatcher }
+
+procedure TWebMockJSONMatcher.Add(const APath: string; const APattern: TRegEx);
+begin
+  ValueMatchers.Add(TWebMockJSONPatternMatcher.Create(APath, APattern));
+end;
 
 procedure TWebMockJSONMatcher.Add<T>(const APath: string; const AValue: T);
 var
@@ -140,6 +160,26 @@ var
 begin
   if AJSON.TryGetValue<T>(Path, LValue) then
     Result := TComparer<T>.Default.Compare(LValue, Value) = 0
+  else
+    Result := False;
+end;
+
+{ TWebMockJSONPatternMatcher }
+
+constructor TWebMockJSONPatternMatcher.Create(const APath: string;
+  const APattern: TRegEx);
+begin
+  inherited Create;
+  FPath := APath;
+  FPattern := APattern;
+end;
+
+function TWebMockJSONPatternMatcher.IsMatch(const AJSON: TJSONValue): Boolean;
+var
+  LValue: string;
+begin
+  if AJSON.TryGetValue<string>(Path, LValue) then
+    Result := Pattern.IsMatch(LValue)
   else
     Result := False;
 end;

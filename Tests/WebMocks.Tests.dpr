@@ -66,7 +66,12 @@ uses
   WebMock.MatchingJSON.Tests in 'Features\WebMock.MatchingJSON.Tests.pas',
   WebMock.JSONMatcher in '..\Source\WebMock.JSONMatcher.pas',
   WebMock.JSONMatcher.Tests in 'WebMock.JSONMatcher.Tests.pas',
-  WebMock.JSONValueMatcher.Tests in 'WebMock.JSONValueMatcher.Tests.pas';
+  WebMock.JSONValueMatcher.Tests in 'WebMock.JSONValueMatcher.Tests.pas',
+  WebMock.MatchingXML.Tests in 'Features\WebMock.MatchingXML.Tests.pas',
+  WebMock.XMLMatcher.Tests in 'WebMock.XMLMatcher.Tests.pas',
+  WebMock.XMLMatcher in '..\Source\WebMock.XMLMatcher.pas',
+  WebMock.XMLValueMatcher.Tests in 'WebMock.XMLValueMatcher.Tests.pas',
+  WebMock.JSONPatternMatcher.Tests in 'WebMock.JSONPatternMatcher.Tests.pas';
 
 var
   Runner: ITestRunner;
@@ -114,5 +119,4 @@ begin
     on E: Exception do
       System.Writeln(E.ClassName, ': ', E.Message);
   end;
-
 end.

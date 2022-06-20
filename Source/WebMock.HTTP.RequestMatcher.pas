@@ -61,8 +61,11 @@ type
     function WithJSON(const APath: string; AValue: Float64): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithJSON(const APath: string; AValue: Integer): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithJSON(const APath: string; AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
+    function WithJSON(const APath: string; APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithQueryParam(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
     function WithQueryParam(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
+    function WithXML(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
+    function WithXML(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
   end;
 
   TWebMockHTTPRequestMatcher = class(TInterfacedObject,
@@ -88,8 +91,11 @@ type
       function WithJSON(const APath: string; AValue: Float64): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithJSON(const APath: string; AValue: Integer): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithJSON(const APath: string; AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
+      function WithJSON(const APath: string; APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithQueryParam(const AName, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
       function WithQueryParam(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
+      function WithXML(const AXPath, AValue: string): IWebMockHTTPRequestMatcherBuilder; overload;
+      function WithXML(const AXPath: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
     end;
 
   private
@@ -130,7 +136,8 @@ uses
   WebMock.JSONMatcher,
   WebMock.StringWildcardMatcher,
   WebMock.StringAnyMatcher,
-  WebMock.StringRegExMatcher;
+  WebMock.StringRegExMatcher,
+  WebMock.XMLMatcher;
 
 { TWebMockHTTPRequestMatcher }
 
@@ -199,7 +206,13 @@ begin
     for LQueryPair in LQueryPairs do
     begin
       LQueryParts := LQueryPair.Split(['='], 2);
-      Result.Add(TNetEncoding.URL.Decode(LQueryParts[0]), TNetEncoding.URL.Decode(LQueryParts[1]));
+      if Length(LQueryParts) = 1 then
+        Result.Add(TNetEncoding.URL.Decode(LQueryParts[0]), '')
+      else
+        Result.Add(
+          TNetEncoding.URL.Decode(LQueryParts[0]),
+          TNetEncoding.URL.Decode(LQueryParts[1])
+        );
     end;
   end
 end;
@@ -427,6 +440,28 @@ begin
   Result := Self;
 end;
 
+function TWebMockHTTPRequestMatcher.TBuilder.WithXML(const AXPath: string;
+  const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder;
+begin
+  if not (Matcher.Body is TWebMockXMLMatcher) then
+    Matcher.Body := TWebMockXMLMatcher.Create;
+
+  (Matcher.Body as TWebMockXMLMatcher).Add(AXPath, APattern);
+
+  Result := Self;
+end;
+
+function TWebMockHTTPRequestMatcher.TBuilder.WithXML(const AXPath,
+  AValue: string): IWebMockHTTPRequestMatcherBuilder;
+begin
+  if not (Matcher.Body is TWebMockXMLMatcher) then
+    Matcher.Body := TWebMockXMLMatcher.Create;
+
+  (Matcher.Body as TWebMockXMLMatcher).Add(AXPath, AValue);
+
+  Result := Self;
+end;
+
 function TWebMockHTTPRequestMatcher.TBuilder.WithQueryParam(const AName,
   AValue: string): IWebMockHTTPRequestMatcherBuilder;
 begin
@@ -434,6 +469,17 @@ begin
     AName,
     TWebMockStringWildcardMatcher.Create(AValue)
   );
+
+  Result := Self;
+end;
+
+function TWebMockHTTPRequestMatcher.TBuilder.WithJSON(const APath: string;
+  APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder;
+begin
+  if not (Matcher.Body is TWebMockJSONMatcher) then
+    Matcher.Body := TWebMockJSONMatcher.Create;
+
+  (Matcher.Body as TWebMockJSONMatcher).Add(APath, APattern);
 
   Result := Self;
 end;

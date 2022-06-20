@@ -71,6 +71,10 @@ type
     [TestCase('Wildcard', 'Value1,*')]
     procedure IsMatch_WhenQueryParamsAreSetGivenMatchingRequestInfo_ReturnsTrue(const AParamValue, AMatchValue: string);
     [Test]
+    procedure IsMatch_WhenQueryParamsAreSetToMatchEmptyStringAndQueryParamIsPresentWithoutValue_ReturnsTrue;
+    [Test]
+    procedure IsMatch_WhenQueryParamsAreSetToMatchWildcardAndQueryParamIsPresentWithoutValue_ReturnsTrue;
+    [Test]
     procedure IsMatch_WhenQueryParamsAreSetGivenNonMatchingRequestInfo_ReturnsFalse;
     [Test]
     procedure IsMatch_WhenQueryParamsAreSetToMatchWildcardAndURLHasNoParam_ReturnsFalse;
@@ -292,6 +296,46 @@ begin
   );
 
   Assert.IsFalse(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
+end;
+
+procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenQueryParamsAreSetToMatchEmptyStringAndQueryParamIsPresentWithoutValue_ReturnsTrue;
+var
+  LRequestInfo: TIdHTTPRequestInfo;
+  LParamName: string;
+  LRequest: IWebMockHTTPRequest;
+begin
+  LParamName := 'Param1';
+  LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/match?Param1');
+  LRequest := TWebMockHTTPRequest.Create(LRequestInfo);
+
+  RequestMatcher := TWebMockHTTPRequestMatcher.Create('/match', 'GET');
+  RequestMatcher.QueryParams.AddOrSetValue(
+    LParamName, TWebMockStringWildcardMatcher.Create('')
+  );
+
+  Assert.IsTrue(RequestMatcher.IsMatch(LRequest));
+
+  LRequestInfo.Free;
+end;
+
+procedure TWebMockHTTPRequestMatcherTests.IsMatch_WhenQueryParamsAreSetToMatchWildcardAndQueryParamIsPresentWithoutValue_ReturnsTrue;
+var
+  LRequestInfo: TIdHTTPRequestInfo;
+  LParamName: string;
+  LRequest: IWebMockHTTPRequest;
+begin
+  LParamName := 'Param1';
+  LRequestInfo := TMockIdHTTPRequestInfo.Mock('GET', '/match?Param1');
+  LRequest := TWebMockHTTPRequest.Create(LRequestInfo);
+
+  RequestMatcher := TWebMockHTTPRequestMatcher.Create('/match', 'GET');
+  RequestMatcher.QueryParams.AddOrSetValue(
+    LParamName, TWebMockStringWildcardMatcher.Create('*')
+  );
+
+  Assert.IsTrue(RequestMatcher.IsMatch(LRequest));
 
   LRequestInfo.Free;
 end;
