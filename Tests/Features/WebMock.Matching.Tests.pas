@@ -66,6 +66,8 @@ type
     [Test]
     procedure Request_NotMatchingQueryParam_RespondsNotImplemented;
     [Test]
+    procedure Request_MatchingMultipleQueryParamsWithDuplicatedNames_RespondsOK;
+    [Test]
     procedure Request_MatchingQueryParamByRegEx_RespondsOK;
     [Test]
     procedure Request_NotMatchingQueryParamByRegEx_RespondsNotImplemented;
@@ -137,6 +139,18 @@ begin
     .WithHeader(LHeaderName1, LHeaderValue1)
     .WithHeader(LHeaderName2, LHeaderValue2);
   LResponse := WebClient.Get(WebMock.BaseURL, nil, LHeaders);
+
+  Assert.AreEqual(200, LResponse.StatusCode);
+end;
+
+procedure TWebMockMatchingTests.Request_MatchingMultipleQueryParamsWithDuplicatedNames_RespondsOK;
+var
+  LResponse: IHTTPResponse;
+begin
+  WebMock.StubRequest('*', '*')
+    .WithQueryParam('Param', 'Value1')
+    .WithQueryParam('Param', 'Value2');
+  LResponse := WebClient.Get(WebMock.URLFor('/endpoint?Param=Value1&Param=Value2'));
 
   Assert.AreEqual(200, LResponse.StatusCode);
 end;

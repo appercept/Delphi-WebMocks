@@ -77,6 +77,10 @@ type
     [Test]
     procedure WasRequestedWithQueryParam_NotMatchingRequest_Fails;
     [Test]
+    procedure WasRequestedWithQueryParam_MatchingRequestWithDuplicateParams_Passes;
+    [Test]
+    procedure WasRequestedWithQueryParam_NotMatchingRequestWithDuplicateParams_Fails;
+    [Test]
     procedure WasRequestedWithFormData_MatchingRequest_Passes;
     [Test]
     procedure WasRequestedWithFormData_NotMatchingRequest_Fails;
@@ -631,6 +635,22 @@ begin
   LJSON.Free;
 end;
 
+procedure TWebMockAssertionsTests.WasRequestedWithQueryParam_MatchingRequestWithDuplicateParams_Passes;
+begin
+  WebClient.Get(WebMock.URLFor('/') + '?Param=Value1&Param=Value2');
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert.Get('/')
+        .WithQueryParam('Param', 'Value1')
+        .WithQueryParam('Param', 'Value2')
+        .WasRequested;
+    end,
+    ETestPass
+  );
+end;
+
 procedure TWebMockAssertionsTests.WasRequestedWithQueryParam_MatchingRequest_Passes;
 var
   LParamName, LParamValue: string;
@@ -645,6 +665,22 @@ begin
       WebMock.Assert.Get('/').WithQueryParam(LParamName, LParamValue).WasRequested;
     end,
     ETestPass
+  );
+end;
+
+procedure TWebMockAssertionsTests.WasRequestedWithQueryParam_NotMatchingRequestWithDuplicateParams_Fails;
+begin
+  WebClient.Get(WebMock.URLFor('/') + '?Param=Value1&Param=Value2');
+
+  Assert.WillRaise(
+    procedure
+    begin
+      WebMock.Assert.Get('/')
+        .WithQueryParam('Param', 'Value1')
+        .WithQueryParam('Param', 'NoMatch')
+        .WasRequested;
+    end,
+    ETestFailure
   );
 end;
 

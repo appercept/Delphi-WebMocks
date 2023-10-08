@@ -258,6 +258,7 @@
         <DCCReference Include="..\Source\WebMock.XMLMatcher.pas"/>
         <DCCReference Include="WebMock.XMLValueMatcher.Tests.pas"/>
         <DCCReference Include="WebMock.JSONPatternMatcher.Tests.pas"/>
+        <DCCReference Include="WebMock.HTTP.RequestQueryParamsMatcher.Tests.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -314,6 +315,12 @@
                 <DeployFile LocalName="WebMocks.Tests.dSYM" Configuration="Debug" Class="ProjectOSXDebug"/>
                 <DeployFile LocalName="WebMocks.Tests.entitlements" Configuration="Debug" Class="ProjectOSXEntitlements"/>
                 <DeployFile LocalName="WebMocks.Tests.exe" Configuration="Debug" Class="ProjectOutput"/>
+                <DeployFile LocalName="WebMocks.Tests.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>WebMocks_Tests.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="WebMocks.Tests.info.plist" Configuration="Debug" Class="ProjectOSXInfoPList"/>
                 <DeployFile LocalName="WebMocks.Tests" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployClass Name="AdditionalDebugSymbols">

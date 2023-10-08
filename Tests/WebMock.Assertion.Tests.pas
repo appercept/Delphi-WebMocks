@@ -720,7 +720,7 @@ begin
 
   Assert.AreEqual(
     LParamValue,
-    (Matcher.QueryParams[LParamName] as TWebMockStringWildcardMatcher).Value
+    (Matcher.QueryParams.QueryParams.First.ValueMatcher as TWebMockStringWildcardMatcher).Value
   );
 
   Assertion.Free;
@@ -779,7 +779,7 @@ begin
 
   Assert.AreEqual(
     LParamPattern,
-    (Matcher.QueryParams[LParamName] as TWebMockStringRegExMatcher).RegEx
+    (Matcher.QueryParams.QueryParams.First.ValueMatcher as TWebMockStringRegExMatcher).RegEx
   );
 
   Assertion.Free;
