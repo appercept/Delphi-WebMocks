@@ -464,7 +464,7 @@ begin
 
   Assert.AreEqual(
     LParamPattern,
-    (StubbedRequest.Matcher.QueryParams[LParamName] as TWebMockStringRegExMatcher).RegEx
+    (StubbedRequest.Matcher.QueryParams.QueryParams.First.ValueMatcher as TWebMockStringRegExMatcher).RegEx
   );
 end;
 
@@ -484,7 +484,7 @@ begin
 
   Assert.AreEqual(
     LParamValue,
-    (StubbedRequest.Matcher.QueryParams[LParamName] as TWebMockStringWildcardMatcher).Value
+    (StubbedRequest.Matcher.QueryParams.QueryParams.First.ValueMatcher as TWebMockStringWildcardMatcher).Value
   );
 end;
 

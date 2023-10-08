@@ -32,6 +32,7 @@ uses
   IdHeaderList,
   System.Classes,
   System.Generics.Collections,
+  System.Net.URLClient,
   System.RegularExpressions,
   System.Rtti,
   WebMock.HTTP.Messages,
@@ -68,6 +69,36 @@ type
     function WithXML(const AName: string; const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder; overload;
   end;
 
+  TWebMockHTTPRequestNameStringValueMatcher = record
+  private
+    FName: string;
+    FValueMatcher: IStringMatcher;
+    function SelectParameters(const AName: string;
+      const AFrom: TURIParameters): TURIParameters;
+  public
+    constructor Create(const AName: string; AValueMatcher: IStringMatcher);
+
+    function IsMatch(const AQueryParams: TURIParameters): Boolean;
+
+    property Name: string read FName write FName;
+    property ValueMatcher: IStringMatcher read FValueMatcher write FValueMatcher;
+  end;
+
+  TWebMockHTTPRequestQueryParamsMatcher = class(TObject)
+  private
+    FQueryParams: TList<TWebMockHTTPRequestNameStringValueMatcher>;
+    function ExtractURIQueryString(const AURI: string): string;
+    function ParseURIQueryParams(const AURI: string): TURIParameters;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    function Add(const AName, AValue: string): Integer; overload;
+    function Add(const AName: string; APattern: TRegEx): Integer; overload;
+    function IsMatch(const AURI: string): Boolean;
+    property QueryParams: TList<TWebMockHTTPRequestNameStringValueMatcher> read FQueryParams;
+  end;
+
   TWebMockHTTPRequestMatcher = class(TInterfacedObject,
     IWebMockHTTPRequestMatcher, IWebMockHTTPRequestMatcherBuilder)
   public type
@@ -101,12 +132,11 @@ type
   private
     FContent: IStringMatcher;
     FHeaders: TDictionary<string, IStringMatcher>;
-    FQueryParams: TDictionary<string, IStringMatcher>;
+    FQueryParams: TWebMockHTTPRequestQueryParamsMatcher;
     FHTTPMethod: string;
     FURIMatcher: IStringMatcher;
     FBuilder: IWebMockHTTPRequestMatcherBuilder;
     function ExtractDocumentPath(const AURI: string): string;
-    function ExtractURIQueryParams(const AURI: string): TDictionary<string, string>;
     function DocumentMatches(const AURI: string): Boolean;
     function HeadersMatches(AHeaders: TStrings): Boolean;
     function QueryParamsMatches(const AURI: string): Boolean;
@@ -122,7 +152,7 @@ type
     property Body: IStringMatcher read FContent write FContent;
     property Builder: IWebMockHTTPRequestMatcherBuilder read GetBuilder implements IWebMockHTTPRequestMatcherBuilder;
     property Headers: TDictionary<string, IStringMatcher> read FHeaders;
-    property QueryParams: TDictionary<string, IStringMatcher> read FQueryParams;
+    property QueryParams: TWebMockHTTPRequestQueryParamsMatcher read FQueryParams;
     property HTTPMethod: string read FHTTPMethod write FHTTPMethod;
     property URIMatcher: IStringMatcher read FURIMatcher;
   end;
@@ -148,7 +178,7 @@ begin
   FBuilder := TBuilder.Create(Self);
   FContent := TWebMockStringAnyMatcher.Create;
   FHeaders := TDictionary<string, IStringMatcher>.Create;
-  FQueryParams := TDictionary<string, IStringMatcher>.Create;
+  FQueryParams := TWebMockHTTPRequestQueryParamsMatcher.Create;
   FURIMatcher := TWebMockStringWildcardMatcher.Create(AURI);
   FHTTPMethod := AHTTPMethod;
 end;
@@ -160,7 +190,7 @@ begin
   FBuilder := TBuilder.Create(Self);
   FContent := TWebMockStringAnyMatcher.Create;
   FHeaders := TDictionary<string, IStringMatcher>.Create;
-  FQueryParams := TDictionary<string, IStringMatcher>.Create;
+  FQueryParams := TWebMockHTTPRequestQueryParamsMatcher.Create;
   FURIMatcher := TWebMockStringRegExMatcher.Create(AURIPattern);
   FHTTPMethod := AHTTPMethod;
 end;
@@ -188,33 +218,6 @@ begin
     Result := AURI.Substring(0, LQuestionPos)
   else
     Result := AURI;
-end;
-
-function TWebMockHTTPRequestMatcher.ExtractURIQueryParams(const AURI: string): TDictionary<string, string>;
-var
-  LQuestionPos: Integer;
-  LQueryString, LQueryPair: string;
-  LQueryPairs, LQueryParts: TArray<string>;
-begin
-  Result := TDictionary<string, string>.Create;
-
-  LQuestionPos := AURI.IndexOf('?');
-  if LQuestionPos > 0 then
-  begin
-    LQueryString := AURI.Substring(LQuestionPos + 1, AURI.Length - 1);
-    LQueryPairs := LQueryString.Split(['&']);
-    for LQueryPair in LQueryPairs do
-    begin
-      LQueryParts := LQueryPair.Split(['='], 2);
-      if Length(LQueryParts) = 1 then
-        Result.Add(TNetEncoding.URL.Decode(LQueryParts[0]), '')
-      else
-        Result.Add(
-          TNetEncoding.URL.Decode(LQueryParts[0]),
-          TNetEncoding.URL.Decode(LQueryParts[1])
-        );
-    end;
-  end
 end;
 
 function TWebMockHTTPRequestMatcher.GetBuilder: IWebMockHTTPRequestMatcherBuilder;
@@ -256,28 +259,8 @@ end;
 
 function TWebMockHTTPRequestMatcher.QueryParamsMatches(
   const AURI: string): Boolean;
-var
-  LParam: TPair<string, IStringMatcher>;
-  LExtractedParams: TDictionary<string, string>;
 begin
-  if QueryParams.Count = 0 then
-    Exit(True);
-
-  LExtractedParams := ExtractURIQueryParams(AURI);
-  try
-    for LParam in QueryParams do
-    begin
-      if not LExtractedParams.ContainsKey(LParam.Key) then
-        Exit(False);
-
-      if not LParam.Value.IsMatch(LExtractedParams[LParam.Key]) then
-        Exit(False);
-    end;
-  finally
-    LExtractedParams.Free;
-  end;
-
-  Result := True;
+  Result := QueryParams.IsMatch(AURI);
 end;
 
 function TWebMockHTTPRequestMatcher.StreamToString(AStream: TStream): string;
@@ -432,10 +415,7 @@ end;
 function TWebMockHTTPRequestMatcher.TBuilder.WithQueryParam(const AName: string;
   const APattern: TRegEx): IWebMockHTTPRequestMatcherBuilder;
 begin
-  Matcher.QueryParams.AddOrSetValue(
-    AName,
-    TWebMockStringRegExMatcher.Create(APattern)
-  );
+  Matcher.QueryParams.Add(AName, APattern);
 
   Result := Self;
 end;
@@ -465,10 +445,7 @@ end;
 function TWebMockHTTPRequestMatcher.TBuilder.WithQueryParam(const AName,
   AValue: string): IWebMockHTTPRequestMatcherBuilder;
 begin
-  Matcher.QueryParams.AddOrSetValue(
-    AName,
-    TWebMockStringWildcardMatcher.Create(AValue)
-  );
+  Matcher.QueryParams.Add(AName, AValue);
 
   Result := Self;
 end;
@@ -482,6 +459,155 @@ begin
   (Matcher.Body as TWebMockJSONMatcher).Add(APath, APattern);
 
   Result := Self;
+end;
+
+{ TWebMockHTTPRequestNameStringValueMatcher }
+
+constructor TWebMockHTTPRequestNameStringValueMatcher.Create(const AName: string;
+  AValueMatcher: IStringMatcher);
+begin
+  FName := AName;
+  FValueMatcher := AValueMatcher;
+end;
+
+function TWebMockHTTPRequestNameStringValueMatcher.IsMatch(
+  const AQueryParams: TURIParameters): Boolean;
+var
+  LMatchCandidates: TURIParameters;
+  LMatchCandidate: TURIParameter;
+begin
+  LMatchCandidates := SelectParameters(Name, AQueryParams);
+  for LMatchCandidate in LMatchCandidates do
+    if ValueMatcher.IsMatch(LMatchCandidate.Value) then
+      Exit(True);
+
+  Result := False;
+end;
+
+function TWebMockHTTPRequestNameStringValueMatcher.SelectParameters(
+  const AName: string; const AFrom: TURIParameters): TURIParameters;
+var
+  LParams: TList<TURIParameter>;
+  LParam: TURIParameter;
+begin
+  LParams := TList<TURIParameter>.Create;
+  try
+    for LParam in AFrom do
+      if LParam.Name.Equals(AName) then
+        LParams.Add(LParam);
+    Result := LParams.ToArray;
+  finally
+    LParams.Free;
+  end;
+end;
+
+{ TWebMockHTTPRequestQueryParamsMatcher }
+
+function TWebMockHTTPRequestQueryParamsMatcher.Add(const AName,
+  AValue: string): Integer;
+begin
+  Result := QueryParams.Add(
+    TWebMockHTTPRequestNameStringValueMatcher.Create(
+      AName,
+      TWebMockStringWildcardMatcher.Create(AValue)
+    )
+  );
+end;
+
+function TWebMockHTTPRequestQueryParamsMatcher.Add(const AName: string;
+  APattern: TRegEx): Integer;
+begin
+  Result := QueryParams.Add(
+    TWebMockHTTPRequestNameStringValueMatcher.Create(
+      AName,
+      TWebMockStringRegExMatcher.Create(APattern)
+    )
+  );
+end;
+
+constructor TWebMockHTTPRequestQueryParamsMatcher.Create;
+begin
+  inherited;
+  FQueryParams := TList<TWebMockHTTPRequestNameStringValueMatcher>.Create;
+end;
+
+destructor TWebMockHTTPRequestQueryParamsMatcher.Destroy;
+begin
+  FQueryParams.Free;
+  inherited;
+end;
+
+function TWebMockHTTPRequestQueryParamsMatcher.ExtractURIQueryString(
+  const AURI: string): string;
+var
+  LQuestionPos: Integer;
+begin
+  LQuestionPos := AURI.IndexOf('?');
+  if LQuestionPos > 0 then
+    Result := AURI.Substring(LQuestionPos + 1, AURI.Length - 1);
+end;
+
+function TWebMockHTTPRequestQueryParamsMatcher.ParseURIQueryParams(
+  const AURI: string): TURIParameters;
+
+  function ParseParamToken(const AParamToken: string): TURIParameter;
+  var
+    LEqualsPos: Integer;
+    LParamName, LParamValue: string;
+  begin
+    LParamName := '';
+    LParamValue := '';
+    LEqualsPos := AParamToken.IndexOf('=');
+    if LEqualsPos > 0 then
+    begin
+      LParamName := AParamToken.Substring(0, LEqualsPos);
+      if AParamToken.Length > (LEqualsPos + 1) then
+        LParamValue := AParamToken.Substring(LEqualsPos + 1, AParamToken.Length - 1);
+    end
+    else
+      LParamName := AParamToken;
+    Result := TURIParameter.Create(
+      TNetEncoding.URL.Decode(LParamName),
+      TNetEncoding.URL.Decode(LParamValue)
+    );
+  end;
+
+var
+  LQueryParams: TList<TURIParameter>;
+  LQueryString, LParamToken: string;
+  LQueryPairs: TArray<string>;
+begin
+  LQueryParams := TList<TURIParameter>.Create;
+  try
+    LQueryString := ExtractURIQueryString(AURI);
+    LQueryPairs := LQueryString.Split(['&']);
+
+    for LParamToken in LQueryPairs do
+      LQueryParams.Add(ParseParamToken(LParamToken));
+
+    Result := LQueryParams.ToArray;
+  finally
+    LQueryParams.Free;
+  end;
+end;
+
+function TWebMockHTTPRequestQueryParamsMatcher.IsMatch(
+  const AURI: string): Boolean;
+var
+  LParsedQueryParams: TURIParameters;
+  LQueryParam: TWebMockHTTPRequestNameStringValueMatcher;
+begin
+  if QueryParams.Count = 0 then
+    Exit(True);
+
+  LParsedQueryParams := ParseURIQueryParams(AURI);
+  for LQueryParam in QueryParams do
+  begin
+    if not LQueryParam.IsMatch(LParsedQueryParams) then
+      Exit(False);
+  end;
+
+  Result := True;
 end;
 
 end.
