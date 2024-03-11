@@ -252,7 +252,10 @@ var
   LHeader: TPair<string, string>;
 begin
   for LHeader in AResponseHeaders do
-    AResponseInfo.CustomHeaders.AddValue(LHeader.Key, LHeader.Value);
+    if LHeader.Key.ToLower.Equals('content-length') then
+      AResponseInfo.ContentLength := LHeader.Value.ToInt64
+    else
+      AResponseInfo.CustomHeaders.AddValue(LHeader.Key, LHeader.Value);
 end;
 
 procedure TWebMock.SetResponseStatus(AResponseInfo: TIdHTTPResponseInfo;
