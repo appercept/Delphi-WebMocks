@@ -50,6 +50,8 @@ type
     procedure Response_WithHeaderChained_HasValueForEachHeader;
     [Test]
     procedure Response_WithHeaders_HasValueForAllHeaders;
+    [Test]
+    procedure Response_WithContentLengthHeader_SetsResponseContentLength;
   end;
 
 implementation
@@ -59,6 +61,17 @@ implementation
 uses
   System.Net.HttpClient,
   TestHelpers;
+
+procedure TWebMockResponsesWithHeadersTests.Response_WithContentLengthHeader_SetsResponseContentLength;
+var
+  LResponse: IHTTPResponse;
+begin
+  WebMock.StubRequest('HEAD', '*').ToRespond
+    .WithHeader('content-length', '12345');
+  LResponse := WebClient.Head(WebMock.BaseURL);
+
+  Assert.AreEqual<Int64>(12345, LResponse.ContentLength);
+end;
 
 procedure TWebMockResponsesWithHeadersTests.Response_WithHeaderChained_HasValueForEachHeader;
 var
