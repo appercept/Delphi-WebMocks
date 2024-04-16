@@ -40,7 +40,7 @@ type
   [TestFixture]
   TWebMockAssertionTests = class(TObject)
   private
-    History: IInterfaceList;
+    History: TList<IWebMockHTTPRequest>;
     Assertion: TWebMockAssertion;
     function GetMatcher: TWebMockHTTPRequestMatcher;
     property Matcher: TWebMockHTTPRequestMatcher read GetMatcher;
@@ -341,13 +341,13 @@ end;
 
 procedure TWebMockAssertionTests.Setup;
 begin
-  History := TInterfaceList.Create;
+  History := TList<IWebMockHTTPRequest>.Create;
   Assertion := TWebMockAssertion.Create(History);
 end;
 
 procedure TWebMockAssertionTests.TearDown;
 begin
-  History := nil;
+  History.Free;
 end;
 
 procedure TWebMockAssertionTests.WasRequested_NotMatchingHistory_RaisesFailingException;

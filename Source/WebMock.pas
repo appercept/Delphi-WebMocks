@@ -57,7 +57,7 @@ type
     FServer: TIdHTTPServer;
     FBaseURL: string;
     FStubRegistry: TInterfaceList; // IWebMockRequestStub
-    FHistory: IInterfaceList;
+    FHistory: TList<IWebMockHTTPRequest>;
     procedure InitializeServer(const APort: TWebWockPort);
     procedure StartServer(const APort: TWebWockPort);
     procedure OnServerRequest(AContext: TIdContext;
@@ -93,7 +93,7 @@ type
       : TWebMockDynamicRequestStub; overload;
     function URLFor(AURI: string): string;
     property BaseURL: string read FBaseURL;
-    property History: IInterfaceList read FHistory;
+    property History: TList<IWebMockHTTPRequest> read FHistory;
     property StubRegistry: TInterfaceList read FStubRegistry;
     property Port: Integer read GetPort;
   end;
@@ -124,14 +124,15 @@ end;
 constructor TWebMock.Create(const APort: TWebWockPort = 0);
 begin
   inherited Create;
+  FHistory := TList<IWebMockHTTPRequest>.Create;
   FStubRegistry := TInterfaceList.Create;
-  FHistory := TInterfaceList.Create;
   InitializeServer(APort);
 end;
 
 destructor TWebMock.Destroy;
 begin
   FStubRegistry.Free;
+  FHistory.Free;
   FServer.Free;
   inherited;
 end;
