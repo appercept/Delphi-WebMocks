@@ -51,6 +51,10 @@ type
     [Test]
     procedure WasRequested_WithRegExURIMatchingRequest_Passes;
     [Test]
+    procedure WasRequested_WithMultiplePassingAssertions_Passes;
+    [Test]
+    procedure WasRequested_WithMultipleAssertionsOnePassingOneFailing_Fails;
+    [Test]
     procedure WasRequested_WithRegExURINotMatchingRequest_Fails;
     [Test]
     procedure WasRequestedWithBodyString_MatchingRequestBody_Passes;
@@ -120,6 +124,10 @@ type
     procedure WasNotRequested_NotMatchingRequest_Passes;
     [Test]
     procedure WasNotRequested_MatchingRequest_Fails;
+    [Test]
+    procedure WasNotRequested_WithMultiplePassingAssertions_Passes;
+    [Test]
+    procedure WasNotRequested_WithMultipleAssertionsOnePassingOneFailing_Fails;
   end;
 
 implementation
@@ -136,12 +144,11 @@ procedure TWebMockAssertionsTests.DeleteWasRequested_MatchingRequest_Passes;
 begin
   WebClient.Delete(WebMock.URLFor('/'));
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert.Delete('/').WasRequested;
-    end,
-    ETestPass
+    end
   );
 end;
 
@@ -162,12 +169,11 @@ procedure TWebMockAssertionsTests.GetWasRequested_MatchingRequest_Passes;
 begin
   WebClient.Get(WebMock.URLFor('/'));
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert.Get('/').WasRequested;
-    end,
-    ETestPass
+    end
   );
 end;
 
@@ -188,12 +194,11 @@ procedure TWebMockAssertionsTests.HeadWasRequested_MatchingRequest_Passes;
 begin
   WebClient.Head(WebMock.URLFor('/'));
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert.Head('/').WasRequested;
-    end,
-    ETestPass
+    end
   );
 end;
 
@@ -227,25 +232,45 @@ procedure TWebMockAssertionsTests.WasNotRequested_NotMatchingRequest_Passes;
 begin
   WebClient.Get(WebMock.URLFor('/'));
 
+  Assert.WillNotRaise(
+    procedure
+    begin
+      WebMock.Assert.Request('GET', '/resource').WasNotRequested;
+    end
+  );
+end;
+
+procedure TWebMockAssertionsTests.WasNotRequested_WithMultipleAssertionsOnePassingOneFailing_Fails;
+begin
+  WebClient.Get(WebMock.URLFor('/'));
+
   Assert.WillRaise(
     procedure
     begin
       WebMock.Assert.Request('GET', '/resource').WasNotRequested;
+      WebMock.Assert.Request('GET', '/').WasNotRequested;
     end,
-    ETestPass
+    ETestFailure
   );
+end;
+
+procedure TWebMockAssertionsTests.WasNotRequested_WithMultiplePassingAssertions_Passes;
+begin
+  WebClient.Get(WebMock.URLFor('/'));
+
+  WebMock.Assert.Request('GET', '/resources/1').WasNotRequested;
+  WebMock.Assert.Request('GET', '/resources/2').WasNotRequested;
 end;
 
 procedure TWebMockAssertionsTests.PatchWasRequested_MatchingRequest_Passes;
 begin
   WebClient.Patch(WebMock.URLFor('/'));
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert.Patch('/').WasRequested;
-    end,
-    ETestPass
+    end
   );
 end;
 
@@ -269,12 +294,11 @@ begin
   LContentStream := TStringStream.Create('');
   WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert.Post('/').WasRequested;
-    end,
-    ETestPass
+    end
   );
 
   LContentStream.Free;
@@ -302,12 +326,11 @@ procedure TWebMockAssertionsTests.PutWasRequested_MatchingRequest_Passes;
 begin
   WebClient.Put(WebMock.URLFor('/'));
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert.Put('/').WasRequested;
-    end,
-    ETestPass
+    end
   );
 end;
 
@@ -331,12 +354,11 @@ begin
   LContentStream := TStringStream.Create('HELLO');
   WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert.Post('/').WithBody(TRegEx.Create('ELLO')).WasRequested;
-    end,
-    ETestPass
+    end
   );
 
   LContentStream.Free;
@@ -369,12 +391,11 @@ begin
   LContentStream := TStringStream.Create('OK');
   WebClient.Post(WebMock.URLFor('/'), LContentStream);
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert.Post('/').WithBody(LContent).WasRequested;
-    end,
-    ETestPass
+    end
   );
 
   LContentStream.Free;
@@ -406,15 +427,14 @@ begin
   LFormData.AddPair('AField', 'AValue');
   WebClient.Post(WebMock.URLFor('/form'), LFormData);
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert
         .Post('/form')
         .WithFormData('AField', 'AValue')
         .WasRequested;
-    end,
-    ETestPass
+    end
   );
 
   LFormData.Free;
@@ -455,15 +475,14 @@ begin
     )
   );
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert
         .Get('/')
         .WithHeader(LHeaderName, TRegEx.Create('Value-\d+'))
         .WasRequested;
-    end,
-    ETestPass
+    end
   );
 end;
 
@@ -509,12 +528,11 @@ begin
     )
   );
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert.Get('/').WithHeaders(LHeaders).WasRequested;
-    end,
-    ETestPass
+    end
   );
 
   LHeaders.Free;
@@ -562,12 +580,11 @@ begin
     )
   );
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert.Get('/').WithHeader(LHeaderName, LHeaderValue).WasRequested;
-    end,
-    ETestPass
+    end
   );
 end;
 
@@ -600,7 +617,7 @@ begin
   LJSON := TStringStream.Create('{ "key": "value" }');
   WebClient.Post(WebMock.URLFor('/json'), LJSON);
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert
@@ -639,15 +656,14 @@ procedure TWebMockAssertionsTests.WasRequestedWithQueryParam_MatchingRequestWith
 begin
   WebClient.Get(WebMock.URLFor('/') + '?Param=Value1&Param=Value2');
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert.Get('/')
         .WithQueryParam('Param', 'Value1')
         .WithQueryParam('Param', 'Value2')
         .WasRequested;
-    end,
-    ETestPass
+    end
   );
 end;
 
@@ -659,12 +675,11 @@ begin
   LParamValue := 'Value1';
   WebClient.Get(WebMock.URLFor('/') + Format('?%s=%s', [LParamName, LParamValue]));
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert.Get('/').WithQueryParam(LParamName, LParamValue).WasRequested;
-    end,
-    ETestPass
+    end
   );
 end;
 
@@ -708,15 +723,14 @@ begin
   LXML := TStringStream.Create('<Object><Attr1>Value 1</Attr1></Object>');
   WebClient.Post(WebMock.URLFor('/xml'), LXML);
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert
         .Post('/xml')
         .WithXML('/Object/Attr1', 'Value 1')
         .WasRequested;
-    end,
-    ETestPass
+    end
   );
 
   LXML.Free;
@@ -743,16 +757,37 @@ begin
   LXML.Free;
 end;
 
-procedure TWebMockAssertionsTests.WasRequested_WithRegExURIMatchingRequest_Passes;
+procedure TWebMockAssertionsTests.WasRequested_WithMultipleAssertionsOnePassingOneFailing_Fails;
 begin
-  WebClient.Get(WebMock.URLFor('/resource/1'));
+  WebClient.Get(WebMock.URLFor('/'));
 
   Assert.WillRaise(
     procedure
     begin
-      WebMock.Assert.Request('GET', TRegEx.Create('/resource/\d+')).WasRequested;
+      WebMock.Assert.Request('GET', '/').WasRequested;
+      WebMock.Assert.Request('POST', '/').WasRequested;
     end,
-    ETestPass
+    ETestFailure
+  );
+end;
+
+procedure TWebMockAssertionsTests.WasRequested_WithMultiplePassingAssertions_Passes;
+begin
+  WebClient.Get(WebMock.URLFor('/'));
+
+  WebMock.Assert.Request('GET', '/').WasRequested;
+  WebMock.Assert.Request('GET', '/').WasRequested;
+end;
+
+procedure TWebMockAssertionsTests.WasRequested_WithRegExURIMatchingRequest_Passes;
+begin
+  WebClient.Get(WebMock.URLFor('/resource/1'));
+
+  Assert.WillNotRaise(
+    procedure
+    begin
+      WebMock.Assert.Request('GET', TRegEx.Create('/resource/\d+')).WasRequested;
+    end
   );
 end;
 
@@ -773,12 +808,11 @@ procedure TWebMockAssertionsTests.WasRequested_WithStringURIMatchingRequest_Pass
 begin
   WebClient.Get(WebMock.URLFor('/'));
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       WebMock.Assert.Request('GET', '/').WasRequested;
-    end,
-    ETestPass
+    end
   );
 end;
 

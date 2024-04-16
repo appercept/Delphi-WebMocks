@@ -156,11 +156,10 @@ end;
 
 procedure TWebMockAssertion.WasNotRequested;
 begin
+  Assert.IsTrue(True);
   try
     if MatchesHistory then
-      Assert.Fail(Format('Found request matching %s', [Matcher.ToString]))
-    else
-      Assert.Pass(Format('Did not find request matching %s', [Matcher.ToString]));
+      Assert.Fail(Format('Found request matching %s', [Matcher.ToString]));
   finally
     Free;
   end;
@@ -168,10 +167,9 @@ end;
 
 procedure TWebMockAssertion.WasRequested;
 begin
+  Assert.IsTrue(True);
   try
-    if MatchesHistory then
-      Assert.Pass(Format('Found request matching %s', [Matcher.ToString]))
-    else
+    if not MatchesHistory then
       Assert.Fail(Format('Expected to find request matching %s', [Matcher.ToString]));
   finally
     Free;
