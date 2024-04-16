@@ -30,6 +30,7 @@ interface
 uses
   DUnitX.TestFramework,
   System.Classes,
+  System.Generics.Collections,
   System.RegularExpressions,
   System.Rtti,
   WebMock.HTTP.Messages,
@@ -40,10 +41,10 @@ type
   TWebMockAssertion = class(TObject)
   private
     FMatcher: IWebMockHTTPRequestMatcher;
-    FHistory: IInterfaceList;
+    FHistory: TList<IWebMockHTTPRequest>;
     function MatchesHistory: Boolean;
   public
-    constructor Create(const AHistory: IInterfaceList);
+    constructor Create(const AHistory: TList<IWebMockHTTPRequest>);
     function Delete(const AURI: string): TWebMockAssertion;
     function Get(const AURI: string): TWebMockAssertion;
     function Head(const AURI: string): TWebMockAssertion;
@@ -70,7 +71,7 @@ type
     function WithXML(const AXPath: string; APattern: TRegEx): TWebMockAssertion; overload;
     procedure WasRequested;
     procedure WasNotRequested;
-    property History: IInterfaceList read FHistory;
+    property History: TList<IWebMockHTTPRequest> read FHistory;
     property Matcher: IWebMockHTTPRequestMatcher read FMatcher;
   end;
 
@@ -84,7 +85,7 @@ uses
   WebMock.StringRegExMatcher,
   WebMock.StringWildcardMatcher;
 
-constructor TWebMockAssertion.Create(const AHistory: IInterfaceList);
+constructor TWebMockAssertion.Create(const AHistory: TList<IWebMockHTTPRequest>);
 begin
   inherited Create;
   FHistory := AHistory;
