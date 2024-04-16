@@ -82,11 +82,11 @@ type
     [Test]
     procedure Put_Always_ReturnsSelf;
     [Test]
-    procedure WasRequested_MatchingHistory_RaisesPassingException;
+    procedure WasRequested_MatchingHistory_DoesNotRaisePassingException;
     [Test]
     procedure WasRequested_NotMatchingHistory_RaisesFailingException;
     [Test]
-    procedure WasNotRequested_NotMatchingHistory_RaisesPassingException;
+    procedure WasNotRequested_NotMatchingHistory_DoesNotRaisePassingException;
     [Test]
     procedure WasNotRequested_MatchingHistory_RaisesFailingException;
     [Test]
@@ -809,7 +809,7 @@ begin
   );
 end;
 
-procedure TWebMockAssertionTests.WasNotRequested_NotMatchingHistory_RaisesPassingException;
+procedure TWebMockAssertionTests.WasNotRequested_NotMatchingHistory_DoesNotRaisePassingException;
 var
   LRequestInfo: TMockIdHTTPRequestInfo;
 begin
@@ -817,16 +817,15 @@ begin
   History.Add(TWebMockHTTPRequest.Create(LRequestInfo));
   LRequestInfo.Free;
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       Assertion.Request('DELETE', '/').WasNotRequested;
-    end,
-    ETestPass
+    end
   );
 end;
 
-procedure TWebMockAssertionTests.WasRequested_MatchingHistory_RaisesPassingException;
+procedure TWebMockAssertionTests.WasRequested_MatchingHistory_DoesNotRaisePassingException;
 var
   LRequestInfo: TMockIdHTTPRequestInfo;
 begin
@@ -834,12 +833,11 @@ begin
   History.Add(TWebMockHTTPRequest.Create(LRequestInfo));
   LRequestInfo.Free;
 
-  Assert.WillRaise(
+  Assert.WillNotRaise(
     procedure
     begin
       Assertion.Request('GET', '/').WasRequested;
-    end,
-    ETestPass
+    end
   );
 end;
 
