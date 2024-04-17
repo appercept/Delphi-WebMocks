@@ -117,7 +117,7 @@ end.
 ```
 
 By default `TWebMock` will bind to a port dynamically assigned start at `8080`.
-This behaviour can be overriden by specifying a port at creation.
+This behaviour can be overridden by specifying a port at creation.
 ```Delphi
 WebMock := TWebMock.Create(8088);
 ```
@@ -351,7 +351,7 @@ WebMock.StubRequest('GET', '/')
 
 #### Stubbed Response Content: Fixture Files
 When stubbing responses with binary or large content it is likely easier to
-provide the content as a file. This can be acheived using `WithBodyFile`
+provide the content as a file. This can be achieved using `WithBodyFile`
 which has the same signature as `WithBody` but the first argument is the
 path to a file.
 ```Delphi
@@ -360,7 +360,7 @@ WebMock.StubRequest('GET', '/').WithBodyFile('image.jpg');
 
 The Delphi-WebMocks will attempt to set the content-type according to the file
 extension. If the file type is unknown then the content-type will default to
-`application/octet-stream`. The content-type can be overriden with the second
+`application/octet-stream`. The content-type can be overridden with the second
 argument. e.g.
 ```Delphi
 WebMock.StubRequest('GET', '/').WithBodyFile('file.myext', 'application/xml');
@@ -487,7 +487,7 @@ performing extra unwanted requests.
 This project follows [Semantic Versioning](https://semver.org).
 
 ## License
-Copyright ©2019-2022 Richard Hatherall <richard@appercept.com>
+Copyright ©2019-2024 Richard Hatherall <richard@appercept.com>
 
 WebMocks is distributed under the terms of the Apache License (Version 2.0).
 
