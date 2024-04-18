@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.2.1](https://github.com/appercept/Delphi-WebMocks/tree/3.2.1) (2024-04-18)
+
+[Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/3.2.0...3.2.1)
+
+**Fixed bugs:**
+
+- Only the first WebMock.Assert in a test yields correct assertion result [\#58](https://github.com/appercept/Delphi-WebMocks/issues/58)
+- Setting content-length response header does not set response content length correctly [\#56](https://github.com/appercept/Delphi-WebMocks/issues/56)
+- WithQueryParam assertion is not correctly testing duplicates [\#54](https://github.com/appercept/Delphi-WebMocks/issues/54)
+- The History interface does not work as documented [\#53](https://github.com/appercept/Delphi-WebMocks/issues/53)
+
+**Merged pull requests:**
+
+- fix: Restore History interface [\#60](https://github.com/appercept/Delphi-WebMocks/pull/60) ([rhatherall](https://github.com/rhatherall))
+- fix: Allow multiple assertions [\#59](https://github.com/appercept/Delphi-WebMocks/pull/59) ([rhatherall](https://github.com/rhatherall))
+- fix: Allow setting Content-Length by header [\#57](https://github.com/appercept/Delphi-WebMocks/pull/57) ([rhatherall](https://github.com/rhatherall))
+- fix: Allow duplicate query parameter matching [\#55](https://github.com/appercept/Delphi-WebMocks/pull/55) ([rhatherall](https://github.com/rhatherall))
+
 ## [3.2.0](https://github.com/appercept/Delphi-WebMocks/tree/3.2.0) (2022-06-20)
 
 [Full Changelog](https://github.com/appercept/Delphi-WebMocks/compare/3.1.0...3.2.0)
