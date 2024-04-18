@@ -4,8 +4,8 @@
   "licenses": [{ "type": "Apache 2.0", "file": "LICENSE" }],
   "platforms": "Linux64;OSX32;OSX64;Win32;Win64",
   "package_compiler_min": 29,
-  "package_compiler_max": 34,
+  "package_compiler_max": 36,
   "compiler_min": 29,
-  "compiler_max": 34,
+  "compiler_max": 36,
   "dependencies": []
 }
