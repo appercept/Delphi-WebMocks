@@ -253,10 +253,7 @@ end;
 function TWebMockStaticRequestStub.WithQueryParam(const AName: string;
   const APattern: TRegEx): TWebMockStaticRequestStub;
 begin
-  Matcher.QueryParams.AddOrSetValue(
-    AName,
-    TWebMockStringRegExMatcher.Create(APattern)
-  );
+  Matcher.QueryParams.Add(AName, APattern);
 
   Result := Self;
 end;
@@ -286,10 +283,7 @@ end;
 function TWebMockStaticRequestStub.WithQueryParam(const AName,
   AValue: string): TWebMockStaticRequestStub;
 begin
-  Matcher.QueryParams.AddOrSetValue(
-    AName,
-    TWebMockStringWildcardMatcher.Create(AValue)
-  );
+  Matcher.QueryParams.Add(AName, AValue);
 
   Result := Self;
 end;

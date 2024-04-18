@@ -71,7 +71,8 @@ uses
   WebMock.XMLMatcher.Tests in 'WebMock.XMLMatcher.Tests.pas',
   WebMock.XMLMatcher in '..\Source\WebMock.XMLMatcher.pas',
   WebMock.XMLValueMatcher.Tests in 'WebMock.XMLValueMatcher.Tests.pas',
-  WebMock.JSONPatternMatcher.Tests in 'WebMock.JSONPatternMatcher.Tests.pas';
+  WebMock.JSONPatternMatcher.Tests in 'WebMock.JSONPatternMatcher.Tests.pas',
+  WebMock.HTTP.RequestQueryParamsMatcher.Tests in 'WebMock.HTTP.RequestQueryParamsMatcher.Tests.pas';
 
 var
   Runner: ITestRunner;
