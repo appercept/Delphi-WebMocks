@@ -52,7 +52,7 @@ procedure TWebMockXMLMatcherTests.Add_Always_AddsValueMatcher;
 begin
   Matcher.Add('/APath', '*');
 
-  Assert.AreEqual(1, Matcher.ValueMatchers.Count);
+  Assert.AreEqual<NativeInt>(1, Matcher.ValueMatchers.Count);
 end;
 
 procedure TWebMockXMLMatcherTests.Add_CalledMultipleTimes_AddsMultipleValueMatchers;
@@ -61,14 +61,14 @@ begin
   Matcher.Add('Path2', '*');
   Matcher.Add('Path3', '*');
 
-  Assert.AreEqual(3, Matcher.ValueMatchers.Count);
+  Assert.AreEqual<NativeInt>(3, Matcher.ValueMatchers.Count);
 end;
 
 procedure TWebMockXMLMatcherTests.Add_GivenPattern_AddsRegExMatcher;
 begin
   Matcher.Add('/APath', TRegEx.Create('.*'));
 
-  Assert.AreEqual(1, Matcher.ValueMatchers.Count);
+  Assert.AreEqual<NativeInt>(1, Matcher.ValueMatchers.Count);
 end;
 
 procedure TWebMockXMLMatcherTests.Class_Always_ImplementsStringMatcher;
@@ -82,7 +82,7 @@ end;
 
 procedure TWebMockXMLMatcherTests.Create_Always_InitializesEmpty;
 begin
-  Assert.AreEqual(0, Matcher.ValueMatchers.Count);
+  Assert.AreEqual<NativeInt>(0, Matcher.ValueMatchers.Count);
 end;
 
 procedure TWebMockXMLMatcherTests.IsMatch_WhenGivenValueDoesNotMatchValue_ReturnsFalse;

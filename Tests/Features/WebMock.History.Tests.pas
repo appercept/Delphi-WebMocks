@@ -80,7 +80,7 @@ begin
 
   WebClient.Get(WebMock.URLFor('stubbed'));
 
-  Assert.AreEqual(ExpectedHistoryCount, WebMock.History.Count);
+  Assert.AreEqual<NativeInt>(ExpectedHistoryCount, WebMock.History.Count);
 end;
 
 procedure TWebMockHistoryTests.History_AfterUnStubbedRequest_IncreasesCount;
@@ -91,7 +91,7 @@ begin
 
   WebClient.Get(WebMock.URLFor('not-stubbed'));
 
-  Assert.AreEqual(ExpectedHistoryCount, WebMock.History.Count);
+  Assert.AreEqual<NativeInt>(ExpectedHistoryCount, WebMock.History.Count);
 end;
 
 procedure TWebMockHistoryTests.Setup;

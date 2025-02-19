@@ -159,7 +159,7 @@ begin
 
   WebMock.ResetHistory;
 
-  Assert.AreEqual(0, WebMock.History.Count);
+  Assert.AreEqual<NativeInt>(0, WebMock.History.Count);
 end;
 
 procedure TWebMockTests.Reset_Always_ClearsHistory;
@@ -168,7 +168,7 @@ begin
 
   WebMock.Reset;
 
-  Assert.AreEqual(0, WebMock.History.Count);
+  Assert.AreEqual<NativeInt>(0, WebMock.History.Count);
 end;
 
 procedure TWebMockTests.Reset_Always_ClearsStubRegistry;
